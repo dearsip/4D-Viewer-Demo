@@ -29,18 +29,18 @@ public class FourDDemo : I4DSoftware
     public FourDDemo()
     {
         // 以下の shapes の定義をコメントアウトしたものと交換したり自分で設定することで、表示する図形を変えられる。
-        shapes = new Geom.Shape[8];
+        /*shapes = new Geom.Shape[8];
         for (int i=0; i<8; i++)
         {
             shapes[i] = Shapes.pentachoron();
             shapes[i].aligncenter[i / 2] = 1.8 * ((double)i % 2 * 2 - 1);
             shapes[i].place();
-        }
-        /*shapes = new Geom.Shape[] { Shapes.pentachoron(), Shapes.pentachoron() };
+        }*/
+        shapes = new Geom.Shape[] { Shapes.pentachoron(), Shapes.pentachoron() };
         shapes[0].aligncenter[0] = 1.1;
         shapes[0].place();
         shapes[1].aligncenter[0] = -1.1;
-        shapes[1].place();*/
+        shapes[1].place();
 
         origin = new double[] { 0, 0, 0, -3 };
         reg1 = new double[4];

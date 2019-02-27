@@ -1,6 +1,6 @@
-# 4D Viewer Demo
+﻿# 4D Viewer Demo
 
-![4D Viewer Demo](https://gyazo.com/a4f4de49c26fc9cfefeda513255a2ea9.png)
+![4D Viewer Demo](https://gyazo.com/84cf5137b8543312921756f57a6d8cb2.jpg)
 
 陰面消去（陰胞消去）を搭載した多胞体表示ソフト。
 
@@ -9,7 +9,10 @@
 
 ## 操作方法
 トリガー: 押している間、図形を回転させる。
+
 グリップボタン: 押している間、ディスプレイの位置を動かす。
+
+また、`Assets/Scripts/ThreeDDisplay.cs`内のコンストラクタの`shapes`の定義を変更することで、異なる多胞体を表示できる。
 
 ## 更新予定
 - 表示できる多胞体の追加
