@@ -7,6 +7,8 @@
 [4D Blocks](http://www.urticator.net/blocks/v6/index.html)のソースコードを流用している。
 また、実装には[4dforvive](https://github.com/leo92613/4dforvive)を一部参考にしている。
 
+流用している部分はコメントもそのまま載せている。追加、変更した箇所については日本語でコメントを書いている。
+
 ## 操作方法
 トリガー: 押している間、図形を回転させる。
 
