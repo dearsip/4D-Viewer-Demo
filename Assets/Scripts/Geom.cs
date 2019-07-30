@@ -126,7 +126,7 @@ public class Geom
         private Shape() { }
 
         // 各要素を指定してShapeを生成する。
-        public Shape(double[][] vertex, int[][] eiv, int[][] fiv, int[][] cie, int[][] cif, double[][] cn)
+        public Shape(double[][] vertex, int[][] eiv, int[][] fiv, int[][] cie, int[][] cif, double[][] cn, Color[] color)
         {
             this.vertex = vertex;
             edge = new Edge[eiv.Length];
@@ -137,6 +137,7 @@ public class Geom
             for (int i = 0; i < cie.Length; i++) cell[i] = new Cell(cie[i], cif[i], cn[i]);
             calculate();
             ideal = copy();
+            for (int i = 0; i < cell.Length; i++) cell[i].color = color[i];
         }
 
         public int getSize() { return face.Length; }

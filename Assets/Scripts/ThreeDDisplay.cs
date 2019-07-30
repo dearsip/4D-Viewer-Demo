@@ -14,6 +14,7 @@ public class ThreeDDisplay : MonoBehaviour
     private Mesh mesh;
     private Vector3[] vertices;
     private int[] triangles;
+    private Color[] colors;
     
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean grab;
@@ -25,6 +26,8 @@ public class ThreeDDisplay : MonoBehaviour
     private Quaternion relarot;
 
     private double[][] rotate; // 4DSoftware への出力。double[0]からdouble[1]、double[2]からdouble[3]への回転を意味する。
+
+    public Material lineMaterial;
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +47,7 @@ public class ThreeDDisplay : MonoBehaviour
     void Update()
     {
         calcInput();
-        soft.Run(ref vertices, ref triangles, rotate); // ソフトの出力が vertices, triangles に収められる
+        soft.Run(ref vertices, ref triangles, ref colors, rotate); // ソフトの出力が vertices, triangles に収められる
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
             mesh.triangles = triangles;
@@ -55,6 +58,7 @@ public class ThreeDDisplay : MonoBehaviour
             mesh.vertices = vertices;
             mesh.triangles = triangles;
         }
+        mesh.colors = colors;
         mesh.RecalculateNormals();
         GetComponent<MeshFilter>().sharedMesh = mesh;
     }

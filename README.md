@@ -1,6 +1,7 @@
 ﻿# 4D Viewer Demo
 
 ![4D Viewer Demo](https://gyazo.com/84cf5137b8543312921756f57a6d8cb2.jpg)
+![4D Viewer Demo](https://gyazo.com/bd58350e133aae05051f0b068b47e402.jpg)
 
 陰面消去（陰胞消去）を搭載した多胞体表示ソフト。
 
@@ -15,9 +16,6 @@
 また、`Assets/Scripts/ThreeDDisplay.cs`内のコンストラクタの`shapes`の定義を変更することで、異なる多胞体を表示できる。
 
 ## 更新予定
+- VRChatワールド化
 - 表示できる多胞体の追加
 - より簡単な多胞体定義
-- 複数の色による表示
-- 稜線の表示
-- 胞同士に隙間を開けた表示
-- 中空ポリゴンによる表示

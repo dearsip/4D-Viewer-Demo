@@ -382,11 +382,11 @@ public class Clip
             return this; // convenience
         }
 
-        public void drawPolygon(Polygon polygon, Color color, double[] origin)
+        public void drawPolygon(Polygon polygon, double[] origin)
         {
             list.Clear();
             clip(polygon, bl, list);
-            for (int i = 0; i<list.Count; i++) next.drawPolygon(list[i], color, origin);
+            for (int i = 0; i<list.Count; i++) next.drawPolygon(list[i], origin);
         }
     }
 

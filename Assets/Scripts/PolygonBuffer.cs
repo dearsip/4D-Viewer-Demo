@@ -46,7 +46,7 @@ public class PolygonBuffer : IDraw
         size--;
     }
 
-    public void drawPolygon(Polygon face, Color color, double[] origin)
+    public void drawPolygon(Polygon face, double[] origin)
     {
         Polygon polygon = getNext();
         polygon.copy(face);

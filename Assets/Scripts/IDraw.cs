@@ -8,5 +8,5 @@ using UnityEngine;
 // 描画対象は Polygon に変更している。
 public interface IDraw
 {
-    void drawPolygon(Polygon polygon, Color color, double[] origin);
+    void drawPolygon(Polygon polygon, double[] origin);
 }
