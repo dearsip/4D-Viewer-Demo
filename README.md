@@ -1,7 +1,6 @@
 # 4D Viewer Demo
 
-![4D Viewer Demo](https://gyazo.com/84cf5137b8543312921756f57a6d8cb2.jpg)
-![4D Viewer Demo](https://gyazo.com/bd58350e133aae05051f0b068b47e402.jpg)
+![4D Viewer Demo](https://gyazo.com/9fb58977238f3a8e3d3093e8dd28d26f.jpg)
 
 陰面消去（陰胞消去）を搭載した多胞体表示ソフト。[→動画](https://www.dropbox.com/s/0izebadcbj6yj12/4D%20Viewer%20Demo%202019-08-03%2013-47-15.mp4?dl=0)
 
