@@ -7,7 +7,7 @@ using UnityEngine;
  */
 // 元のコードの GeomModel（特にその中の render(..)） を主体とした、プログラムの本体。
 
-public class FourDDemo : I4DSoftware
+public class FourDDemo
 {
     private Geom.Shape[] shapes;
     private bool[][] inFromt;
@@ -27,38 +27,13 @@ public class FourDDemo : I4DSoftware
     private List<int> tris;
     private List<Color> cols;
 
+    private int shapeNum, colorNum;
+
+    private float cellAlpha;
+    private Color faceColor;
+
     public FourDDemo()
     {
-        // 以下の shapes の定義をコメントアウトしたものと交換したり自分で設定することで、表示する図形を変えられる。
-
-        // 正五胞体8つ
-        /*shapes = new Geom.Shape[8];
-        for (int i=0; i<8; i++)
-        {
-            shapes[i] = Shapes.pentachoron();
-            shapes[i].aligncenter[i / 2] = 1.8 * ((double)i % 2 * 2 - 1);
-            shapes[i].place();
-        }*/
-
-        // 正五胞体2つ
-        /*shapes = new Geom.Shape[] { Shapes.pentachoron(), Shapes.pentachoron() };
-        shapes[0].aligncenter[0] = 1.1;
-        shapes[0].place();
-        shapes[1].aligncenter[0] = -1.1;
-        shapes[1].place();*/
-
-        // 正八胞体
-        shapes = new Geom.Shape[] { Shapes.superCell() };
-
-        // 正八胞体（色配置２）
-        // shapes = new Geom.Shape[] { Shapes.superCell() };
-
-        // 正十六胞体
-        // shapes = new Geom.Shape[] { Shapes.hexadecachoron() };
-
-        // 正十六胞体（色配置２）
-        // shapes = new Geom.Shape[] { Shapes.hd2() };
-
         origin = new double[] { 0, 0, 0, -3 };
         reg1 = new double[4];
         reg2 = new double[4];
@@ -67,12 +42,9 @@ public class FourDDemo : I4DSoftware
         axis = new double[4][];
         for (int i = 0; i < 4; i++) axis[i] = new double[4];
         Vec.unitMatrix(axis);
-        clipUnits = new Clip.Draw[shapes.Length];
-        for (int i = 0; i < shapes.Length; i++) clipUnits[i] = new Clip.Draw(4);
-        inFront = new bool[shapes.Length][];
-        for (int i = 0; i < shapes.Length; i++) inFront[i] = new bool[shapes.Length];
-        separators = new Geom.Separator[shapes.Length][];
-        for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
+
+        shapeNum = 1; colorNum = 0;
+        setShape();
 
         buf = new PolygonBuffer(4);
         bufRelative = new PolygonBuffer(3);
@@ -82,9 +54,95 @@ public class FourDDemo : I4DSoftware
         tris = new List<int>();
         cols = new List<Color>();
 
+        faceColor = new Color(1.0f, 1.0f, 1.0f, 0.1f);
+        cellAlpha = 0.3f;
     }
 
-    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, double[][] rotate)
+    public void changeShape(int shapeNum)
+    {
+        this.shapeNum = shapeNum;
+        colorNum = 0;
+        setShape();
+    }
+
+    public void changeColor(int colorNum)
+    {
+        this.colorNum = colorNum;
+        setShape();
+    }
+
+    public void changeFaceAlpha(float a) { faceColor.a = a; }
+
+    public void changeCellAlpha(float a) { cellAlpha = a; }
+
+    public void changeRetina(double r)
+    {
+        origin[3] = -(r * r + 1) * 3;
+        renderRelative.setRetina(1 / (r * r + 1) * (6 / (6 + r)));
+    }
+
+    private void setShape()
+    {
+        switch (shapeNum*3+colorNum)
+        {
+            case 0:
+                shapes = new Geom.Shape[] { Shapes.pc2Big() };
+                break;
+            case 1:
+                shapes = new Geom.Shape[] { Shapes.pc3Big() };
+                break;
+            case 2:
+                shapes = new Geom.Shape[] { Shapes.pentachoronBig() };
+                break;
+            case 3:
+                shapes = new Geom.Shape[] { Shapes.superCell() };
+                break;
+            case 4:
+                shapes = new Geom.Shape[] { Shapes.sc2() };
+                break;
+            case 5:
+                shapes = new Geom.Shape[] { Shapes.sc3() };
+                break;
+            case 6:
+                shapes = new Geom.Shape[] { Shapes.hexadecachoron() };
+                break;
+            case 7:
+                shapes = new Geom.Shape[] { Shapes.hd2() };
+                break;
+            case 8:
+                shapes = new Geom.Shape[] { Shapes.hd3() };
+                break;
+            case 9:
+                shapes = new Geom.Shape[] { Shapes.pc2(), Shapes.pc2() };
+                shapes[0].aligncenter[0] = 1.1;
+                shapes[0].place();
+                shapes[1].aligncenter[0] = -1.1;
+                shapes[1].place();
+                break;
+            case 10:
+                shapes = new Geom.Shape[] { Shapes.pentachoron(), Shapes.pentachoron() };
+                shapes[0].aligncenter[0] = 1.1;
+                shapes[0].place();
+                shapes[1].aligncenter[0] = -1.1;
+                shapes[1].place();
+                break;
+            case 11:
+                shapes = new Geom.Shape[] { Shapes.pcRed(), Shapes.pcCyan() };
+                shapes[0].aligncenter[0] = 1.1;
+                shapes[0].place();
+                shapes[1].aligncenter[0] = -1.1;
+                shapes[1].place();
+                break;
+        }
+        clipUnits = new Clip.Draw[shapes.Length];
+        for (int i = 0; i < shapes.Length; i++) clipUnits[i] = new Clip.Draw(4);
+        inFront = new bool[shapes.Length][];
+        for (int i = 0; i < shapes.Length; i++) inFront[i] = new bool[shapes.Length];
+        separators = new Geom.Separator[shapes.Length][];
+        for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
+    }
+
+    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, double[][] rotate, double[] eyeVector)
     {
         Vec.zero(reg1);
         for (int i = 0; i < shapes.Length; i++) // 回転
@@ -121,6 +179,8 @@ public class FourDDemo : I4DSoftware
         }
 
         renderRelative.run(axis);
+
+        bufRelative.sort(eyeVector); // できる限り自然な描画にするために、meshを大まかに並べ替える。
 
         convert(bufRelative, ref vertices, ref triangles, ref colors);
     }
@@ -196,7 +256,7 @@ public class FourDDemo : I4DSoftware
 
     private void drawShape(Geom.Shape shape)
     {
-        // for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
         for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i]);
     }
 
@@ -204,7 +264,7 @@ public class FourDDemo : I4DSoftware
     {
         double[][] vertex = new double[face.iv.Length][];
         for (int i = 0; i < face.iv.Length; i++) vertex[i] = (double[])shape.vertex[face.iv[i]].Clone();
-        Polygon polygon = new Polygon(vertex, Color.white);
+        Polygon polygon = new Polygon(vertex, faceColor);
         currentDraw.drawPolygon(polygon, origin);
     }
 
@@ -222,6 +282,7 @@ public class FourDDemo : I4DSoftware
             vertex[i] = new double[shape.vertex[face.iv[i]].Length];
             Vec.mid(vertex[i], cell.center, shape.vertex[face.iv[i]], 0.8);
         }
+        cell.color.a = cellAlpha;
         Polygon polygon = new Polygon(vertex, cell.color);
         currentDraw.drawPolygon(polygon, origin);
     }

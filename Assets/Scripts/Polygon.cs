@@ -7,6 +7,7 @@ public class Polygon
 {
     public double[][] vertex;
     public Color color;
+    public double dist;
 
     public Polygon() { }
 

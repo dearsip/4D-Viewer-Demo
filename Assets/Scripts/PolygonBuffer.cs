@@ -9,14 +9,16 @@ using UnityEngine;
 public class PolygonBuffer : IDraw
 {
     private int dim;
-    private ArrayList polygons;
+    private List<Polygon> polygons;
     private int size;
+    private IComparer<Polygon> comparer;
 
-    public PolygonBuffer (int dim)
+    public PolygonBuffer(int dim)
     {
         this.dim = dim;
-        polygons = new ArrayList();
+        polygons = new List<Polygon>();
         size = 0;
+        comparer = new PolygonComparer();
     }
 
     public void clear()
@@ -31,7 +33,8 @@ public class PolygonBuffer : IDraw
         if (size < polygons.Count)
         {
             polygon = (Polygon)polygons[size];
-        } else
+        }
+        else
         {
             polygon = new Polygon();
             polygons.Add(polygon);
@@ -58,5 +61,25 @@ public class PolygonBuffer : IDraw
     public Polygon get(int i)
     {
         return (Polygon)polygons[i];
+    }
+
+    public void sort(double[] eyeVector)
+    {
+        double[] sum = new double[3];
+        for (int i = 0; i < size; i++)
+        {
+            Vec.copy(sum, polygons[i].vertex[0]);
+            for (int j = 1; j < polygons[i].vertex.Length; j++) Vec.add(sum, sum, polygons[i].vertex[j]);
+            polygons[i].dist = Vec.dot(sum, eyeVector) / polygons[i].vertex.Length;
+        }
+        polygons.Sort(0, size, comparer);
+    }
+
+    class PolygonComparer : IComparer<Polygon>
+    {
+        public int Compare(Polygon x, Polygon y)
+        {
+            return (x.dist - y.dist > 0) ? -1 : 1;
+        }
     }
 }

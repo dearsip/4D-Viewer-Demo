@@ -55,6 +55,117 @@ public class Shapes
         return new Geom.Shape(vertex, eiv, fiv, cie, cif, cn, color);
     }
 
+    public static Geom.Shape pentachoronBig()
+    {
+        double[][] vertex = new double[][]
+        {
+            new double[] { 0, 0, 0, 1 },
+            new double[] { 0, 0, Math.Sqrt(15)/4.0, -1/4.0 },
+            new double[] { Math.Sqrt(30)/6.0, 0, -Math.Sqrt(15)/12.0, -1/4.0 },
+            new double[] { -Math.Sqrt(30)/12.0, Math.Sqrt(10)/4.0, -Math.Sqrt(15)/12.0, -1/4.0 },
+            new double[] { -Math.Sqrt(30)/12.0, -Math.Sqrt(10)/4.0, -Math.Sqrt(15)/12.0, -1/4.0 }
+        };
+        for (int i = 0; i < 5; i++) Vec.scale(vertex[i], vertex[i], 2);
+        int[][] eiv = new int[10][];
+        int count = 0;
+        for (int i = 0; i < 4; i++)
+            for (int j = i + 1; j < 5; j++) eiv[count++] = new int[] { i, j };
+        int[][] fiv = new int[10][];
+        count = 0;
+        for (int i = 0; i < 3; i++)
+            for (int j = i + 1; j < 4; j++)
+                for (int k = j + 1; k < 5; k++) fiv[count++] = new int[] { i, j, k };
+        int[][] cie = new int[][]
+        {
+            new int[] { 0,1,2,4,5,7 },
+            new int[] { 0,1,3,4,6,8 },
+            new int[] { 0,2,3,5,6,9 },
+            new int[] { 1,2,3,7,8,9 },
+            new int[] { 4,5,6,7,8,9 }
+        };
+        int[][] cif = new int[][]
+        {
+            new int[] { 0,1,3,6 },
+            new int[] { 0,2,4,7 },
+            new int[] { 1,2,5,8 },
+            new int[] { 3,4,5,9 },
+            new int[] { 6,7,8,9 }
+        };
+        double[][] cn = new double[5][];
+        Color[] color = new Color[5];
+        for (int i = 0; i < 5; i++)
+        {
+            cn[i] = new double[4];
+            Vec.scale(cn[i], vertex[4 - i], -1);
+            color[i] = defc;
+        }
+        return new Geom.Shape(vertex, eiv, fiv, cie, cif, cn, color);
+    }
+
+    // 正五胞体（配色２）
+    public static Geom.Shape pc2()
+    {
+        Geom.Shape shape = pentachoron();
+        shape.cell[0].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
+        shape.cell[1].color = new Color(1.0f, 1.0f, 0.0f, 0.3f);
+        shape.cell[2].color = new Color(0.0f, 1.0f, 0.0f, 0.3f);
+        shape.cell[3].color = new Color(1.0f, 0.0f, 1.0f, 0.3f);
+        shape.cell[4].color = new Color(1.0f, 0.0f, 1.0f, 0.3f);
+        return shape;
+    }
+
+    // 正五胞体（配色３）
+    public static Geom.Shape pc3()
+    {
+        Geom.Shape shape = pentachoron();
+        shape.cell[0].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
+        shape.cell[1].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[2].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[3].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[4].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        return shape;
+    }
+
+    // 正五胞体（配色２）
+    public static Geom.Shape pc2Big()
+    {
+        Geom.Shape shape = pentachoronBig();
+        shape.cell[0].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
+        shape.cell[1].color = new Color(1.0f, 1.0f, 0.0f, 0.3f);
+        shape.cell[2].color = new Color(0.0f, 1.0f, 0.0f, 0.3f);
+        shape.cell[3].color = new Color(0.0f, 0.0f, 1.0f, 0.3f);
+        shape.cell[4].color = new Color(1.0f, 0.0f, 1.0f, 0.3f);
+        return shape;
+    }
+
+    // 正五胞体（配色３）
+    public static Geom.Shape pc3Big()
+    {
+        Geom.Shape shape = pentachoronBig();
+        shape.cell[0].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
+        shape.cell[1].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[2].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[3].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        shape.cell[4].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        return shape;
+    }
+
+    // 正五胞体（赤）
+    public static Geom.Shape pcRed()
+    {
+        Geom.Shape shape = pentachoron();
+        for (int i = 0; i < 5; i++) shape.cell[i].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
+        return shape;
+    }
+
+    // 正五胞体（青）
+    public static Geom.Shape pcCyan()
+    {
+        Geom.Shape shape = pentachoron();
+        for (int i = 0; i < 5; i++) shape.cell[i].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        return shape;
+    }
+
     // 正八胞体の胞一つ
     public static Geom.Shape monoCell()
     {
@@ -236,7 +347,7 @@ public class Shapes
         Color[] color = new Color[]
         {
             new Color( 1.0f, 1.0f, 1.0f, 0.3f ),
-            new Color( 0.5f, 0.5f, 0.5f, 0.3f ),
+            new Color( 0.4f, 0.4f, 0.4f, 0.3f ),
             new Color( 1.0f, 1.0f, 0.0f, 0.3f ),
             new Color( 0.0f, 0.0f, 1.0f, 0.3f ),
             new Color( 1.0f, 0.0f, 1.0f, 0.3f ),
@@ -248,13 +359,24 @@ public class Shapes
     }
 
     // 正八胞体（配色２）
-    public static Geom.Shape torCell()
+    public static Geom.Shape sc2()
     {
         Geom.Shape shape = superCell();
         for (int i = 0; i < 4; i++)
         {
             shape.cell[i].color = new Color(1.0f, 0.0f, 0.0f, 0.3f);
             shape.cell[i + 4].color = new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        }
+        return shape;
+    }
+
+    // 正八胞体（配色３）
+    public static Geom.Shape sc3()
+    {
+        Geom.Shape shape = superCell();
+        for (int i = 0; i < 8; i++)
+        {
+            shape.cell[i].color = defc;
         }
         return shape;
     }
@@ -273,6 +395,9 @@ public class Shapes
             new double[] { 0, 0, 0, 1 },
             new double[] { 0, 0, 0, -1 },
         };
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 4; j++)
+                vertex[i][j] *= 2;
         int[][] eiv = new int[][] 
         {
             new int[] { 0,2 },
@@ -469,6 +594,31 @@ public class Shapes
         {
             shape.cell[i].color = (((i + i/2 + i/4 + i/8) & 1) == 0) ? 
                 new Color(1.0f, 0.0f, 0.0f, 0.3f) : new Color(0.0f, 1.0f, 1.0f, 0.3f);
+        }
+        return shape;
+    }
+
+    // 正十六胞体（配色３）
+    public static Geom.Shape hd3()
+    {
+        Geom.Shape shape = hexadecachoron();
+        for (int i = 0; i < 16; i++)
+        {
+            shape.cell[i].color = defc;
+        }
+        return shape;
+    }
+
+    public static Geom.Shape scale(Geom.Shape shape, double s)
+    {
+        for (int i = 0; i < shape.vertex.Length; i++) Vec.scale(shape.vertex[i], shape.vertex[i], s);
+        Vec.scale(shape.shapecenter, shape.shapecenter, s);
+        Vec.scale(shape.aligncenter, shape.aligncenter, s);
+        shape.radius *= s;
+        for (int i = 0; i < shape.cell.Length; i++)
+        {
+            Vec.scale(shape.cell[i].center, shape.cell[i].center, s);
+            shape.cell[i].threshold *= s;
         }
         return shape;
     }

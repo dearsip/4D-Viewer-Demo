@@ -103,7 +103,7 @@ namespace Valve.VR.InteractionSystem
 			}
 		}
 
-        protected void UpdateLinearMapping( Transform updateTransform )
+        protected virtual void UpdateLinearMapping( Transform updateTransform )
 		{
 			prevMapping = linearMapping.value;
 			linearMapping.value = Mathf.Clamp01( initialMappingOffset + CalculateLinearMapping( updateTransform ) );
