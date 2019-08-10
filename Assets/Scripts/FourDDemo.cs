@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
+using System;
 
 /**
  * A model that lets the user move around geometric shapes.
@@ -9,6 +11,8 @@ using UnityEngine;
 
 public class FourDDemo
 {
+    private Geom.Shape[] shapelist;
+
     private Geom.Shape[] shapes;
     private bool[][] inFromt;
     private PolygonBuffer buf;
@@ -18,6 +22,7 @@ public class FourDDemo
     private Clip.Draw[] clipUnits;
     private bool[][] inFront;
     private Geom.Separator[][] separators;
+    private Clip.Result clipResult;
 
     private double[] origin;
     private double[][] axis;
@@ -27,10 +32,16 @@ public class FourDDemo
     private List<int> tris;
     private List<Color> cols;
 
-    private int shapeNum, colorNum;
+    private int shapeNum = 1;
+    private int colorNum = 1;
 
-    private float cellAlpha;
-    private Color faceColor;
+    private float cellAlpha = 0.6f;
+    private Color faceColor = Color.white;
+    private double offset = 0.8;
+    private double border = -1;
+    private int[] colors;
+    private int colorVal = 12;
+    private int selectedCell = -1;
 
     public FourDDemo()
     {
@@ -42,26 +53,27 @@ public class FourDDemo
         axis = new double[4][];
         for (int i = 0; i < 4; i++) axis[i] = new double[4];
         Vec.unitMatrix(axis);
-
-        shapeNum = 1; colorNum = 0;
+        
+        shapelist = new Geom.Shape[] { Shapes.cell_5(), Shapes.cell_8(), Shapes.cell_16(),
+                                       Shapes.cell_24(), Shapes.cell_120(), Shapes.cell_600() };
+        shapes = new Geom.Shape[1];
         setShape();
+        colors = new int[shapes[0].cell.Length];
 
         buf = new PolygonBuffer(4);
         bufRelative = new PolygonBuffer(3);
         renderRelative = new RenderRelative(buf, bufRelative, 4, 1);
+        clipResult = new Clip.Result();
 
         verts = new List<Vector3>();
         tris = new List<int>();
         cols = new List<Color>();
-
-        faceColor = new Color(1.0f, 1.0f, 1.0f, 0.1f);
-        cellAlpha = 0.3f;
     }
 
     public void changeShape(int shapeNum)
     {
         this.shapeNum = shapeNum;
-        colorNum = 0;
+        colorNum = 1;
         setShape();
     }
 
@@ -81,59 +93,17 @@ public class FourDDemo
         renderRelative.setRetina(1 / (r * r + 1) * (6 / (6 + r)));
     }
 
+    public void changeBorder(double r) { border = r; }
+
+    public void changeOffset(double r) { offset = r; }
+
     private void setShape()
     {
-        switch (shapeNum*3+colorNum)
-        {
-            case 0:
-                shapes = new Geom.Shape[] { Shapes.pc2Big() };
-                break;
-            case 1:
-                shapes = new Geom.Shape[] { Shapes.pc3Big() };
-                break;
-            case 2:
-                shapes = new Geom.Shape[] { Shapes.pentachoronBig() };
-                break;
-            case 3:
-                shapes = new Geom.Shape[] { Shapes.superCell() };
-                break;
-            case 4:
-                shapes = new Geom.Shape[] { Shapes.sc2() };
-                break;
-            case 5:
-                shapes = new Geom.Shape[] { Shapes.sc3() };
-                break;
-            case 6:
-                shapes = new Geom.Shape[] { Shapes.hexadecachoron() };
-                break;
-            case 7:
-                shapes = new Geom.Shape[] { Shapes.hd2() };
-                break;
-            case 8:
-                shapes = new Geom.Shape[] { Shapes.hd3() };
-                break;
-            case 9:
-                shapes = new Geom.Shape[] { Shapes.pc2(), Shapes.pc2() };
-                shapes[0].aligncenter[0] = 1.1;
-                shapes[0].place();
-                shapes[1].aligncenter[0] = -1.1;
-                shapes[1].place();
-                break;
-            case 10:
-                shapes = new Geom.Shape[] { Shapes.pentachoron(), Shapes.pentachoron() };
-                shapes[0].aligncenter[0] = 1.1;
-                shapes[0].place();
-                shapes[1].aligncenter[0] = -1.1;
-                shapes[1].place();
-                break;
-            case 11:
-                shapes = new Geom.Shape[] { Shapes.pcRed(), Shapes.pcCyan() };
-                shapes[0].aligncenter[0] = 1.1;
-                shapes[0].place();
-                shapes[1].aligncenter[0] = -1.1;
-                shapes[1].place();
-                break;
-        }
+        shapes[0] = shapelist[shapeNum];
+        colorVal = Vec.max(Shapes.colorList[shapeNum][colorNum]) + 1;
+        if (colorVal == 1) colorVal = 12;
+        colors = Shapes.colorList[shapeNum][colorNum];
+        for (int i = 0; i < shapes[0].cell.Length; i++) shapes[0].cell[i].color = Color.HSVToRGB(1f * colors[i] / colorVal, 1, 1);
         clipUnits = new Clip.Draw[shapes.Length];
         for (int i = 0; i < shapes.Length; i++) clipUnits[i] = new Clip.Draw(4);
         inFront = new bool[shapes.Length][];
@@ -142,7 +112,8 @@ public class FourDDemo
         for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
     }
 
-    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, double[][] rotate, double[] eyeVector)
+    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, 
+        double[][] rotate, double[] eyeVector, double[] cursor, bool edit)
     {
         Vec.zero(reg1);
         for (int i = 0; i < shapes.Length; i++) // 回転
@@ -151,6 +122,8 @@ public class FourDDemo
             shapes[i].rotateFrame(rotate[2], rotate[3], reg1, reg2, reg3);
             shapes[i].place();
         }
+
+        click(cursor, edit);
 
         buf.clear();
 
@@ -175,12 +148,13 @@ public class FourDDemo
                 if (shapes[h] == null) continue;
                 if (inFront[h][i]) currentDraw = clipUnits[h].chain(currentDraw);
             }
-            drawShape(shapes[i]);
+            drawShape(shapes[i], eyeVector);
         }
 
         renderRelative.run(axis);
 
         bufRelative.sort(eyeVector); // できる限り自然な描画にするために、meshを大まかに並べ替える。
+        //applyBorder();
 
         convert(bufRelative, ref vertices, ref triangles, ref colors);
     }
@@ -254,10 +228,10 @@ public class FourDDemo
         return cell.visible;
     }
 
-    private void drawShape(Geom.Shape shape)
+    private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
-        for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
-        for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i]);
+        // for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }
 
     private void drawFace(Geom.Shape shape, Geom.Face face)
@@ -269,40 +243,89 @@ public class FourDDemo
     }
 
     // 隙間を空けた胞表示。
-    private void drawCell(Geom.Shape shape, Geom.Cell cell)
+    private void drawCell(Geom.Shape shape, Geom.Cell cell, bool selected, double[] eyeVector)
     {
-        for(int i = 0; i < cell.ifa.Length; i++) { drawFace(shape, cell, shape.face[cell.ifa[i]]); }
+        Vec.sub(reg1, cell.center, origin);
+        Vec.toAxisCoordinates(reg1, reg1, axis);
+        Vec.projectRetina(reg4, reg1, renderRelative.getRetina());
+        bool beyond = Vec.dot(reg4, eyeVector) < border;
+        for (int i = 0; i < cell.ifa.Length; i++) drawFace(shape, cell, shape.face[cell.ifa[i]], selected, beyond);
     }
 
-    private void drawFace(Geom.Shape shape, Geom.Cell cell, Geom.Face face)
+    private void drawFace(Geom.Shape shape, Geom.Cell cell, Geom.Face face, bool selected, bool beyond)
     {
         double[][] vertex = new double[face.iv.Length][];
         for (int i = 0; i < face.iv.Length; i++)
         {
             vertex[i] = new double[shape.vertex[face.iv[i]].Length];
-            Vec.mid(vertex[i], cell.center, shape.vertex[face.iv[i]], 0.8);
+            Vec.mid(vertex[i], cell.center, shape.vertex[face.iv[i]], offset);
         }
-        cell.color.a = cellAlpha;
-        Polygon polygon = new Polygon(vertex, cell.color);
+        cell.color.a = (beyond) ? cellAlpha * 0.1f : cellAlpha;
+        Polygon polygon = new Polygon(vertex, selected ? cell.color +Color.white * 0.2f : cell.color);
         currentDraw.drawPolygon(polygon, origin);
+    }
+
+    private void applyBorder()
+    {
+        int size = bufRelative.getSize();
+        int target = size / 2;
+        int n = target / 2;
+        while (n > 0)
+        {
+            if (target < size && bufRelative.get(target).dist < border) target -= n;
+            else target += n;
+            n /= 2;
+        }
+        for (int i = target; i < size; i++) bufRelative.get(i).color.a *= 0.1f;
+    }
+
+    public void click(double[] vector, bool edit)
+    {
+        Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
+        Vec.addScaled(reg2, origin, reg3, 10000); // infinity
+        Geom.Shape shape = shapes[0];
+        if (Clip.closestApproach(shape.shapecenter, origin, reg3, reg1) <= shape.radius * shape.radius)
+        { // could be a hit
+            Clip.clip(origin, reg2, shape, clipResult);
+            if ((clipResult.clip & Clip.KEEP_A) != 0)
+            {
+                selectedCell = clipResult.ia;
+                if (edit)
+                {
+                    colors[selectedCell]++;
+                    colors[selectedCell] %= colorVal;
+                    shape.cell[selectedCell].color = Color.HSVToRGB(1f * colors[selectedCell] / colorVal, 1, 1);
+                }
+            }
+            else selectedCell = -1;
+        }
+    }
+
+    public void save()
+    {
+        StreamWriter sw = new StreamWriter("./LogData.txt", true);
+        sw.WriteLine(Vec.ToString(colors));
+        sw.Flush();
+        sw.Close();
     }
 
     // Polygon の情報を vertices, triangles, colors に変換する。
     private void convert(PolygonBuffer buf, ref Vector3[] vertices, ref int[] triangles, ref Color[] colors)
     {
         int count = 0;
+        Polygon p;
         verts.Clear();
         tris.Clear();
         cols.Clear();
         for (int i=0; i<buf.getSize(); i++)
         {
-            int v = buf.get(i).vertex.Length;
-            if (v < 3) continue;
+            p = buf.get(i);
+            int v = p.vertex.Length;
             for (int j = 0; j < v; j++)
             {
-                reg4 = buf.get(i).vertex[j];
+                reg4 = p.vertex[j];
                 verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
-                cols.Add(buf.get(i).color);
+                cols.Add(p.color);
             }
             for (int j = 0; j < v - 2; j++)
             {

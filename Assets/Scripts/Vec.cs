@@ -336,6 +336,11 @@ public class Vec
         }
     }
 
+    public static void project(double[] dest, double[] src, double[] normal)
+    {
+        project(dest, src, normal, 0, PROJ_ORTHO, normal);
+    }
+
     // --- coordinate conversion ---
 
     /**
@@ -451,6 +456,35 @@ public class Vec
         reflect(dest, dest, reg1, reg2);
     }
 
+    // 4次元の外積
+    public static void outerProduct(double[] dest, double[] src1, double[] src2, double[] src3)
+    {
+        dest[0] =   src1[1] * src2[2] * src3[3]
+                  + src1[2] * src2[3] * src3[1]
+                  + src1[3] * src2[1] * src3[2]
+                  - src1[3] * src2[2] * src3[1]
+                  - src1[1] * src2[3] * src3[2]
+                  - src1[2] * src2[1] * src3[3];
+        dest[1] = - src1[2] * src2[3] * src3[0]
+                  - src1[3] * src2[0] * src3[2]
+                  - src1[0] * src2[2] * src3[3]
+                  + src1[0] * src2[3] * src3[2]
+                  + src1[2] * src2[0] * src3[3]
+                  + src1[3] * src2[2] * src3[0];
+        dest[2] =   src1[3] * src2[0] * src3[1]
+                  + src1[0] * src2[1] * src3[3]
+                  + src1[1] * src2[3] * src3[0]
+                  - src1[1] * src2[0] * src3[3]
+                  - src1[3] * src2[1] * src3[0]
+                  - src1[0] * src2[3] * src3[1];
+        dest[3] = - src1[0] * src2[1] * src3[2]
+                  - src1[1] * src2[2] * src3[0]
+                  - src1[2] * src2[0] * src3[1]
+                  + src1[2] * src2[1] * src3[0]
+                  + src1[0] * src2[2] * src3[1]
+                  + src1[1] * src2[0] * src3[2];
+    }
+
     // デバッグ用。
     public static String ToString(double[] dest)
     {
@@ -461,5 +495,23 @@ public class Vec
             s += dest[i].ToString();
         }
         return s;
+    }
+
+    public static String ToString(int[] dest)
+    {
+        String s = dest[0].ToString();
+        for (int i = 1; i < dest.Length; i++)
+        {
+            s += ",";
+            s += dest[i].ToString();
+        }
+        return s;
+    }
+
+    public static int max(int[] src)
+    {
+        int m = src[0];
+        for (int i = 1; i < src.Length; i++) if (m < src[i]) m = src[i];
+        return m;
     }
 }

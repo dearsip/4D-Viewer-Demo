@@ -140,7 +140,7 @@ public class Geom
             for (int i = 0; i < cell.Length; i++) cell[i].color = color[i];
         }
 
-        public int getSize() { return face.Length; }
+        public int getSize() { return cell.Length; }
         public Clip.Boundary getBoundary(int i) { return cell[i]; }
 
         public Shape copy()
@@ -521,7 +521,7 @@ public class Geom
     public abstract class Separator
     {
 
-        public int apply(double[] origin) { return 0; }
+        public virtual int apply(double[] origin) { return 0; }
 
         public const int S1_FRONT = -1;
         public const int NO_FRONT = 0;
@@ -553,7 +553,7 @@ public class Geom
             this.invert = invert;
         }
 
-        public int apply(double[] origin)
+        public override int apply(double[] origin)
         {
             double value = Vec.dot(origin, normal);
             int result;
@@ -567,7 +567,7 @@ public class Geom
 
     public class NullSeparator : Separator
     {
-        public int apply(double[] origin) { return NO_FRONT; }
+        public override int apply(double[] origin) { return NO_FRONT; }
     }
 
     public static Separator nullSeparator = new NullSeparator();

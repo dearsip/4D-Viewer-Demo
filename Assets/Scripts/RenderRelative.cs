@@ -61,6 +61,8 @@ public class RenderRelative
         }
     }
 
+    public double getRetina() { return retina; }
+
     // --- processing ---
 
     // the call to projectRetina could cause division by zero

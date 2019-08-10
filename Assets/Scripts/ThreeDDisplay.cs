@@ -24,6 +24,7 @@ public class ThreeDDisplay : MonoBehaviour
 
     public Player player;
     private double[] eyeVector;
+    private double[] cursor;
 
     private Vector3 reg1;
     private Vector3 reg2;
@@ -32,8 +33,9 @@ public class ThreeDDisplay : MonoBehaviour
 
     private double[][] rotate; // 4DSoftware への出力。double[0]からdouble[1]、double[2]からdouble[3]への回転を意味する。
 
-    public Slider faceSlider, cellSlider, retinaSlider;
-    public bool wRotate;
+    public Slider faceSlider, cellSlider, retinaSlider, sizeSlider, borderSlider, offsetSlider;
+    public Transform display;
+    private bool wRotate, edit;
 
     // Start is called before the first frame update
     void Start()
@@ -48,13 +50,15 @@ public class ThreeDDisplay : MonoBehaviour
         rotate[3] = new double[] { 1, 0, 0, 0 };
         reg2 = new Vector3(0, 0, 0);
         eyeVector = new double[3];
+        cursor = new double[4];
         wRotate = true;
     }
     
     void Update()
     {
         calcInput();
-        soft.Run(ref vertices, ref triangles, ref colors, rotate, eyeVector); // ソフトの出力が vertices, triangles に収められる
+        soft.Run(ref vertices, ref triangles, ref colors, rotate, 
+            eyeVector, cursor, grab.GetStateDown(hand) && edit); // ソフトの出力が vertices, triangles に収められる
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
             mesh.triangles = triangles;
@@ -105,6 +109,9 @@ public class ThreeDDisplay : MonoBehaviour
         reg1 = this.transform.position - player.hmdTransform.position;
         for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
         Vec.normalize(eyeVector, eyeVector);
+
+        reg1 = (pose.GetLocalPosition(hand) - this.transform.position) / 0.3f * 2f / display.localScale[0];
+        for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
     }
 
     public void changeShape(int shapeNum) { soft.changeShape(shapeNum); }
@@ -113,9 +120,19 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void changeFaceAlpha() { soft.changeFaceAlpha(faceSlider.value); }
 
-    public void changeCellAlpha() { soft.changeCellAlpha(cellSlider.value); }
+    public void changeCellAlpha() { if (soft != null) soft.changeCellAlpha(cellSlider.value); }
 
     public void toggleWRotate() { wRotate = !wRotate; }
 
-    public void changeRetina() { soft.changeRetina((double)retinaSlider.value * 3); }
+    public void toggleEdit() { edit = !edit; }
+
+    public void changeRetina() { soft.changeRetina(retinaSlider.value * 3); }
+
+    public void changeSize() { float s = sizeSlider.value * 2 + 1; ; display.localScale = new Vector3(s, s, s); }
+
+    public void changeBorder() { if (soft != null) soft.changeBorder(borderSlider.value * 2 - 1); }
+
+    public void changeOffset() { soft.changeOffset(offsetSlider.value); }
+
+    public void save() { soft.save(); }
 }
