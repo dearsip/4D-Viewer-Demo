@@ -2,7 +2,7 @@
 
 ![4D Viewer Demo](https://gyazo.com/d1925f09be7e199be6ecca24a74cb23c.jpg)
 
-陰面消去（陰胞消去）を搭載した多胞体表示ソフト。（最新版の色塗り機能は複数の多胞体の表示に対応しないため陰胞消去は機能しない。）[→動画](https://youtu.be/LQwlI3UJW3g)
+陰面消去（陰胞消去）を搭載した多胞体表示ソフト。（最新版の色塗り機能は複数の多胞体の表示に対応しないため陰胞消去は機能しない。）[→動画](https://youtu.be/TU6tFoykZz8)
 
 [4D Blocks](http://www.urticator.net/blocks/v6/index.html)のソースコードを流用している。
 また、実装には[4dforvive](https://github.com/leo92613/4dforvive)を一部参考にしている。
