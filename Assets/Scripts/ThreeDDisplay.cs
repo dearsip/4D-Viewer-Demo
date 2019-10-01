@@ -35,7 +35,7 @@ public class ThreeDDisplay : MonoBehaviour
 
     public Slider faceSlider, cellSlider, retinaSlider, sizeSlider, borderSlider, offsetSlider;
     public Transform display;
-    private bool wRotate, edit;
+    private bool wRotate, edit, spin;
 
     // Start is called before the first frame update
     void Start()
@@ -58,7 +58,7 @@ public class ThreeDDisplay : MonoBehaviour
     {
         calcInput();
         soft.Run(ref vertices, ref triangles, ref colors, rotate, 
-            eyeVector, cursor, grab.GetStateDown(hand) && edit); // ソフトの出力が vertices, triangles に収められる
+            eyeVector, cursor, grab.GetStateDown(hand) && edit, spin); // ソフトの出力が vertices, triangles に収められる
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
             mesh.triangles = triangles;
@@ -135,4 +135,6 @@ public class ThreeDDisplay : MonoBehaviour
     public void changeOffset() { soft.changeOffset(offsetSlider.value); }
 
     public void save() { soft.save(); }
+
+    public void toggleSpin() { spin = !spin; }
 }

@@ -271,7 +271,7 @@ public class Geom
         public void place()
         {
             PlaceHelper helper = new PlaceHelper(axis, aligncenter, ideal.aligncenter);
-                helper.placePos(shapecenter, ideal.shapecenter);
+            helper.placePos(shapecenter, ideal.shapecenter);
 
             for (int i = 0; i < cell.Length; i++) cell[i].place(ideal.cell[i], helper);
             for (int i = 0; i < vertex.Length; i++) helper.placePos(vertex[i], ideal.vertex[i]);
@@ -286,6 +286,16 @@ public class Geom
             if (origin == null) origin = clone1(getAlignCenter());
             vrotate(aligncenter, from, to, origin, reg1, reg2);
             for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i], axis[i], from, to, reg1, reg2);
+        }
+
+        public void rotateRelative(double[] from, double[] to, double[] reg1, double[] reg2)
+        {
+            for (int i = 0; i < vertex.Length; i++) Vec.rotate(ideal.vertex[i], ideal.vertex[i], from, to, reg1, reg2);
+            for (int i = 0; i < cell.Length; i++)
+            {
+                Vec.rotate(ideal.cell[i].center, ideal.cell[i].center, from, to, reg1, reg2);
+                Vec.rotate(ideal.cell[i].normal, ideal.cell[i].normal, from, to, reg1, reg2);
+            }
         }
 
         public double vmin(bool[] b, int axis)

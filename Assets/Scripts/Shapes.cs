@@ -470,7 +470,7 @@ public class Shapes
         new int[][]
         {
             new int[] { 0, 0, 0, 0, 0 },
-            new int[] { 0, 1, 2, 3, 4 },
+            new int[] { 3, 4, 1, 2, 0 },
             new int[] { 1, 0, 0, 0, 0 }
         },
         new int[][]
