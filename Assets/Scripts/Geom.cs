@@ -268,10 +268,21 @@ public class Geom
             return n;
         }
 
+        public void reset()
+        {
+            // use this to avoid accumulation of FP error in trains
+            for (int i = 0; i < cell.Length; i++) cell[i].reset(ideal.cell[i]);
+            for (int i = 0; i < vertex.Length; i++) Vec.copy(vertex[i], ideal.vertex[i]);
+            Vec.copy(shapecenter, ideal.shapecenter);
+            Vec.copy(aligncenter, ideal.aligncenter);
+            // radius doesn't change under these transformations
+            for (int i = 0; i < axis.Length; i++) Vec.copy(axis[i], ideal.axis[i]);
+        }
+
         public void place()
         {
             PlaceHelper helper = new PlaceHelper(axis, aligncenter, ideal.aligncenter);
-                helper.placePos(shapecenter, ideal.shapecenter);
+            helper.placePos(shapecenter, ideal.shapecenter);
 
             for (int i = 0; i < cell.Length; i++) cell[i].place(ideal.cell[i], helper);
             for (int i = 0; i < vertex.Length; i++) helper.placePos(vertex[i], ideal.vertex[i]);
@@ -286,6 +297,16 @@ public class Geom
             if (origin == null) origin = clone1(getAlignCenter());
             vrotate(aligncenter, from, to, origin, reg1, reg2);
             for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i], axis[i], from, to, reg1, reg2);
+        }
+
+        public void rotateRelative(double[] from, double[] to, double[] reg1, double[] reg2)
+        {
+            for (int i = 0; i < vertex.Length; i++) Vec.rotate(ideal.vertex[i], ideal.vertex[i], from, to, reg1, reg2);
+            for (int i = 0; i < cell.Length; i++)
+            {
+                Vec.rotate(ideal.cell[i].center, ideal.cell[i].center, from, to, reg1, reg2);
+                Vec.rotate(ideal.cell[i].normal, ideal.cell[i].normal, from, to, reg1, reg2);
+            }
         }
 
         public double vmin(bool[] b, int axis)
@@ -433,6 +454,20 @@ public class Geom
                 if (b[i]) iv[j++] = i;
             }
             return iv;
+        }
+
+        public void reset(Cell ideal)
+        {
+            Vec.copy(center, ideal.center);
+            if (ideal.normal != null)
+            {
+                Vec.copy(normal, ideal.normal);
+            }
+            else
+            {
+                normal = null;
+            }
+            threshold = ideal.threshold;
         }
 
         public void place(Cell ideal, PlaceHelper helper)
