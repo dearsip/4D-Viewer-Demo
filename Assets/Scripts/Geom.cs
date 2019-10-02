@@ -268,6 +268,17 @@ public class Geom
             return n;
         }
 
+        public void reset()
+        {
+            // use this to avoid accumulation of FP error in trains
+            for (int i = 0; i < cell.Length; i++) cell[i].reset(ideal.cell[i]);
+            for (int i = 0; i < vertex.Length; i++) Vec.copy(vertex[i], ideal.vertex[i]);
+            Vec.copy(shapecenter, ideal.shapecenter);
+            Vec.copy(aligncenter, ideal.aligncenter);
+            // radius doesn't change under these transformations
+            for (int i = 0; i < axis.Length; i++) Vec.copy(axis[i], ideal.axis[i]);
+        }
+
         public void place()
         {
             PlaceHelper helper = new PlaceHelper(axis, aligncenter, ideal.aligncenter);
@@ -443,6 +454,20 @@ public class Geom
                 if (b[i]) iv[j++] = i;
             }
             return iv;
+        }
+
+        public void reset(Cell ideal)
+        {
+            Vec.copy(center, ideal.center);
+            if (ideal.normal != null)
+            {
+                Vec.copy(normal, ideal.normal);
+            }
+            else
+            {
+                normal = null;
+            }
+            threshold = ideal.threshold;
         }
 
         public void place(Cell ideal, PlaceHelper helper)

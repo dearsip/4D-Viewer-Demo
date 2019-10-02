@@ -137,4 +137,6 @@ public class ThreeDDisplay : MonoBehaviour
     public void save() { soft.save(); }
 
     public void toggleSpin() { spin = !spin; }
+
+    public void reset() { soft.reset(); }
 }

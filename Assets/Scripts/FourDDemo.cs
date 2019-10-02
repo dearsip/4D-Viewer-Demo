@@ -124,36 +124,43 @@ public class FourDDemo
         for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
     }
 
+    private void spin()
+    {
+        double theta = Time.deltaTime;
+        if (count < 1)
+        {
+            count += theta;
+            if (count >= 1) theta = 1 + theta - count;
+        }
+        else
+        {
+            count += theta;
+            if (count >= 2)
+            {
+                count -= 2;
+                theta = count;
+            }
+            else theta = 0;
+        }
+        if (theta > 0)
+        {
+            theta *= 72;
+            Vec.rotateAngle(reg1, reg2, spinv[0], spinv[1], 2 * theta);
+            for (int i = 0; i < shapes.Length; i++) shapes[i].rotateRelative(spinv[0], reg1, reg2, reg3);
+            Vec.rotateAngle(reg1, reg2, spinv[2], spinv[3], theta);
+            for (int i = 0; i < shapes.Length; i++) shapes[i].rotateRelative(spinv[2], reg1, reg2, reg3);
+        }
+    }
+
+    public void reset()
+    {
+        for (int i = 0; i < shapes.Length; i++) shapes[i].reset();
+    }
+
     public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, 
         double[][] rotate, double[] eyeVector, double[] cursor, bool edit, bool spin)
     {
-        if (spin)
-        {
-            double theta = Time.deltaTime;
-            if (count < 1)
-            {
-                count += theta;
-                if (count >= 1) theta = 1 + theta - count;
-            }
-            else
-            {
-                count += theta;
-                if (count >= 2)
-                {
-                    count -= 2;
-                    theta = count;
-                }
-                else theta = 0;
-            }
-            if (theta > 0)
-            {
-                theta *= 72;
-                Vec.rotateAngle(reg1, reg2, spinv[0], spinv[1], 2 * theta);
-                for (int i = 0; i < shapes.Length; i++) shapes[i].rotateRelative(spinv[0], reg1, reg2, reg3);
-                Vec.rotateAngle(reg1, reg2, spinv[2], spinv[3], theta);
-                for (int i = 0; i < shapes.Length; i++) shapes[i].rotateRelative(spinv[2], reg1, reg2, reg3);
-            }
-        }
+        if (spin) this.spin();
 
         Vec.zero(reg1);
 
@@ -286,6 +293,7 @@ public class FourDDemo
     // 隙間を空けた胞表示。
     private void drawCell(Geom.Shape shape, Geom.Cell cell, bool selected, double[] eyeVector)
     {
+        // border 処理のために視点からの距離を測る。
         Vec.sub(reg1, cell.center, origin);
         Vec.toAxisCoordinates(reg1, reg1, axis);
         Vec.projectRetina(reg4, reg1, renderRelative.getRetina());
@@ -295,6 +303,7 @@ public class FourDDemo
 
     private void drawFace(Geom.Shape shape, Geom.Cell cell, Geom.Face face, bool selected, bool beyond)
     {
+        // offset を掛けて縮める。
         double[][] vertex = new double[face.iv.Length][];
         for (int i = 0; i < face.iv.Length; i++)
         {
@@ -322,6 +331,7 @@ public class FourDDemo
 
     public void click(double[] vector, bool edit)
     {
+        // Vec.fromAxisCoordinates(reg3, vector, axis); // 現時点では視点は動かないため不要
         Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
         Vec.addScaled(reg2, origin, reg3, 10000); // infinity
         Geom.Shape shape = shapes[0];
