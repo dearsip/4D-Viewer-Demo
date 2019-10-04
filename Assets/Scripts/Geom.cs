@@ -46,6 +46,11 @@ public class Geom
         return e;
     }
 
+    private static void varotate(double[][] vertex, double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
+    {
+        for (int i = 0; i < vertex.Length; i++) vrotate(vertex[i], from, to, origin, reg1, reg2);
+    }
+
     private static void vrotate(double[] vec, double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
     {
         Vec.sub(vec, vec, origin);
@@ -148,6 +153,7 @@ public class Geom
             Shape s = new Shape();
 
             s.cell = clone2(cell);
+            s.face = clone2(face);
             s.subface = subface; // share
             s.edge = clone2(edge);
             s.vertex = clone2(vertex);
@@ -291,7 +297,26 @@ public class Geom
             // axis is fixed
         }
 
-       public void rotateFrame(double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
+        public void translateFrame(double[] d)
+        {
+            // do aligncenter and axes now, update the rest later
+            Vec.add(aligncenter, aligncenter, d);
+        }
+
+        public void rotate(double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
+        {
+            if (origin == null) origin = clone1(getAlignCenter());
+            // since rotations are orthogonal, covariant vs. contravariant doesn't matter
+            for (int i = 0; i < cell.Length; i++) cell[i].rotate(from, to, origin, reg1, reg2);
+            varotate(vertex, from, to, origin, reg1, reg2);
+            vrotate(shapecenter, from, to, origin, reg1, reg2); // the clone1 call prevents this step from going awry
+            vrotate(aligncenter, from, to, origin, reg1, reg2);
+            // radius doesn't change
+            for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i], axis[i], from, to, reg1, reg2);
+            // no origin shift for axes!
+        }
+
+        public void rotateFrame(double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
         {
             // do aligncenter and axes now, update the rest later
             if (origin == null) origin = clone1(getAlignCenter());
@@ -482,6 +507,14 @@ public class Geom
                 normal = null;
             }
             calcThreshold(); // can't transform it
+        }
+
+        public void rotate(double[] from, double[] to, double[] origin, double[] reg1, double[] reg2)
+        {
+            vrotate(center, from, to, origin, reg1, reg2);
+            if (normal != null) Vec.rotate(normal, normal, from, to, reg1, reg2);
+            // no origin shift for normals!
+            calcThreshold(); // threshold changes if origin isn't coordinate origin
         }
     }
 

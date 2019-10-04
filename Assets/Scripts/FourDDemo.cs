@@ -11,7 +11,7 @@ using System;
 
 public class FourDDemo
 {
-    private Geom.Shape[] shapelist;
+    private Geom.Shape[][] shapelist;
 
     private Geom.Shape[] shapes;
     private bool[][] inFromt;
@@ -26,7 +26,8 @@ public class FourDDemo
 
     private double[] origin;
     private double[][] axis;
-    private double[] reg1, reg2, reg3, reg4;
+    private double[] zero = new double[] { 0, 0, 0, 0 };
+    private double[] reg0, reg1, reg2, reg3, reg4, reg5;
 
     private List<Vector3> verts;
     private List<int> tris;
@@ -39,9 +40,18 @@ public class FourDDemo
     private Color faceColor = Color.white;
     private double offset = 0.8;
     private double border = -1;
-    private int[] colors;
-    private int colorVal = 12;
+    private int[][] colors;
+    private int[] colorVal;
+    private int selectedShape = -1;
     private int selectedCell = -1;
+
+    public bool hapActive;
+    public double size = 1;
+    private double[] haptics;
+    public static int hNum = 9; // 解像度
+    public static int hNum2 = hNum * hNum;
+    public static int hNum3 = hNum * hNum * hNum;
+    public static float hNumh = (hNum - 1) / 2.0f;
 
     private static double PHI = (1 + Math.Sqrt(5)) / 2;
     private double[][] spinv = new double[][]
@@ -56,20 +66,18 @@ public class FourDDemo
     public FourDDemo()
     {
         origin = new double[] { 0, 0, 0, -3 };
+        reg0 = new double[4];
         reg1 = new double[4];
         reg2 = new double[4];
         reg3 = new double[4];
         reg4 = new double[3];
+        reg5 = new double[3];
         axis = new double[4][];
         for (int i = 0; i < 4; i++) axis[i] = new double[4];
         Vec.unitMatrix(axis);
-        
-        shapelist = new Geom.Shape[] { Shapes.cell_5(), Shapes.cell_8(), Shapes.cell_16(),
-                                       Shapes.cell_24(), Shapes.cell_120(), Shapes.cell_600() };
-        shapes = new Geom.Shape[1];
-        setShape();
-        colors = new int[shapes[0].cell.Length];
 
+        initShape();
+        setShape();
         buf = new PolygonBuffer(4);
         bufRelative = new PolygonBuffer(3);
         renderRelative = new RenderRelative(buf, bufRelative, 4, 1);
@@ -79,7 +87,61 @@ public class FourDDemo
         tris = new List<int>();
         cols = new List<Color>();
 
+        initHaptics();
+
         for (int i = 0; i < spinv.Length; i++) Vec.normalize(spinv[i], spinv[i]);
+    }
+
+    private void initShape()
+    {
+        ShapeBuilder sb = new ShapeBuilder();
+        shapelist = new Geom.Shape[][]
+        {
+            new Geom.Shape[] { Shapes.cell_5() },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_16() },
+            new Geom.Shape[] { Shapes.cell_24(sb) },
+            new Geom.Shape[] { Shapes.cell_120(sb) },
+            new Geom.Shape[] { Shapes.cell_600(sb) },
+            new Geom.Shape[7],
+            new Geom.Shape[7],
+            new Geom.Shape[] { Shapes.convex(sb) }
+        };
+
+        shapelist[6][0] = Shapes.cone(sb);
+        for (int i = 1; i < 7; i++) shapelist[6][i] = shapelist[6][0].copy();
+        Vec.unitVector(reg1, 3);
+        for (int i = 0; i < 6; i++)
+        {
+            Vec.unitVector(reg0, i / 2);
+            if (i % 2 != 0) Vec.scale(reg0, reg0, -1);
+            shapelist[6][i + 1].rotateFrame(reg1, reg0, zero, reg2, reg3);
+            shapelist[6][i + 1].place();
+            Vec.unitMatrix(shapelist[6][i + 1].axis);
+        }
+        for (int i = 1; i < 7; i++) shapelist[6][i].ideal = shapelist[6][i].copy();
+
+        shapelist[7][0] = Shapes.flat(sb);
+        for (int i = 1; i < 6; i++) shapelist[7][i] = shapelist[7][0].copy();
+        Vec.unitVector(reg1, 0);
+        for (int i = 0; i < 4; i++)
+        {
+            Vec.unitVector(reg0, i / 2 + 1);
+            if (i % 2 != 0) Vec.scale(reg0, reg0, -1);
+            shapelist[7][i + 1].rotateFrame(reg1, reg0, zero, reg2, reg3);
+            shapelist[7][i + 1].place();
+            Vec.unitMatrix(shapelist[7][i + 1].axis);
+        }
+        for (int i = 0; i < 2; i++) shapelist[7][5].rotateFrame(reg1, reg0, zero, reg2, reg3);
+        shapelist[7][5].place();
+        Vec.unitMatrix(shapelist[7][5].axis);
+        for (int i = 1; i < 6; i++) shapelist[7][i].ideal = shapelist[7][i].copy();
+        shapelist[7][6] = shapelist[6][0].copy();
+    }
+
+    private void initHaptics()
+    {
+        haptics = new double[hNum3];
     }
 
     public void changeShape(int shapeNum)
@@ -107,21 +169,25 @@ public class FourDDemo
 
     public void changeBorder(double r) { border = r; }
 
-    public void changeOffset(double r) { offset = r; }
+    public void changeOffset(double r) { offset = r * 0.999; } // 最大値でのZ-Fightingを防ぐ
 
     private void setShape()
     {
-        shapes[0] = shapelist[shapeNum];
-        colorVal = Vec.max(Shapes.colorList[shapeNum][colorNum]) + 1;
-        if (colorVal == 1) colorVal = 12;
-        colors = Shapes.colorList[shapeNum][colorNum];
-        for (int i = 0; i < shapes[0].cell.Length; i++) shapes[0].cell[i].color = Color.HSVToRGB(1f * colors[i] / colorVal, 1, 1);
-        clipUnits = new Clip.Draw[shapes.Length];
-        for (int i = 0; i < shapes.Length; i++) clipUnits[i] = new Clip.Draw(4);
-        inFront = new bool[shapes.Length][];
-        for (int i = 0; i < shapes.Length; i++) inFront[i] = new bool[shapes.Length];
-        separators = new Geom.Separator[shapes.Length][];
-        for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
+        shapes = shapelist[shapeNum];
+        colorVal = new int[shapes.Length];
+        for (int k = 0; k < shapes.Length; k++)
+        {
+            colorVal[k] = Vec.max(Shapes.colorList[shapeNum][colorNum][k]) + 1;
+            if (colorVal[k] == 1) colorVal[k] = 12;
+            colors = Shapes.colorList[shapeNum][colorNum];
+            for (int i = 0; i < shapes[k].cell.Length; i++) shapes[k].cell[i].color = Color.HSVToRGB(1f * colors[k][i] / colorVal[k], 1, 1);
+            clipUnits = new Clip.Draw[shapes.Length];
+            for (int i = 0; i < shapes.Length; i++) clipUnits[i] = new Clip.Draw(4);
+            inFront = new bool[shapes.Length][];
+            for (int i = 0; i < shapes.Length; i++) inFront[i] = new bool[shapes.Length];
+            separators = new Geom.Separator[shapes.Length][];
+            for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
+        }
     }
 
     private void spin()
@@ -157,19 +223,25 @@ public class FourDDemo
         for (int i = 0; i < shapes.Length; i++) shapes[i].reset();
     }
 
-    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, 
-        double[][] rotate, double[] eyeVector, double[] cursor, bool edit, bool spin)
+    public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, ref double[] haptics,
+        double[][] rotate, double[] eyeVector, double[] cursor, double[][] cursorAxis, bool edit, bool spin)
     {
         if (spin) this.spin();
 
-        Vec.zero(reg1);
-
         for (int i = 0; i < shapes.Length; i++) // 回転
         {
-            shapes[i].rotateFrame(rotate[0], rotate[1], reg1, reg2, reg3);
-            shapes[i].rotateFrame(rotate[2], rotate[3], reg1, reg2, reg3);
+            shapes[i].rotateFrame(rotate[0], rotate[1], zero, reg2, reg3);
+            shapes[i].rotateFrame(rotate[2], rotate[3], zero, reg2, reg3);
             shapes[i].place();
         }
+
+        if (hapActive) calcHaptics(cursor, cursorAxis);
+        else Vec.zero(this.haptics);
+        StreamWriter sw = new StreamWriter("./Haptics.txt", false);
+        sw.WriteLine(Vec.ToString(this.haptics));
+        sw.Flush();
+        sw.Close();
+        haptics = this.haptics;
 
         click(cursor, edit);
 
@@ -228,7 +300,7 @@ public class FourDDemo
 
 
                     sep = separators[i][j];
-                    if (sep == null)
+                    //if (sep == null)
                     {
                         sep = Clip.staticSeparate(s1, s2,/* any = */ false);
                         separators[i][j] = sep;
@@ -329,33 +401,74 @@ public class FourDDemo
         for (int i = target; i < size; i++) bufRelative.get(i).color.a *= 0.1f;
     }
 
-    public void click(double[] vector, bool edit)
+    private void calcHaptics(double[] cursor, double[][] cursorAxis)
     {
-        // Vec.fromAxisCoordinates(reg3, vector, axis); // 現時点では視点は動かないため不要
+        for (int i = 0; i < haptics.Length; i++)
+        {
+            reg4[0] = i % hNum - hNumh; // 立方体形に配置
+            reg4[1] = i / hNum % hNum - hNumh;
+            reg4[2] = i / hNum2 - hNumh;
+            Vec.scale(reg4, reg4, 0.3 / hNumh / (size - 0.4)); // 解像度・画面サイズに合わせて縮小
+            reg4[0] = reg4[0] + 0.1 / size; // 手の位置へ平行移動
+            reg4[1] = reg4[1] + 0.05 / size;
+            reg4[2] = reg4[2] - 0.65 / size;
+            Vec.fromAxisCoordinates(reg5, reg4, cursorAxis); // 向きを変更
+            for (int j = 0; j < 3; j++) reg0[j] = reg5[j]; // reg0[3] (= 0) は編集されない
+            Vec.add(reg0, cursor, reg0);
+            haptics[i] = click(reg0, false);
+            haptics[i] = 1 - haptics[i]; // 近いほど大きく
+        }
+        double max = Vec.max(haptics); // 最も近い点
+        if (max > 0) for (int i = 0; i < hNum3; i++) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
+        max = 0; // 総和が小さい->一部しか触れていない->高圧力と考える
+        int touch = 0;
+        for (int i = 0; i < hNum3; i++)
+        {
+            max += haptics[i];
+            if (haptics[i] != 0) touch++;
+        }
+        if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
+    }
+
+    public double click(double[] vector, bool edit)
+    {
         Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
         Vec.addScaled(reg2, origin, reg3, 10000); // infinity
-        Geom.Shape shape = shapes[0];
-        if (Clip.closestApproach(shape.shapecenter, origin, reg3, reg1) <= shape.radius * shape.radius)
-        { // could be a hit
-            Clip.clip(origin, reg2, shape, clipResult);
-            if ((clipResult.clip & Clip.KEEP_A) != 0)
-            {
-                selectedCell = clipResult.ia;
-                if (edit)
+        double dMin = 1;
+        for (int i = 0; i < shapes.Length; i++)
+        {
+            Geom.Shape shape = shapes[i];
+            if (Clip.closestApproach(shape.shapecenter, origin, reg3, reg1) <= shape.radius * shape.radius)
+            { // could be a hit
+                Clip.clip(origin, reg2, shape, clipResult);
+                if ((clipResult.clip & Clip.KEEP_A) != 0)
                 {
-                    colors[selectedCell]++;
-                    colors[selectedCell] %= colorVal;
-                    shape.cell[selectedCell].color = Color.HSVToRGB(1f * colors[selectedCell] / colorVal, 1, 1);
+                    if (clipResult.a < dMin)
+                    {
+                        dMin = clipResult.a;
+                        selectedShape = i;
+                        selectedCell = clipResult.ia;
+                    }
                 }
             }
-            else selectedCell = -1;
         }
+        if (dMin < 1)
+        {
+            if (edit)
+            {
+                colors[selectedShape][selectedCell]++;
+                colors[selectedShape][selectedCell] %= colorVal[selectedShape];
+                shapes[selectedShape].cell[selectedCell].color = Color.HSVToRGB(1f * colors[selectedShape][selectedCell] / colorVal[selectedShape], 1, 1);
+            }
+        }
+        else selectedCell = -1;
+        return dMin;
     }
 
     public void save()
     {
         StreamWriter sw = new StreamWriter("./LogData.txt", true);
-        sw.WriteLine(Vec.ToString(colors));
+        foreach (int[] c in colors) sw.WriteLine(Vec.ToString(c));
         sw.Flush();
         sw.Close();
     }

@@ -514,4 +514,11 @@ public class Vec
         for (int i = 1; i < src.Length; i++) if (m < src[i]) m = src[i];
         return m;
     }
+
+    public static double max(double[] src)
+    {
+        double m = src[0];
+        for (int i = 1; i < src.Length; i++) if (m < src[i]) m = src[i];
+        return m;
+    }
 }

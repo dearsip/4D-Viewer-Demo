@@ -17,7 +17,10 @@ public class ThreeDDisplay : MonoBehaviour
     private Vector3[] vertices;
     private int[] triangles;
     private Color[] colors;
-    
+    private double[] haptics;
+    public HapticsTester hapticsTester;
+
+    public Transform hand_;
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean grab;
     public SteamVR_Action_Pose pose;
@@ -25,6 +28,7 @@ public class ThreeDDisplay : MonoBehaviour
     public Player player;
     private double[] eyeVector;
     private double[] cursor;
+    private double[][] cursorAxis;
 
     private Vector3 reg1;
     private Vector3 reg2;
@@ -51,14 +55,17 @@ public class ThreeDDisplay : MonoBehaviour
         reg2 = new Vector3(0, 0, 0);
         eyeVector = new double[3];
         cursor = new double[4];
+        cursorAxis = new double[3][];
+        for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
         wRotate = true;
     }
     
     void Update()
     {
         calcInput();
-        soft.Run(ref vertices, ref triangles, ref colors, rotate, 
-            eyeVector, cursor, grab.GetStateDown(hand) && edit, spin); // ソフトの出力が vertices, triangles に収められる
+        soft.Run(ref vertices, ref triangles, ref colors, ref haptics, rotate, 
+            eyeVector, cursor, cursorAxis, grab.GetStateDown(hand) && edit, spin); // ソフトの出力が vertices, triangles に収められる
+        hapticsTester.draw(haptics);
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
             mesh.triangles = triangles;
@@ -94,8 +101,8 @@ public class ThreeDDisplay : MonoBehaviour
             reg2.Set(1, 0, 0);
             Vector3.OrthoNormalize(ref reg1, ref reg2); // reg2 を回転軸と垂直に
             reg1 = relarot * reg2; // reg2 を reg1 に送る回転
-            for (int i = 0; i < 3; i++) rotate[2][i] = (double)reg2[i]; // double に変換
-            for (int i = 0; i < 3; i++) rotate[3][i] = (double)reg1[i];
+            for (int i = 0; i < 3; i++) rotate[2][i] = reg2[i]; // double に変換
+            for (int i = 0; i < 3; i++) rotate[3][i] = reg1[i];
             Vec.normalize(rotate[2], rotate[2]); // 誤差を補正
             Vec.normalize(rotate[3], rotate[3]);
         }
@@ -112,6 +119,18 @@ public class ThreeDDisplay : MonoBehaviour
 
         reg1 = (pose.GetLocalPosition(hand) - this.transform.position) / 0.3f * 2f / display.localScale[0];
         for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
+
+        for (int i = 0; i < 3; i++) cursorAxis[0][i] = hand_.right[i];
+        for (int i = 0; i < 3; i++) cursorAxis[1][i] = hand_.up[i];
+        for (int i = 0; i < 3; i++) cursorAxis[2][i] = hand_.forward[i];
+        /*relarot = Quaternion.Inverse(pose.GetLocalRotation(hand));
+        for (int i = 0; i < 3; i++)
+        {
+            reg1.Set(0, 0, 0);
+            reg1[i] = 1;
+            reg1 = relarot * reg1;
+            for (int j = 0; j < 3; j++) cursorAxis[i][j] = reg1[j];
+        }    */
     }
 
     public void changeShape(int shapeNum) { soft.changeShape(shapeNum); }
@@ -128,7 +147,7 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void changeRetina() { soft.changeRetina(retinaSlider.value * 3); }
 
-    public void changeSize() { float s = sizeSlider.value * 2 + 1; ; display.localScale = new Vector3(s, s, s); }
+    public void changeSize() { float s = sizeSlider.value * 2 + 1; ; display.localScale = new Vector3(s, s, s); soft.size = s; }
 
     public void changeBorder() { if (soft != null) soft.changeBorder(borderSlider.value * 2 - 1); }
 
@@ -137,6 +156,8 @@ public class ThreeDDisplay : MonoBehaviour
     public void save() { soft.save(); }
 
     public void toggleSpin() { spin = !spin; }
+
+    public void toggleHaptics() { soft.hapActive = !soft.hapActive; }
 
     public void reset() { soft.reset(); }
 }
