@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 public class HapticsTester : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class HapticsTester : MonoBehaviour
     private int hNum2 = FourDDemo.hNum2;
     private int hNum3 = FourDDemo.hNum3;
     private float hNumh = FourDDemo.hNumh;
+    private float[] outputs;
 
     // Start is called before the first frame update
     void Start()
@@ -48,6 +50,9 @@ public class HapticsTester : MonoBehaviour
         }
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+
+        outputs = new float[hNum3];
+        for (int i = 0; i < hNum3; i++) outputs[i] = (FourDDemo.outputNum.Contains(i) ? 2 : 1);
     }
 
     // Update is called once per frame
@@ -58,11 +63,11 @@ public class HapticsTester : MonoBehaviour
 
     public void draw(double[] haptics)
     {
-        for (int i = 0; i < hNum3; i++)
+        for (int i = 0; i < hNum3; i++) if (FourDDemo.cut[i])
             for (int j = 0; j < 8; j++)
-                vertices[8 * i + j].Set(centers[i].x + (0.3f + (float)haptics[i]) / 4 * (j % 2 * 2 - 1) / hNumh,
-                                        centers[i].y + (0.3f + (float)haptics[i]) / 4 * (j / 2 % 2 * 2 - 1) / hNumh,
-                                        centers[i].z + (0.3f + (float)haptics[i]) / 4 * (j / 4 * 2 - 1) / hNumh);
+                vertices[8 * i + j].Set(centers[i].x + (0.3f + (float)haptics[i]) / 4 * (j % 2 * 2 - 1) / hNumh * outputs[i],
+                                        centers[i].y + (0.3f + (float)haptics[i]) / 4 * (j / 2 % 2 * 2 - 1) / hNumh * outputs[i],
+                                        centers[i].z + (0.3f + (float)haptics[i]) / 4 * (j / 4 * 2 - 1) / hNumh * outputs[i]);
         mesh.vertices = vertices;
 
         mesh.RecalculateNormals();

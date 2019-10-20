@@ -484,8 +484,7 @@ public class Vec
                   + src1[0] * src2[2] * src3[1]
                   + src1[1] * src2[0] * src3[2];
     }
-
-    // デバッグ用。
+    
     public static String ToString(double[] dest)
     {
         String s = dest[0].ToString();
@@ -498,6 +497,28 @@ public class Vec
     }
 
     public static String ToString(int[] dest)
+    {
+        String s = dest[0].ToString();
+        for (int i = 1; i < dest.Length; i++)
+        {
+            s += ",";
+            s += dest[i].ToString();
+        }
+        return s;
+    }
+
+    public static String ToString(bool[] dest)
+    {
+        String s = dest[0].ToString();
+        for (int i = 1; i < dest.Length; i++)
+        {
+            s += ",";
+            s += dest[i].ToString();
+        }
+        return s;
+    }
+
+    public static String ToString(float[] dest)
     {
         String s = dest[0].ToString();
         for (int i = 1; i < dest.Length; i++)

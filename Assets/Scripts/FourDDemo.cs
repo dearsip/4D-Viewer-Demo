@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System;
+using WebSocketSharp;
 
 /**
  * A model that lets the user move around geometric shapes.
@@ -48,7 +49,12 @@ public class FourDDemo
     public bool hapActive;
     public double size = 1;
     private double[] haptics;
-    public static int hNum = 9; // 解像度
+    private bool[] cutting; // 手の形を調べる v手の形
+    public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+    public static int[] outputNum = { 659 };
+    private float[] output;
+    private double max_;
+    public static int hNum = 9; // 解像度（固定）
     public static int hNum2 = hNum * hNum;
     public static int hNum3 = hNum * hNum * hNum;
     public static float hNumh = (hNum - 1) / 2.0f;
@@ -62,6 +68,9 @@ public class FourDDemo
         new double[] { 1+PHI, 1-PHI,  0,  0 }
     };
     private double count = 0;
+
+    private WebSocket ws;
+    private bool error = true; // 振動装置と接続しているときはfalseにする
 
     public FourDDemo()
     {
@@ -90,6 +99,18 @@ public class FourDDemo
         initHaptics();
 
         for (int i = 0; i < spinv.Length; i++) Vec.normalize(spinv[i], spinv[i]);
+
+        output = new float[outputNum.Length];
+
+        if (!error)
+        {
+            this.ws = new WebSocket("ws://192.168.0.13:9999");
+            this.ws.OnMessage += (object sender, MessageEventArgs e) =>
+            {
+                Debug.Log(e.Data);
+            };
+            this.ws.Connect();
+        }
     }
 
     private void initShape()
@@ -142,6 +163,9 @@ public class FourDDemo
     private void initHaptics()
     {
         haptics = new double[hNum3];
+        for (int i = 0; i < hNum3; i++) if (!cut[i]) haptics[i] = 0;
+        cutting = new bool[hNum3];
+        for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
     }
 
     public void changeShape(int shapeNum)
@@ -237,12 +261,18 @@ public class FourDDemo
 
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(this.haptics);
-        StreamWriter sw = new StreamWriter("./Haptics.txt", false);
-        sw.WriteLine(Vec.ToString(this.haptics));
-        sw.Flush();
-        sw.Close();
         haptics = this.haptics;
-
+        for (int i = 0; i < output.Length; i++) output[i] = Mathf.Min((float)(this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ ) , 1f);
+        if (!error)
+        {
+            try {
+                ws.Send(Vec.ToString(output));
+            } catch (InvalidOperationException e)
+            {
+                Debug.Log(e);
+                error = true;
+            }
+        }
         click(cursor, edit);
 
         buf.clear();
@@ -403,12 +433,12 @@ public class FourDDemo
 
     private void calcHaptics(double[] cursor, double[][] cursorAxis)
     {
-        for (int i = 0; i < haptics.Length; i++)
+        for (int i = 0; i < haptics.Length; i++) if (cut[i])
         {
             reg4[0] = i % hNum - hNumh; // 立方体形に配置
             reg4[1] = i / hNum % hNum - hNumh;
             reg4[2] = i / hNum2 - hNumh;
-            Vec.scale(reg4, reg4, 0.3 / hNumh / (size - 0.4)); // 解像度・画面サイズに合わせて縮小
+            Vec.scale(reg4, reg4, 0.2 / hNumh / (size - 0.4)); // 解像度・画面サイズに合わせて縮小
             reg4[0] = reg4[0] + 0.1 / size; // 手の位置へ平行移動
             reg4[1] = reg4[1] + 0.05 / size;
             reg4[2] = reg4[2] - 0.65 / size;
@@ -419,15 +449,21 @@ public class FourDDemo
             haptics[i] = 1 - haptics[i]; // 近いほど大きく
         }
         double max = Vec.max(haptics); // 最も近い点
-        if (max > 0) for (int i = 0; i < hNum3; i++) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
+        if (max > 0) for (int i = 0; i < hNum3; i++) if (cut[i]) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
         max = 0; // 総和が小さい->一部しか触れていない->高圧力と考える
         int touch = 0;
         for (int i = 0; i < hNum3; i++)
         {
-            max += haptics[i];
-            if (haptics[i] != 0) touch++;
+            if (haptics[i] != 0)
+            {
+                max += haptics[i];
+                touch++;
+                cutting[i] = true;
+            }
         }
         if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
+        //max_ = Math.Max(Vec.max(haptics), max_);
+        //Debug.Log(max_);
     }
 
     public double click(double[] vector, bool edit)
@@ -469,6 +505,10 @@ public class FourDDemo
     {
         StreamWriter sw = new StreamWriter("./LogData.txt", true);
         foreach (int[] c in colors) sw.WriteLine(Vec.ToString(c));
+        sw.Flush();
+        sw.Close();
+        sw = new StreamWriter("./Cutting.txt", true);
+        foreach (int[] c in colors) sw.WriteLine(Vec.ToString(cutting));
         sw.Flush();
         sw.Close();
     }
