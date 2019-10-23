@@ -39,7 +39,7 @@ public class FourDDemo
 
     private float cellAlpha = 0.6f;
     private Color faceColor = Color.white;
-    private double offset = 0.8;
+    private double offset = 0.999;
     private double border = -1;
     private int[][] colors;
     private int[] colorVal;
@@ -51,7 +51,7 @@ public class FourDDemo
     private double[] haptics;
     private bool[] cutting; // 手の形を調べる v手の形
     public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-    public static int[] outputNum = { 659 };
+    public static int[] outputNum = { 522, 659 };
     private float[] output;
     private double max_;
     public static int hNum = 9; // 解像度（固定）
@@ -70,7 +70,7 @@ public class FourDDemo
     private double count = 0;
 
     private WebSocket ws;
-    private bool error = true; // 振動装置と接続しているときはfalseにする
+    private bool error = false; // 振動装置と接続しているときはfalseにする
 
     public FourDDemo()
     {
@@ -438,7 +438,7 @@ public class FourDDemo
             reg4[0] = i % hNum - hNumh; // 立方体形に配置
             reg4[1] = i / hNum % hNum - hNumh;
             reg4[2] = i / hNum2 - hNumh;
-            Vec.scale(reg4, reg4, 0.2 / hNumh / (size - 0.4)); // 解像度・画面サイズに合わせて縮小
+            Vec.scale(reg4, reg4, 0.4 / hNumh / size); // 解像度・画面サイズに合わせて縮小
             reg4[0] = reg4[0] + 0.1 / size; // 手の位置へ平行移動
             reg4[1] = reg4[1] + 0.05 / size;
             reg4[2] = reg4[2] - 0.65 / size;
