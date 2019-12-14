@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
+using SimpleFileBrowser;
 
 // 毎フレーム、コントローラーからの入力を計算して FourDDemo に投げ、返された mesh の情報を適用する。
 [RequireComponent(typeof(MeshRenderer))]
@@ -58,8 +59,29 @@ public class ThreeDDisplay : MonoBehaviour
         cursorAxis = new double[3][];
         for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
         wRotate = true;
+        FileBrowser.HideDialog();
+        StartCoroutine(ShowLoadDialogCoroutine());
     }
-    
+
+    IEnumerator ShowLoadDialogCoroutine()
+    {
+        // Show a load file dialog and wait for a response from user
+        // Load file/folder: file, Initial path: default (Documents), Title: "Load File", submit button text: "Load"
+        yield return FileBrowser.WaitForLoadDialog(false, null, "Load File", "Load");
+
+        // Dialog is closed
+        // Print whether a file is chosen (FileBrowser.Success)
+        // and the path to the selected file (FileBrowser.Result) (null, if FileBrowser.Success is false)
+        Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
+
+        if (FileBrowser.Success)
+        {
+            // If a file was chosen, read its bytes via FileBrowserHelpers
+            // Contrary to File.ReadAllBytes, this function works on Android 10+, as well
+            byte[] bytes = FileBrowserHelpers.ReadBytesFromFile(FileBrowser.Result);
+        }
+    }
+
     void Update()
     {
         calcInput();

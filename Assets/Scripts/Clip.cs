@@ -258,13 +258,13 @@ public class Clip
         return new Polygon(vn, polygon.color); // 隠れる部分を返す
     }
 
-    // 単一の boundary によるクリッピング（視錐台用）。完全に隠れたら false を返す。
+    // 単一の boundary によるクリッピング（視錐台用）。完全に隠れたら true を返す。
     public static bool clip(Polygon polygon, Boundary boundary)
     {
         List<Polygon> list = new List<Polygon>(); // 上の clip(..) を流用するために生成
-        if (clip(polygon, boundary, list) == polygon) return false;
+        if (clip(polygon, boundary, list) == polygon) return true;
         polygon.copy(list[0]);
-        return true;
+        return false;
     }
 
     // --- view boundaries ---
@@ -272,7 +272,7 @@ public class Clip
     public class CustomBoundary : Boundary
     {
 
-        private double[] n;
+        public double[] n;
         private double t;
 
         public CustomBoundary(double[] n, double t)

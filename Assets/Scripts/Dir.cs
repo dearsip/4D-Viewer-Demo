@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
 /**
  * A utility class for manipulating direction numbers.
@@ -68,16 +66,16 @@ public class Dir
 
     // --- random selection ---
 
-    /*public static int pick(int dim, Random random)
+    public static int pick(int dim, Random random)
     {
-        return random.nextInt(2 * dim);
+        return random.Next(2 * dim);
     }
 
     /**
      * Pick a random direction that is orthogonal to the given direction.
      * (Don't call this when dim is 1.)
      */
-    /*public static int pickOrthogonal(int dir, int dim, Random random)
+    public static int pickOrthogonal(int dir, int dim, Random random)
     {
 
         // the idea is, if dir is a forward direction,
@@ -88,10 +86,10 @@ public class Dir
         if ((dir & 1) == 1) dir--;
 
         // then add mod 2*D
-        dir += 2 + random.nextInt(2 * dim - 2);
+        dir += 2 + random.Next(2 * dim - 2);
         dir = dir % (2 * dim);
 
         return dir;
-    }*/
+    }
 
 }

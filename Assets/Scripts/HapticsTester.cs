@@ -64,10 +64,10 @@ public class HapticsTester : MonoBehaviour
     public void draw(double[] haptics)
     {
         for (int i = 0; i < hNum3; i++) if (FourDDemo.cut[i])
-            for (int j = 0; j < 8; j++)
-                vertices[8 * i + j].Set(centers[i].x + (0.3f + (float)haptics[i]) / 4 * (j % 2 * 2 - 1) / hNumh * outputs[i],
-                                        centers[i].y + (0.3f + (float)haptics[i]) / 4 * (j / 2 % 2 * 2 - 1) / hNumh * outputs[i],
-                                        centers[i].z + (0.3f + (float)haptics[i]) / 4 * (j / 4 * 2 - 1) / hNumh * outputs[i]);
+                for (int j = 0; j < 8; j++)
+                    vertices[8 * i + j].Set(centers[i].x + (0.3f + (float)haptics[i]) / 4 * (j % 2 * 2 - 1) / hNumh,// * outputs[i],
+                                            centers[i].y + (0.3f + (float)haptics[i]) / 4 * (j / 2 % 2 * 2 - 1) / hNumh,// * outputs[i],
+                                            centers[i].z + (0.3f + (float)haptics[i]) / 4 * (j / 4 * 2 - 1) / hNumh);// * outputs[i]);
         mesh.vertices = vertices;
 
         mesh.RecalculateNormals();

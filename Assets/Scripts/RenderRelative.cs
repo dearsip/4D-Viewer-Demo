@@ -83,7 +83,7 @@ public class RenderRelative
         }
         for (int i = 0; i < clip.Length; i++)
         {
-            if (!Clip.clip(reg, clip[i])) return false;
+            if (Clip.clip(reg, clip[i])) return false;
         }
 
         dest.vertex = new double[reg.vertex.Length][];
@@ -107,5 +107,25 @@ public class RenderRelative
             if (!convert(dest, src, axis)) bout.unget();
         }
     }
+
+    //public void runObject(double[][] obj, int mask, PointTransform pt)
+    //{
+    //    // no need for clear here
+    //    for (int i = 0; i < obj.Length; i += 2)
+    //    {
+    //        if ((mask & 1) == 1)
+    //        {
+    //            Line dest = out.getNext();
+
+    //            Vec.copy(dest.p1, obj[i]);
+    //            Vec.copy(dest.p2, obj[i + 1]);
+    //            dest.color = Color.white;
+
+    //            pt.transform(dest.p1);
+    //            pt.transform(dest.p2);
+    //        }
+    //        mask >>= 1;
+    //    }
+    //}
 
 }

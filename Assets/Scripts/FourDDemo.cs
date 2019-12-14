@@ -72,7 +72,7 @@ public class FourDDemo
     private double count = 0;
 
     private WebSocket ws;
-    private bool error = false; // 振動装置と接続しているときはfalseにする
+    private bool error = true; // 振動装置と接続しているときはfalseにする
 
     public FourDDemo()
     {
