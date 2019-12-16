@@ -117,7 +117,7 @@ namespace Valve.VR.InteractionSystem
 			}
 		}
 
-        protected float CalculateLinearMapping( Transform updateTransform )
+        protected virtual float CalculateLinearMapping( Transform updateTransform )
 		{
 			Vector3 direction = endPosition.position - startPosition.position;
 			float length = direction.magnitude;

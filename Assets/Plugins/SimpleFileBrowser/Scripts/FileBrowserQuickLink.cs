@@ -24,9 +24,14 @@ namespace SimpleFileBrowser
 		{
 			fileBrowser.OnQuickLinkSelected( this );
 		}
-		#endregion
+        #endregion
 
-		#region Other Events
-		#endregion
-	}
+        #region Other Events
+        #endregion
+
+        public new void Click()
+        {
+            fileBrowser.OnQuickLinkSelected(this);
+        }
+    }
 }

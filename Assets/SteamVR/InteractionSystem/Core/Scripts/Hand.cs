@@ -84,6 +84,10 @@ namespace Valve.VR.InteractionSystem
         public bool spewDebugText = false;
         public bool showDebugInteractables = false;
 
+        public bool useRaycastHover = false;
+        public float raycastHoverRadius = 0.01f;
+        public LineRenderer lr;
+
         public struct AttachedObject
         {
             public GameObject attachedObject;
@@ -862,6 +866,17 @@ namespace Valve.VR.InteractionSystem
             {
                 float scaledHoverRadius = fingerJointHoverRadius * Mathf.Abs(SteamVR_Utils.GetLossyScale(this.transform));
                 CheckHoveringForTransform(mainRenderModel.GetBonePosition((int)fingerJointHover), scaledHoverRadius / 2f, ref closestDistance, ref closestInteractable, Color.yellow);
+            }
+
+            if (useRaycastHover)
+            {
+                RaycastHit hit;
+                Physics.Raycast(transform.position, transform.forward, out hit, 100f);
+                if (hit.collider)
+                {
+                    float scaledHoverRadius = raycastHoverRadius * Mathf.Abs(SteamVR_Utils.GetLossyScale(this.transform));
+                    CheckHoveringForTransform(hit.point, scaledHoverRadius / 2f, ref closestDistance, ref closestInteractable, Color.yellow);
+                }
             }
 
             // Hover on this one

@@ -122,6 +122,29 @@ namespace SimpleFileBrowser
 			c.a = isHidden ? 0.55f : 1f;
 			nameText.color = c;
 		}
-		#endregion
-	}
+        #endregion
+        public void Click()
+        {
+            if (FileBrowser.SingleClickMode)
+            {
+                fileBrowser.OnItemSelected(this);
+                fileBrowser.OnItemOpened(this);
+            }
+            else
+            {
+                if (Time.realtimeSinceStartup - prevTouchTime < DOUBLE_CLICK_TIME)
+                {
+                    if (fileBrowser.SelectedFilePosition == Position)
+                        fileBrowser.OnItemOpened(this);
+
+                    prevTouchTime = Mathf.NegativeInfinity;
+                }
+                else
+                {
+                    fileBrowser.OnItemSelected(this);
+                    prevTouchTime = Time.realtimeSinceStartup;
+                }
+            }
+        }
+    }
 }
