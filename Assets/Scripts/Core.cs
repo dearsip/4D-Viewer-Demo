@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
@@ -24,7 +23,7 @@ public class Core : MonoBehaviour
 
     private Mesh mesh;
 
-    private bool active = false;
+    private bool active, excluded;
     private int[] param;
     private int nMove;
     private int nRotate;
@@ -42,13 +41,14 @@ public class Core : MonoBehaviour
     private int interval;
 
     public Queue<string> queue;
-    public SteamVR_Action_Boolean trigger, move;
+    public SteamVR_Action_Boolean trigger, move, menu;
     public SteamVR_Action_Pose pose;
     public SteamVR_Input_Sources left, right;
     private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight;
     private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight;
     private bool leftTrigger, rightTrigger, lastLeftTrigger, lastRightTrigger, leftTriggerPressed, rightTriggerPressed,
         leftMove, rightMove;
+    public Menu menuPanel;
 
     private Vector3 reg0, reg1;
     private double[] reg2, reg3, reg4;
@@ -110,14 +110,8 @@ public class Core : MonoBehaviour
         SteamVR_Actions.controll.Activate(left);
         SteamVR_Actions.controll.Activate(right);
 
-        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
-        }, left);
-        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
-        }, right);
+        addEvevts();
+
         posLeft = pose.GetLocalPosition(left); rotLeft = pose.GetLocalRotation(left);
         posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
 
@@ -138,11 +132,41 @@ public class Core : MonoBehaviour
         queue = new Queue<string>();
 
         newGame(dim);
+        active = true;
         StartCoroutine(tick());
 
         reg2 = new double[3];
         reg3 = new double[4];
         reg4 = new double[4];
+
+        FileBrowser.HideDialog();
+    }
+
+    private void addEvevts()
+    {
+        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
+        }, left);
+        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
+        }, right);
+        menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            openMenu();
+        }, left);
+        menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            openMenu();
+        }, left);
+    }
+
+    private void openMenu()
+    {
+        SteamVR_Actions.controll.Deactivate(left);
+        SteamVR_Actions.controll.Deactivate(right);
+        menuPanel.Activate(oa);
     }
 
     // Update is called once per frame
@@ -182,8 +206,9 @@ public class Core : MonoBehaviour
         while (true)
         {
             calcInput();
-            string s = takeQueue();
-            if (s == null)
+            //string s = takeQueue();
+            //if (s == null)
+            if (active)
             {
                 // メニューからのコマンドはinactive中に行う
                 // メニュー開いてたらスキップ
@@ -240,11 +265,11 @@ public class Core : MonoBehaviour
                 // actually, it would be nice to be able to recover from a few slow frames,
                 // so do let debt accumulate, but limit it to a fixed number of multiples
             }
-            else
-            {
-                yield return new WaitForSeconds(0.1f);
+            //else
+            //{
+            //    yield return new WaitForSeconds(0.1f);
 
-            }
+            //}
         }
     }
 
@@ -362,6 +387,11 @@ public class Core : MonoBehaviour
             //    alignMode = false;
             //}
         }
+    }
+
+    public OptionsAll getOptionsAll()
+    {
+        return oa;
     }
 
     public void setOptions(/*OptionsKeysConfig okc,*/ OptionsMotion ot)
@@ -658,6 +688,15 @@ public class Core : MonoBehaviour
         opt.ov4.texture[9] = false;
         opt.ov4.retina = 1.8;
         opt.ov4.scale = 0.6;
+
+        opt.od.transparency = 0.3;
+        opt.od.border = 1;
+
+        opt.oo.moveInputType = 0;
+        opt.oo.rotateInputType = 1;
+        opt.oo.toggleLeftAndRight = false;
+        opt.oo.toggleForward = false;
+        opt.oo.toggleAlignMode = false;
 
         dim = 4;
         gameDirectory = null;

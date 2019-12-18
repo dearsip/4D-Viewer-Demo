@@ -6,14 +6,11 @@ using UnityEngine.UI;
 public class ValueToText : MonoBehaviour
 {
     public Slider slider;
-    Text text;
+    InputField text;
 
     private void Start()
     {
-        text = GetComponent<Text>();
-    }
-    private void Update()
-    {
-        text.text = slider.value.ToString();
+        text = GetComponent<InputField>();
+        slider.onValueChanged.AddListener((float f) => { text.text = slider.value.ToString(); });
     }
 }
