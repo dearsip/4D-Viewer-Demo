@@ -45,16 +45,17 @@ public class OptionsMap // implements IValidate
 
     // --- implementation of IValidate ---
 
-    //private static final int DIM_MAP_MIN = 1;
+    public const int DIM_MAP_MIN = 1;
+    public const int DIM_MAP_MAX = 1;
 
-    //private static final int SIZE_MIN = 2;
-    //private static final int SIZE_UNUSED = 1;
+    public const int SIZE_MIN = 2;
+    public const int SIZE_UNUSED = 1;
 
-    //private static final double DENSITY_MIN = 0;
-    //private static final double DENSITY_MAX = 1;
+    public const double DENSITY_MIN = 0;
+    public const double DENSITY_MAX = 1;
 
-    //private static final double PROBABILITY_MIN = 0;
-    //private static final double PROBABILITY_MAX = 1;
+    public const double PROBABILITY_MIN = 0;
+    public const double PROBABILITY_MAX = 1;
 
     //public void validateDimMap() throws ValidationException
     //{

@@ -45,8 +45,8 @@ public class OptionsView// : IValidate
     public const int DEPTH_MIN = 0;
     public const int DEPTH_MAX = 10;
 
-    private const double SCALE_MIN = 0;
-    private const double SCALE_MAX = 1;
+    public const double SCALE_MIN = 0;
+    public const double SCALE_MAX = 1;
 
     //public void validate()
     //{

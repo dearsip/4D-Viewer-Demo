@@ -57,7 +57,6 @@ public class Engine : IMove
     private List<int> tris;
     private List<Color> cols;
     private Mesh mesh;
-    private float cellAlpha = 0.3f;
 
     // --- construction ---
 
@@ -323,10 +322,10 @@ public class Engine : IMove
     // these last two option-setting functions are not invoked via the controller,
     // so they need to end with an explicit re-render call
 
-    public void setOptions(OptionsColor oc, OptionsView ov, /*OptionsStereo os,*/ OptionsSeed oe, OptionsMotion ot)
+    public void setOptions(OptionsColor oc, OptionsView ov, /*OptionsStereo os,*/ OptionsSeed oe, OptionsMotion ot, OptionsDisplay od)
     {
 
-        model.setOptions(oc, oe.colorSeed, ov.depth, ov.texture);
+        model.setOptions(oc, oe.colorSeed, ov.depth, ov.texture, od);
 
         setRetina(ov.retina);
 
@@ -453,7 +452,8 @@ public class Engine : IMove
         //if (getSaveType() != IModel.SAVE_ACTION
         // && getSaveType() != IModel.SAVE_BLOCK
         // && getSaveType() != IModel.SAVE_SHOOT)
-            Vec.add(origin, origin, d);
+        Vec.fromAxisCoordinates(reg3, d, axis);
+        Vec.add(origin, origin, reg3);
         //else
         //{
         //    if (a == 1) return;
@@ -762,7 +762,6 @@ public class Engine : IMove
             {
                 reg5 = p.vertex[j];
                 verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
-                p.color.a = cellAlpha;
                 cols.Add(p.color);
             }
             for (int j = 0; j < v - 2; j++)

@@ -21,6 +21,7 @@ public class RenderAbsolute
 
     private int depthMax;
     private bool[] texture;
+    private double transparency;
 
     private int[] count; // direction use count
     private bool[] useClip;
@@ -77,6 +78,11 @@ public class RenderAbsolute
         {
             this.texture[i] = texture[i];
         }
+    }
+
+    public void setTransparency(double transparency)
+    {
+        this.transparency = transparency;
     }
 
     // --- clipping ---
@@ -138,6 +144,7 @@ public class RenderAbsolute
         for (int i = 0; i < vertex.Length; i++) Vec.sub(vertex[i], vertex[i], origin);
         poly.vertex = vertex;
         poly.color = color;
+        poly.color.a = (float)transparency;
 
         for (int i = 0; i < OptionsView.DEPTH_MAX; i++)
         {
@@ -351,7 +358,7 @@ public class RenderAbsolute
 
     private void addFace(int[] p, int dir)
     {
-        if (texture[0]) addTexture(p, dir, Color.white, 1);
+        if (texture[0]) addTexture(p, dir, Color.white, 0.9999);
 
         Color color = colorizer.getColor(p, dir);
         Color color5 = Color.clear;

@@ -6,7 +6,7 @@ public class OptionsControll// : IValidate
     // --- fields ---
 
     public int moveInputType, rotateInputType;
-    public bool toggleLeftAndRight, toggleForward, toggleAlignMode;
+    public bool invertLeftAndRight, invertForward;
 
     // --- constants ---
 
@@ -25,9 +25,8 @@ public class OptionsControll// : IValidate
     {
         dest.moveInputType = src.moveInputType;
         dest.rotateInputType = src.rotateInputType;
-        dest.toggleLeftAndRight = src.toggleLeftAndRight;
-        dest.toggleForward = src.toggleForward;
-        dest.toggleAlignMode = src.toggleAlignMode;
+        dest.invertLeftAndRight = src.invertLeftAndRight;
+        dest.invertForward = src.invertForward;
     }
 
 }

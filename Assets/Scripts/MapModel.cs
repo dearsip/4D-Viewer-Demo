@@ -73,11 +73,17 @@ public class MapModel : IModel
         renderAbsolute.setTexture(texture);
     }
 
-    public override void setOptions(OptionsColor oc, int seed, int depth, bool[] texture)
+    public override void setTransparency(double transparency)
+    {
+        renderAbsolute.setTransparency(transparency);
+    }
+
+    public override void setOptions(OptionsColor oc, int seed, int depth, bool[] texture, OptionsDisplay od)
     {
         colorizer.setOptions(oc, seed);
         renderAbsolute.setDepth(depth);
         renderAbsolute.setTexture(texture);
+        renderAbsolute.setTransparency(od.transparency);
     }
 
     public override bool isAnimated()

@@ -7,6 +7,8 @@ public class OptionsDisplay// : IValidate
     
     public double transparency;
     public double border;
+    public bool useEdgeColor, hidesel, invertNormals, separate;
+    public int trainSpeed;
 
     // --- construction ---
 
@@ -20,6 +22,17 @@ public class OptionsDisplay// : IValidate
     {
         dest.transparency = src.transparency;
         dest.border = src.border;
+        dest.useEdgeColor = src.useEdgeColor;
+        dest.hidesel = src.hidesel;
+        dest.invertNormals = src.invertNormals;
+        dest.separate = src.separate;
+        dest.trainSpeed = src.trainSpeed;
     }
 
+    public const double TRANSPARENCY_MIN = 0;
+    public const double TRANSPARENCY_MAX = 1;
+    public const double BORDER_MIN = -1;
+    public const double BORDER_MAX = 1;
+    public const int TRAINSPEED_MIN = -5;
+    public const int TRAINSPEED_MAX = 5;
 }

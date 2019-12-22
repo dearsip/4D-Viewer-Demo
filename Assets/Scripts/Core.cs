@@ -6,6 +6,7 @@ using Valve.VR.InteractionSystem;
 using System;
 using SimpleFileBrowser;
 
+public delegate void Command();
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(Interactable))]
@@ -37,15 +38,20 @@ public class Core : MonoBehaviour
     private IMove target;
     private double[] saveOrigin;
     private double[][] saveAxis;
+    public bool alignMode;
+    private int ad0, ad1;
+    private int nActive;
+    private Align alignActive;
 
     private int interval;
 
-    public Queue<string> queue;
+    public Command command;
+    public Command menuCommand;
     public SteamVR_Action_Boolean trigger, move, menu;
     public SteamVR_Action_Pose pose;
     public SteamVR_Input_Sources left, right;
     private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight;
-    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight;
+    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, relarot;
     private bool leftTrigger, rightTrigger, lastLeftTrigger, lastRightTrigger, leftTriggerPressed, rightTriggerPressed,
         leftMove, rightMove;
     public Menu menuPanel;
@@ -104,6 +110,11 @@ public class Core : MonoBehaviour
     //    return (dim == 3) ? keyMapper3 : keyMapper4;
     //}
 
+    public int getSaveType()
+    {
+        return engine.getSaveType();
+    }
+
     // Start is called before the first frame update
     void Start() // ルーチン開始
     {
@@ -129,7 +140,6 @@ public class Core : MonoBehaviour
         eyeVector = new double[3];
         mesh = new Mesh();
         engine = new Engine(mesh);
-        queue = new Queue<string>();
 
         newGame(dim);
         active = true;
@@ -166,15 +176,9 @@ public class Core : MonoBehaviour
     {
         SteamVR_Actions.controll.Deactivate(left);
         SteamVR_Actions.controll.Deactivate(right);
+        SteamVR_Actions._default.Activate(left);
+        SteamVR_Actions._default.Activate(right);
         menuPanel.Activate(oa);
-    }
-
-    // Update is called once per frame
-    // コントローラーの関係
-    // 位置の確認、メニュー開く、ボタン入力
-    void Update()
-    {
-
     }
 
     private void newGame(int dim)
@@ -191,8 +195,8 @@ public class Core : MonoBehaviour
         IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov());
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
 
-        setOptions(/*oa.opt.okc,*/ ot());
-        interval = (int)Math.Ceiling(1000 / ot().frameRate);
+        setOptionsMotion(/*oa.opt.okc,*/ ot());
+        setFrameRate(ot().frameRate);
 
         target = engine;
         saveOrigin = new double[dim];
@@ -206,85 +210,61 @@ public class Core : MonoBehaviour
         while (true)
         {
             calcInput();
-            //string s = takeQueue();
-            //if (s == null)
-            if (active)
-            {
-                // メニューからのコマンドはinactive中に行う
-                // メニュー開いてたらスキップ
-                // 入力処理（位置記録）
-                // サークル押下時のposition記録、直前と変化量の記録
-                // メインルーチン: target操作と更新、レンダリング（engine）
-                // 時計処理
-                controll();
-                engine.renderAbsolute(eyeVector);
-                GetComponent<MeshFilter>().sharedMesh = mesh;
+            menuCommand?.Invoke();
+            menuCommand = null;
+            controll();
+            engine.renderAbsolute(eyeVector);
+            GetComponent<MeshFilter>().sharedMesh = mesh;
 
-                int now = System.Environment.TickCount;
-                int next = base_ + interval; // unsynchronized use of interval is OK
+            int now = System.Environment.TickCount;
+            int next = base_ + interval; // unsynchronized use of interval is OK
 
-                if (now < next)
-                { // we have time, sleep a bit
+            if (now < next)
+            { // we have time, sleep a bit
 
-                    int t = next - now;
+                int t = next - now;
 
-                    // I don't understand this at all, but sometimes the current time
-                    // jumps back by 4-6 minutes for no reason.  does it drift forward
-                    // and then get corrected?  does it jump forward and then back?
-                    // no idea.  in any case, if we don't detect and stop it, the game
-                    // will lock up for that many minutes.
-                    //
-                    if (t > 1000)
-                    {
-                        t = interval; // standard interval is best guess for sleep time
-                        next = now + interval;
-                    }
-
-                    yield return new WaitForSeconds(t * 0.001f);
-                    base_ = next; // same equation as below would work, but this is clearer
-
-                }
-                else
-                { // no time left, tick again immediately
-                    yield return null;
-                    base_ = Math.Max(next, now - 3 * interval); // see note below
+                // I don't understand this at all, but sometimes the current time
+                // jumps back by 4-6 minutes for no reason.  does it drift forward
+                // and then get corrected?  does it jump forward and then back?
+                // no idea.  in any case, if we don't detect and stop it, the game
+                // will lock up for that many minutes.
+                //
+                if (t > 1000)
+                {
+                    t = interval; // standard interval is best guess for sleep time
+                    next = now + interval;
                 }
 
-                // on my system, the actual sleep duration is granular,
-                // with each grain being approximately 55 ms.
-                // so, if you ask to sleep for 100 ms, you usually sleep for 110.
+                yield return new WaitForSeconds(t * 0.001f);
+                base_ = next; // same equation as below would work, but this is clearer
 
-                // the code above is designed to compensate for this.
-                // as long as we are producing frames sufficiently quickly,
-                // base will advance by the exact interval,
-                // so oversleeping will lead to requesting shorter wait times.
-
-                // if we are not producing frames quickly enough,
-                // there's no sense accumulating a large sleep debt,
-                // just go ahead and reset the base.
-                // actually, it would be nice to be able to recover from a few slow frames,
-                // so do let debt accumulate, but limit it to a fixed number of multiples
             }
+            else
+            { // no time left, tick again immediately
+                yield return null;
+                base_ = Math.Max(next, now - 3 * interval); // see note below
+            }
+
+            // on my system, the actual sleep duration is granular,
+            // with each grain being approximately 55 ms.
+            // so, if you ask to sleep for 100 ms, you usually sleep for 110.
+
+            // the code above is designed to compensate for this.
+            // as long as we are producing frames sufficiently quickly,
+            // base will advance by the exact interval,
+            // so oversleeping will lead to requesting shorter wait times.
+
+            // if we are not producing frames quickly enough,
+            // there's no sense accumulating a large sleep debt,
+            // just go ahead and reset the base.
+            // actually, it would be nice to be able to recover from a few slow frames,
+            // so do let debt accumulate, but limit it to a fixed number of multiples
             //else
             //{
             //    yield return new WaitForSeconds(0.1f);
 
             //}
-        }
-    }
-
-    private string takeQueue()
-    {
-        lock (queue)
-        {
-            try
-            {
-                return queue.Dequeue();
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
         }
     }
 
@@ -296,74 +276,125 @@ public class Core : MonoBehaviour
         posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
         lastLeftTrigger = leftTrigger; lastRightTrigger = rightTrigger;
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
-        leftMove = move.GetState(left); rightMove = move.GetState(right);
 
+        leftMove = move.GetState(left); rightMove = move.GetState(right);
         reg1 = this.transform.position - player.hmdTransform.position;
         for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
         Vec.normalize(eyeVector, eyeVector);
     }
+    private double limitAng = 60;
 
     private double limit = 0.2;
-    private double limitAng = Math.PI / 6.0;
     private void controll()
     {
         // save state
 
         IMove saveTarget = target;
         target.save(saveOrigin, saveAxis);
-
-        if (leftMove)
+        if (command != null) command();
+        else
         {
-            for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
-            Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
-            Array.Copy(reg2, reg3, 3);
-            Quaternion relarot = rotLeft * Quaternion.Inverse(lastRotLeft);
-            reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
-            reg3[3] /= Math.Max(limitAng, reg3[3]);
-            Vec.scale(reg3, reg3, dMove);
-            Vec.fromAxisCoordinates(reg4, reg3, engine.getAxisArray());
-            engine.move(reg4);
-        }
-        if (rightMove)
-        {
-            Vec.unitVector(reg3, 3);
-            for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
-            double t = Vec.norm(reg2);
-            if (t != 0)
+            if (leftMove)
             {
-                t = dRotate * Math.Min(limit, t) / limit;
-                Vec.normalize(reg2, reg2);
-                for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
-                reg4[3] = Math.Cos(t);
-                Debug.Log("2: " + Vec.ToString(reg3) + " to " + Vec.ToString(reg4));
-                target.rotateAngle(reg3, reg4);
+                for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
+                Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                Array.Copy(reg2, reg3, 3);
+                relarot = rotLeft * Quaternion.Inverse(lastRotLeft);
+                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                reg3[3] /= Math.Max(limitAng * Math.PI / 180, reg3[3]);
+                Debug.Log(Vec.ToString(reg3));
+                if (alignMode)
+                {
+                    for(int i = 0; i < reg3.Length; i++)
+                    {
+                        if (Math.Abs(reg3[i]) > 0.8)
+                        {
+                            nActive = nMove;
+                            ad0 = Dir.forAxis(i, reg3[i] < 0);
+                            command = alignMove;
+                        }
+                    }
+                }
+                else
+                {
+                    Vec.scale(reg3, reg3, dMove);
+                    engine.move(reg3);
+                }
             }
+            if (rightMove)
+            {
+                if (alignMode)
+                {
+                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                    for (int i = 0; i < reg2.Length; i++)
+                    {
+                        if (Math.Abs(reg2[i]) > 0.8)
+                        {
+                            nActive = nRotate;
+                            ad0 = Dir.forAxis(dim);
+                            ad0 = Dir.forAxis(i, reg2[i] < 0);
+                            command = alignRotate;
+                            break;
+                        }
+                    }
+                    if (command == null)
+                    {
+                        relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                        for (int i = 0; i < 3; i++)
+                        {
+                            float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng * Mathf.PI / 180;
+                            if (Mathf.Abs(f) > 0.8)
+                            {
+                                nActive = nRotate;
+                                ad0 = Dir.forAxis((i + 1) % 3);
+                                ad0 = Dir.forAxis((i + 2) % 3, f < 0);
+                                command = alignRotate;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Vec.unitVector(reg3, 3);
+                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    double t = Vec.norm(reg2);
+                    if (t != 0)
+                    {
+                        t = dRotate * Math.PI / 180 * Math.Min(limit, t) / limit;
+                        Vec.normalize(reg2, reg2);
+                        for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
+                        reg4[3] = Math.Cos(t);
+                        target.rotateAngle(reg3, reg4);
+                    }
 
-            Quaternion relarot = rotRight * Quaternion.Inverse(lastRotRight);
-            float f;
-            relarot.ToAngleAxis(out f, out reg0);
-            //f = (float)dRotate * f * Mathf.PI / 180 / Mathf.Max((float)limitAng, f * Mathf.PI / 180);
-            reg1.Set(1, 0, 0);
-            Vector3.OrthoNormalize(ref reg0, ref reg1);
-            //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
-            //relarot[3] = Mathf.Cos(f);
-            reg0 = relarot * reg1;
-            for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
-            reg3[3] = 0;
-            for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
-            reg4[3] = 0;
-            Vec.normalize(reg3, reg3);
-            Vec.normalize(reg4, reg4);
-            Debug.Log("2: " + Vec.ToString(reg3) + " to " + Vec.ToString(reg4));
-            target.rotateAngle(reg3, reg4);
-        }
-        if (leftTrigger)
-        {
+                    relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                    float f;
+                    relarot.ToAngleAxis(out f, out reg0);
+                    //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
+                    reg1.Set(1, 0, 0);
+                    Vector3.OrthoNormalize(ref reg0, ref reg1);
+                    //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
+                    //relarot[3] = Mathf.Cos(f);
+                    reg0 = relarot * reg1;
+                    for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
+                    reg3[3] = 0;
+                    for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
+                    reg4[3] = 0;
+                    Vec.normalize(reg3, reg3);
+                    Vec.normalize(reg4, reg4);
+                    target.rotateAngle(reg3, reg4);
+                }
+            }
+            if (leftTrigger)
+            {
 
-        }
-        if (rightTrigger)
-        {
+            }
+            if (rightTrigger)
+            {
 
+            }
         }
 
         // update state
@@ -389,12 +420,59 @@ public class Core : MonoBehaviour
         }
     }
 
+    private void alignMove()
+    {
+        Vec.unitVector(reg3, Dir.getAxis(ad0));
+        Vec.scale(reg3, reg3, Dir.getSign(ad0) * dMove);
+        target.move(reg3);
+        if (--nActive <= 0)
+        {
+            target.align().snap();
+            command = null;
+        }
+    }
+
+    private void alignRotate()
+    {
+        Vec.unitVector(reg3, Dir.getAxis(ad0));
+        Vec.scale(reg3, reg3, Dir.getSign(ad0));
+        Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dRotate);
+        target.rotateAngle(reg3, reg4);
+        if (--nActive <= 0)
+        {
+            target.align().snap();
+            command = null;
+        }
+    }
+
+    public void align()
+    {
+        if(alignMode || engine.getSaveType() == IModel.SAVE_ACTION
+                     || engine.getSaveType() == IModel.SAVE_BLOCK
+                     || engine.getSaveType() == IModel.SAVE_SHOOT)
+        {
+            command = null;
+            return;
+        }
+        if (alignActive == null) alignActive = target.align();
+        if (alignActive.align(dAlignMove, dAlignRotate))
+        {
+            alignActive = null;
+            command = null;
+        }
+    }
+
     public OptionsAll getOptionsAll()
     {
         return oa;
     }
 
-    public void setOptions(/*OptionsKeysConfig okc,*/ OptionsMotion ot)
+    public void setFrameRate(double frameRate)
+    {
+        interval = (int)Math.Ceiling(1000 / frameRate);
+    }
+
+    public void setOptionsMotion(/*OptionsKeysConfig okc,*/ OptionsMotion ot)
     {
 
         //for (int i = 0; i < 6; i++)
@@ -426,9 +504,29 @@ public class Core : MonoBehaviour
         // and the angles will never exceed 90 degrees
 
         dMove = 1 / (double)nMove;
-        dRotate = Math.PI / 2.0 / (double)nRotate;
+        dRotate = 90 / (double)nRotate;
         dAlignMove = 1 / (double)nAlignMove;
-        dAlignRotate = Math.PI / 2.0 / (double)nAlignRotate;
+        dAlignRotate = 90 / (double)nAlignRotate;
+    }
+
+    public void updateOptions()
+    {
+        engine.setOptions(oc(), ov(), oa.oeCurrent, ot(), oa.opt.od);
+    }
+
+    public void setOptions()
+    {
+        setOptionsMotion(oa.opt.ot4);
+        setFrameRate(oa.opt.ot4.frameRate);
+    }
+
+    public void closeMenu()
+    {
+        SteamVR_Actions._default.Deactivate(left);
+        SteamVR_Actions._default.Deactivate(right);
+        SteamVR_Actions.controll.Activate(left);
+        SteamVR_Actions.controll.Activate(right);
+        menuPanel.gameObject.SetActive(false);
     }
 
     private void load()
@@ -691,12 +789,15 @@ public class Core : MonoBehaviour
 
         opt.od.transparency = 0.3;
         opt.od.border = 1;
+        opt.od.useEdgeColor = false;
+        opt.od.hidesel = false;
+        opt.od.invertNormals = false;
+        opt.od.separate = true;
 
         opt.oo.moveInputType = 0;
         opt.oo.rotateInputType = 1;
-        opt.oo.toggleLeftAndRight = false;
-        opt.oo.toggleForward = false;
-        opt.oo.toggleAlignMode = false;
+        opt.oo.invertLeftAndRight = false;
+        opt.oo.invertForward = false;
 
         dim = 4;
         gameDirectory = null;

@@ -126,25 +126,25 @@ public Color[] getColors()
     return color;
 }
 
-// --- implementation of IValidate ---
+    // --- implementation of IValidate ---
 
-//private static final int DIM_SAME_MIN = 0;
-//private static final int DIM_SAME_MAX = 4;
+    public const int DIM_SAME_MIN = 0;
+    public const int DIM_SAME_MAX = 4;
 
-//public void validate() throws ValidationException
-//{
+    //public void validate() throws ValidationException
+    //{
 
-//      if (    colorMode != COLOR_MODE_EXTERIOR
-//           && colorMode != COLOR_MODE_INTERIOR
-//           && colorMode != COLOR_MODE_BY_ORIENTATION
-//           && colorMode != COLOR_MODE_BY_DIRECTION
-//           && colorMode != COLOR_MODE_BY_TRACE   ) throw App.getException("OptionsColor.e1");
+    //      if (    colorMode != COLOR_MODE_EXTERIOR
+    //           && colorMode != COLOR_MODE_INTERIOR
+    //           && colorMode != COLOR_MODE_BY_ORIENTATION
+    //           && colorMode != COLOR_MODE_BY_DIRECTION
+    //           && colorMode != COLOR_MODE_BY_TRACE   ) throw App.getException("OptionsColor.e1");
 
-//      if (dimSameParallel      < DIM_SAME_MIN || dimSameParallel      > DIM_SAME_MAX) throw App.getException("OptionsColor.e2",new Object[] { new Integer(DIM_SAME_MIN), new Integer(DIM_SAME_MAX) });
-//      if (dimSamePerpendicular<DIM_SAME_MIN || dimSamePerpendicular> DIM_SAME_MAX) throw App.getException("OptionsColor.e3",new Object[] { new Integer(DIM_SAME_MIN), new Integer(DIM_SAME_MAX) });
+    //      if (dimSameParallel      < DIM_SAME_MIN || dimSameParallel      > DIM_SAME_MAX) throw App.getException("OptionsColor.e2",new Object[] { new Integer(DIM_SAME_MIN), new Integer(DIM_SAME_MAX) });
+    //      if (dimSamePerpendicular<DIM_SAME_MIN || dimSamePerpendicular> DIM_SAME_MAX) throw App.getException("OptionsColor.e3",new Object[] { new Integer(DIM_SAME_MIN), new Integer(DIM_SAME_MAX) });
 
-//      if (getColorCount() == 0) throw App.getException("OptionsColor.e4");
-//   }
+    //      if (getColorCount() == 0) throw App.getException("OptionsColor.e4");
+    //   }
 
 }
 
