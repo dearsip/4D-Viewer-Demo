@@ -48,9 +48,9 @@ public class Engine : IMove
     private double[] reg3;
     private double[] reg4;
 
-    //private MainTransform mt;
-    //private SideTransform st;
-    //private CrossTransform ct;
+    private MainTransform mt;
+    private SideTransform st;
+    private CrossTransform ct;
 
     private double[] reg5;
     private List<Vector3> verts;
@@ -149,9 +149,9 @@ public class Engine : IMove
         reg3 = new double[dimSpace];
         reg4 = new double[dimSpace];
 
-        //mt = new MainTransform(reg3);
-        //st = new SideTransform(reg3);
-        //ct = new CrossTransform(reg3);
+        mt = new MainTransform(reg3);
+        st = new SideTransform(reg3);
+        ct = new CrossTransform(reg3);
 
         reg5 = new double[3];
         verts = new List<Vector3>();
@@ -189,13 +189,13 @@ public class Engine : IMove
 
     public void toggleFisheye()
     {
-        //OptionsFisheye.of.fisheye = !OptionsFisheye.of.fisheye;
+        OptionsFisheye.of.fisheye = !OptionsFisheye.of.fisheye;
         updateRetina();
     }
 
     private double getRetina()
     {
-        return /*OptionsFisheye.of.fisheye ? 1 : */nonFisheyeRetina;
+        return OptionsFisheye.of.fisheye ? 1 : nonFisheyeRetina;
     }
 
     private void updateRetina()
@@ -608,9 +608,10 @@ public class Engine : IMove
         bufRelative.sort(eyeVector);
     }
 
+    private readonly Color white = new Color(1, 1, 1, 0.05f);
     private void renderObject(PolygonBuffer buf, double[][] obj)
     {
-        renderObject(buf, obj, Color.white);
+        renderObject(buf, obj, white);
     }
 
     private void renderObject(PolygonBuffer buf, double[][] obj, Color color)
@@ -623,7 +624,7 @@ public class Engine : IMove
             for (int j = 0; j < 3; j++)
             {
                 poly.vertex[j] = new double[3];
-                for (int k = 0; k < 3; k++) poly.vertex[j][k] = obj[i + j][k];
+                Vec.copy(poly.vertex[j], obj[i + j]);
             }
             poly.color = color;
         }
@@ -671,72 +672,72 @@ public class Engine : IMove
         }
     }
 
-    //private void renderFisheye()
-    //{
-    //    int f = sraxis.Length - 1;
+    private void renderFisheye()
+    {
+        int f = sraxis.Length - 1;
 
-    //    renderRelative.run(axis, true, mt);
-    //    renderRelative.runObject(objCross, -1, ct);
+        renderRelative.run(axis, true, mt);
+        renderRelative.runObject(objCross, -1, ct);
 
-    //    for (int i = 0; i < f; i++)
-    //    {
-    //        renderPair(f, i, i);
-    //    }
-    //}
+        for (int i = 0; i < f; i++)
+        {
+            renderPair(f, i, i);
+        }
+    }
 
-    //private void renderRainbow()
-    //{
-    //    int f = sraxis.Length - 1;
+    private void renderRainbow()
+    {
+        int f = sraxis.Length - 1;
 
-    //    reg3[1] = -OptionsFisheye.of.rdist;
-    //    renderRelative.run(axis, true, mt);
-    //    renderRelative.runObject(objRetina, r, mt);
-    //    renderRelative.runObject(objCross, -1, ct);
-    //    renderPair(f, 0, 0); // x pair offset in x
+        reg3[1] = -OptionsFisheye.rdist;
+        renderRelative.run(axis, true, mt);
+        renderRelative.runObject(objRetina, r, mt);
+        renderRelative.runObject(objCross, -1, ct);
+        renderPair(f, 0, 0); // x pair offset in x
 
-    //    Vec.copy(sraxis[3], axis[3]); // renderPair doesn't really put everything back
+        Vec.copy(sraxis[3], axis[3]); // renderPair doesn't really put everything back
 
-    //    // for the rest of them we have to rotate everything.
-    //    // positive z goes to positive x, that's the
-    //    // natural way because of the retina horizontal tilt.
-    //    //
-    //    Vec.scale(sraxis[2], axis[0], -1);
-    //    Vec.copy(sraxis[0], axis[2]);
+        // for the rest of them we have to rotate everything.
+        // positive z goes to positive x, that's the
+        // natural way because of the retina horizontal tilt.
+        //
+        Vec.scale(sraxis[2], axis[0], -1);
+        Vec.copy(sraxis[0], axis[2]);
 
-    //    reg3[1] = OptionsFisheye.of.rdist;
-    //    renderRelative.run(sraxis, false, mt);
-    //    renderRelative.runObject(objRetina, r, mt);
-    //    renderRelative.runObject(objCross, -1, ct);
-    //    renderPair(f, 2, 0); // z pair offset in x
+        reg3[1] = OptionsFisheye.rdist;
+        renderRelative.run(sraxis, false, mt);
+        renderRelative.runObject(objRetina, r, mt);
+        renderRelative.runObject(objCross, -1, ct);
+        renderPair(f, 2, 0); // z pair offset in x
 
-    //    // no need to put back, we're done
-    //}
+        // no need to put back, we're done
+    }
 
     private static int[] rmask = new int[] { 0x7, 0xD, 0xE, 0xB, 0x677, 0x9DD, 0xCEE, 0x3BB, 0xFF0, 0xF0F };
     private const int r = 0x055; // rainbow mode main retina mask
 
-    //private void renderPair(int f, int i, int j)
-    //{
-    //    int n = ((dimSpaceCache == 4) ? 4 : 0) + 2 * j;
+    private void renderPair(int f, int i, int j)
+    {
+        int n = ((dimSpaceCache == 4) ? 4 : 0) + 2 * j;
 
-    //    reg3[j] = OptionsFisheye.of.offset;
-    //    Vec.scale(sraxis[j], axis[f], -1);
-    //    Vec.copy(sraxis[f], axis[i]);
-    //    st.configure(j, 1);
-    //    renderRelative.run(sraxis, false, st);
-    //    renderRelative.runObject(objRetina, rmask[n], st);
+        reg3[j] = OptionsFisheye.offset;
+        Vec.scale(sraxis[j], axis[f], -1);
+        Vec.copy(sraxis[f], axis[i]);
+        st.configure(j, 1);
+        renderRelative.run(sraxis, false, st);
+        renderRelative.runObject(objRetina, rmask[n], st);
 
-    //    reg3[j] = -OptionsFisheye.of.offset;
-    //    Vec.copy(sraxis[j], axis[f]);
-    //    Vec.scale(sraxis[f], axis[i], -1);
-    //    st.configure(j, -1);
-    //    renderRelative.run(sraxis, false, st);
-    //    renderRelative.runObject(objRetina, rmask[n + 1], st);
+        reg3[j] = -OptionsFisheye.offset;
+        Vec.copy(sraxis[j], axis[f]);
+        Vec.scale(sraxis[f], axis[i], -1);
+        st.configure(j, -1);
+        renderRelative.run(sraxis, false, st);
+        renderRelative.runObject(objRetina, rmask[n + 1], st);
 
-    //    // now put everything back
-    //    reg3[j] = 0;
-    //    Vec.copy(sraxis[j], axis[i]); // incorrect in j != i case but it's the last thing we do
-    //}
+        // now put everything back
+        reg3[j] = 0;
+        Vec.copy(sraxis[j], axis[i]); // incorrect in j != i case but it's the last thing we do
+    }
 
     //private void renderDisplay()
     //{
@@ -794,22 +795,25 @@ public class Engine : IMove
     //      new double[] {-1, 1}, new double[] {-1,-1}
     //};
 
-    // private static readonly double[][] objRetina3 = new double[][] {
-    //   new double[] {-1,-1,-1}, new double[] { 1,-1,-1},
-    //      new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
-    //      new double[] { 1, 1,-1}, new double[] {-1, 1,-1},
-    //      new double[] {-1, 1,-1}, new double[] {-1,-1,-1},
+    private static readonly double[][] objRetina3 = new double[][] {
+        new double[] {-1,-1,-1}, new double[] { 1,-1,-1}, new double[] {-1, 1,-1},
+        new double[] {-1, 1,-1}, new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
 
-    //      new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
-    //      new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
-    //      new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
-    //      new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
+        new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
+        new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+        
+        new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
+        new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
 
-    //      new double[] {-1,-1,-1}, new double[] {-1,-1, 1},
-    //      new double[] { 1,-1,-1}, new double[] { 1,-1, 1},
-    //      new double[] { 1, 1,-1}, new double[] { 1, 1, 1},
-    //      new double[] {-1, 1,-1}, new double[] {-1, 1, 1}
-    //};
+        new double[] {-1, 1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1,-1},
+        new double[] {-1,-1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
+
+        new double[] {-1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1,-1},
+        new double[] { 1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
+
+        new double[] { 1,-1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1, 1},
+        new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] {-1, 1, 1}
+    };
 
     private const double B = 0.04;
     // private static readonly double[][] objCross2 = new double[][] {
@@ -833,20 +837,20 @@ public class Engine : IMove
         new double[] { 0, 0, C }, new double[] {-B, 0, 0 }, new double[] { 0, 0, 0 },
     };
 
-   // private static readonly double[][] objWin2 = new double[][] {
-   //   new double[] {-0.8, 0.4}, new double[] {-0.8,-0.4},
-   //      new double[] {-0.8,-0.4}, new double[] {-0.6, 0  },
-   //      new double[] {-0.6, 0  }, new double[] {-0.4,-0.4},
-   //      new double[] {-0.4,-0.4}, new double[] {-0.4, 0.4},
+    // private static readonly double[][] objWin2 = new double[][] {
+    //   new double[] {-0.8, 0.4}, new double[] {-0.8,-0.4},
+    //      new double[] {-0.8,-0.4}, new double[] {-0.6, 0  },
+    //      new double[] {-0.6, 0  }, new double[] {-0.4,-0.4},
+    //      new double[] {-0.4,-0.4}, new double[] {-0.4, 0.4},
 
-   //      new double[] {-0.1, 0.4}, new double[] { 0.1, 0.4},
-   //      new double[] { 0,   0.4}, new double[] { 0,  -0.4},
-   //      new double[] {-0.1,-0.4}, new double[] { 0.1,-0.4},
+    //      new double[] {-0.1, 0.4}, new double[] { 0.1, 0.4},
+    //      new double[] { 0,   0.4}, new double[] { 0,  -0.4},
+    //      new double[] {-0.1,-0.4}, new double[] { 0.1,-0.4},
 
-   //      new double[] { 0.4,-0.4}, new double[] { 0.4, 0.4},
-   //      new double[] { 0.4, 0.4}, new double[] { 0.8,-0.4},
-   //      new double[] { 0.8,-0.4}, new double[] { 0.8, 0.4}
-   //};
+    //      new double[] { 0.4,-0.4}, new double[] { 0.4, 0.4},
+    //      new double[] { 0.4, 0.4}, new double[] { 0.8,-0.4},
+    //      new double[] { 0.8,-0.4}, new double[] { 0.8, 0.4}
+    //};
 
     private static readonly double[][] objWin3 = new double[][] {
         new double[] {-0.8, 0.4,-1}, new double[] {-0.7,-0.4,-1}, new double[] {-0.9, 0.4,-1},
@@ -862,14 +866,14 @@ public class Engine : IMove
         new double[] { 0.8,-0.4,-1}, new double[] { 0.8, 0.4,-1}, new double[] { 0.7, 0.4,-1}
    };
 
-   // private static readonly double[][] objDead2 = new double[][] {
-   //   new double[] {-1,-1}, new double[] { 1, 1}, new double[] { 1,-1}, new double[] {-1, 1}
-   //};
+    // private static readonly double[][] objDead2 = new double[][] {
+    //   new double[] {-1,-1}, new double[] { 1, 1}, new double[] { 1,-1}, new double[] {-1, 1}
+    //};
 
-   // private static readonly double[][] objDead3 = new double[][] {
-   //   new double[] {-1,-1,-1}, new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1,-1},
-   //     new double[] {-1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1,-1,-1}, new double[] {-1, 1, 1}
-   //};
+    // private static readonly double[][] objDead3 = new double[][] {
+    //   new double[] {-1,-1,-1}, new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1,-1},
+    //     new double[] {-1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1,-1,-1}, new double[] {-1, 1, 1}
+    //};
 
 }
 

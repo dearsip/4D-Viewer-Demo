@@ -100,7 +100,8 @@ public class RenderRelative
     public void run(double[][] axis)
     {
       bout.clear();
-        for (int i = 0; i <bin.getSize(); i++) {
+        for (int i = 0; i <bin.getSize(); i++)
+        {
             Polygon src = bin.get(i);
             Polygon dest = bout.getNext();
 
@@ -108,24 +109,45 @@ public class RenderRelative
         }
     }
 
-    //public void runObject(double[][] obj, int mask, PointTransform pt)
-    //{
-    //    // no need for clear here
-    //    for (int i = 0; i < obj.Length; i += 2)
-    //    {
-    //        if ((mask & 1) == 1)
-    //        {
-    //            Line dest = out.getNext();
+    public void run(double[][] axis, bool clear, PointTransform pt)
+    {
+        if (clear) bout.clear();
+        for (int i = 0; i <bin.getSize(); i++)
+        {
+            Polygon src = bin.get(i);
+            Polygon dest = bout.getNext();
 
-    //            Vec.copy(dest.p1, obj[i]);
-    //            Vec.copy(dest.p2, obj[i + 1]);
-    //            dest.color = Color.white;
+            if (convert(dest, src, axis))
+            {
+                foreach (double[] v in dest.vertex) pt.transform(v);
+            }
+            else
+            {
+            bout.unget();
+            }
+        }
+    }
 
-    //            pt.transform(dest.p1);
-    //            pt.transform(dest.p2);
-    //        }
-    //        mask >>= 1;
-    //    }
-    //}
+    public void runObject(double[][] obj, int mask, PointTransform pt)
+    {
+        // no need for clear here
+        for (int i = 0; i < obj.Length; i += 3)
+        {
+            if ((mask & 1) == 1)
+            {
+                Polygon dest = bout.getNext();
+
+                dest.vertex = new double[3][];
+                for (int j = 0; j < 3; j++)
+                {
+                    dest.vertex[j] = new double[3];
+                    Vec.copy(dest.vertex[j], obj[i + j]);
+                }
+                dest.color = Color.white;
+                dest.color.a = 0.05f;
+            }
+            mask >>= 1;
+        }
+    }
 
 }

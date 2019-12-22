@@ -181,7 +181,7 @@ public class Clip
             np = _np;
         }
         if (a < 0) // 隠れない -> 隠れる が起きていない
-            if (b < 0) 
+            if (b < 0)
             {
                 if (np) // 全て隠れない
                 {
@@ -386,7 +386,7 @@ public class Clip
         {
             list.Clear();
             clip(polygon, bl, list);
-            for (int i = 0; i<list.Count; i++) next.drawPolygon(list[i], origin);
+            for (int i = 0; i < list.Count; i++) next.drawPolygon(list[i], origin);
         }
     }
 
@@ -547,7 +547,7 @@ public class Clip
         return Geom.nullSeparator;
     }
 
-    public static bool isSeparated(Geom.Shape s1, Geom.Shape s2)
+    public static bool isSeparated(Geom.Shape s1, Geom.Shape s2, GJKTester gjk)
     {
 
         // super-fast test, even better than the test in dynamicSeparate
@@ -562,18 +562,17 @@ public class Clip
         // find a separator for a railcar, but railcars haven't animated yet.
         // it's just not worth getting into it.
 
-        return (staticSeparate(s1, s2,/* any = */ true) != Geom.nullSeparator);
+        return (gjk.separate(s1, s2) != Geom.nullSeparator);
     }
 
-    /*public static bool isSeparated(Geom.Shape shape, LinkedList list)
+    public static bool isSeparated(Geom.Shape shape, List<Geom.Shape> list, GJKTester gjk)
     {
-        Iterator i = list.iterator();
-        while (i.hasNext())
+        foreach (Geom.Shape s in list)
         {
-            if (!isSeparated(shape, (Geom.Shape)i.next())) return false;
+            if (!isSeparated(shape, s, gjk)) return false;
         }
         return true;
-    }*/
+    }
 
     // --- dynamic separation ---
 
@@ -657,6 +656,167 @@ public class Clip
         }
         // now y = height
         return true;
+    }
+
+    // --- GJK algorithm ---
+
+    public class GJKTester
+    {
+
+        int dim;
+        Geom.Shape[] s;
+        double[][] p, reg;
+        int[][] v;
+        double[] t, n;
+        const double epsilon = 0.000001;
+
+        public GJKTester(int dim)
+        {
+            this.dim = dim;
+            s = new Geom.Shape[2];
+            p = new double[dim + 1][];
+            v = new int[dim + 1][];
+            for (int i = 0; i <= dim; i++)
+            {
+                p[i] = new double[dim];
+                v[i] = new int[2];
+            }
+            t = new double[2];
+            n = new double[dim];
+            reg = new double[dim][];
+            for (int i = 0; i < reg.Length; i++)
+            {
+                reg[i] = new double[dim];
+            }
+        }
+
+        public Geom.Separator separate(Geom.Shape s0, Geom.Shape s1)
+        {
+            s[0] = s0;
+            s[1] = s1;
+            n = new double[dim];
+            Vec.sub(reg[dim - 1], s[1].shapecenter, s[0].shapecenter);
+            Vec.scale(n, reg[dim - 1], 1);
+            if (!Vec.normalizeTry(n, n)) return Geom.nullSeparator;
+            v[0][0] = 0; v[0][1] = 0;
+            minkSupport(0, 0);
+            if (Vec.dot(n, p[0]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+
+            Vec.sub(reg[0], p[0], reg[dim - 1]);
+            //Vec.scale(n, n, -1);
+            Vec.perpendicular(n, reg[0], epsilon);
+            if (Vec.dot(n, p[0]) < 0) Vec.scale(n, n, -1);
+            minkSupport(0, 1);
+            if (Vec.dot(n, p[1]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+
+            Vec.sub(reg[0], p[0], reg[dim - 1]);
+            Vec.sub(reg[1], p[1], reg[dim - 1]);
+            if (dim == 3) Vec.cross(n, reg[0], reg[1]);
+            else Vec.perpendicular(n, reg[0], reg[1], reg[2], epsilon);
+            if (Vec.dot(n, p[0]) < 0) Vec.scale(n, n, -1);
+            minkSupport(0, 2);
+            if (Vec.dot(n, p[2]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+
+            if (dim == 4)
+            {
+                Vec.sub(reg[0], p[0], reg[dim - 1]);
+                Vec.sub(reg[1], p[1], reg[dim - 1]);
+                Vec.sub(reg[2], p[2], reg[dim - 1]);
+                Vec.cross(n, reg[0], reg[1], reg[2]);
+                if (Vec.dot(n, p[0]) < 0) Vec.scale(n, n, -1);
+                minkSupport(0, 3);
+                if (Vec.dot(n, p[3]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+            }
+
+            Vec.sub(reg[0], p[1], p[0]);
+            Vec.sub(reg[1], p[2], p[0]);
+            if (dim == 3) Vec.cross(n, reg[0], reg[1]);
+            else
+            {
+                Vec.sub(reg[2], p[3], p[0]);
+                Vec.cross(n, reg[0], reg[1], reg[2]);
+            }
+            Vec.normalize(n, n);
+            double d = Vec.dot(n, p[0]);
+            if (d > 0)
+            {
+                Vec.swap(p[1], p[2], reg[0]);
+                int i = v[1][0]; v[1][0] = v[2][0]; v[2][0] = i;
+                i = v[1][1]; v[1][1] = v[2][1]; v[2][1] = i;
+                Vec.scale(n, n, -1);
+            }
+            minkSupport(0, dim);
+            if (Vec.dot(n, p[dim]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+            for (int count = 0; count < 20; count++)
+            {
+            label:
+                for (int i = 0; i < dim; i++)
+                {
+                    int a = (i + 1) % dim;
+                    int b = (i + ((dim == 3 || i % 2 == 0) ? 2 : 3)) % dim;
+                    int c = (i + ((dim == 3 || i % 2 == 0) ? 3 : 2)) % dim;
+                    Vec.sub(reg[0], p[a], p[dim]);
+                    Vec.sub(reg[1], p[b], p[dim]);
+                    if (dim == 3) Vec.cross(n, reg[0], reg[1]);
+                    else
+                    {
+                        Vec.sub(reg[2], p[c], p[dim]);
+                        Vec.cross(n, reg[0], reg[1], reg[2]);
+                    }
+                    Vec.normalize(n, n);
+                    d = Vec.dot(n, p[dim]);
+                    if (d < 0)
+                    {
+                        Vec.copy(p[i], p[dim]); v[i][0] = v[dim][0]; v[i][1] = v[dim][1];
+                        minkSupport(i, dim);
+                        if (Vec.dot(n, p[dim]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+                        count++;
+                        goto label;
+                    }
+                    if (d < epsilon)
+                    {
+                        minkSupport(dim, dim);
+                        if (Vec.dot(n, p[dim]) < epsilon) return new Geom.NormalSeparator(n, t[1], t[0], -1);
+                    }
+                }
+                return Geom.nullSeparator;
+            }
+            return new Geom.NormalSeparator(n, t[1], t[0], -1);
+        }
+
+        private void minkSupport(int from, int to)
+        {
+            support(p[to], false, from, to, 1);
+            support(reg[0], true, from, to, 0);
+            Vec.sub(p[to], p[to], reg[0]);
+        }
+
+        private void support(double[] dest, bool inv, int from, int to, int r)
+        {
+            Vec.scale(reg[1], n, (inv) ? -1 : 1);
+            int next = v[from][r];
+            int now = -1;
+            int prev;
+            double m = Vec.dot(s[r].vertex[next], reg[1]);
+            while (next != now)
+            {
+                prev = now;
+                now = next;
+                foreach (int i in s[r].nbv[now])
+                {
+                    if (i == prev) continue;
+                    double d = Vec.dot(s[r].vertex[i], reg[1]);
+                    if (d > m)
+                    {
+                        m = d;
+                        next = i;
+                    }
+                }
+            }
+            Vec.copy(dest, s[r].vertex[now]);
+            t[r] = (inv) ? -m : m;
+            v[to][r] = now;
+        }
     }
 
 }
