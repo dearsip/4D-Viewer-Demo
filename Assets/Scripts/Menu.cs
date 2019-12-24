@@ -32,24 +32,34 @@ public class Menu : MonoBehaviour
     private void Start()
     {
 
+        SteamVR_Actions._default.Deactivate(left);
+        SteamVR_Actions._default.Deactivate(right);
         interactUI.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
-            rightLaser.SetActive(false);
-            rightHand.useRaycastHover = false;
-            leftLaser.SetActive(true);
-            leftHand.useRaycastHover = true;
+            if (gameObject.activeSelf)
+            {
+                rightLaser.SetActive(false);
+                rightHand.useRaycastHover = false;
+                leftLaser.SetActive(true);
+                leftHand.useRaycastHover = true;
+            }
         }, left);
         interactUI.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
-            leftLaser.SetActive(false);
-            leftHand.useRaycastHover = false;
-            rightLaser.SetActive(true);
-            rightHand.useRaycastHover = true;
+            if (gameObject.activeSelf)
+            {
+                leftLaser.SetActive(false);
+                leftHand.useRaycastHover = false;
+                rightLaser.SetActive(true);
+                rightHand.useRaycastHover = true;
+            }
         }, right);
     }
 
     public void Activate(OptionsAll oa)
     {
+        SteamVR_Actions._default.Activate(left);
+        SteamVR_Actions._default.Activate(right);
         gameObject.SetActive(true);
         rightLaser.SetActive(true);
         rightHand.useRaycastHover = true;
@@ -145,7 +155,7 @@ public class Menu : MonoBehaviour
             OptionsFisheye.copy(OptionsFisheye.of, ofTemp);
             OptionsFisheye.recalculate();
         }
-        catch (Exception) { }
+        catch (Exception e) { Debug.Log(e); }
         core.menuCommand = core.updateOptions;
     }
 
@@ -178,11 +188,13 @@ public class Menu : MonoBehaviour
             oa.opt.ot4.timeAlignMove = getDouble(timeAlignMoveField, false);
             oa.opt.ot4.timeAlignRotate = getDouble(timeAlignRotateField, false);
         }
-        catch (Exception) { }
+        catch (Exception e) { Debug.Log(e); }
 
         // command
         core.menuCommand = core.setOptions;
-        core.closeMenu();
+        SteamVR_Actions._default.Deactivate(left);
+        SteamVR_Actions._default.Deactivate(right);
+        doCancel();
     }
 
     public void doCancel()
@@ -191,6 +203,8 @@ public class Menu : MonoBehaviour
         leftHand.useRaycastHover = false;
         rightLaser.SetActive(false);
         rightHand.useRaycastHover = false;
+        SteamVR_Actions._default.Deactivate(left);
+        SteamVR_Actions._default.Deactivate(right);
         core.closeMenu();
     }
 

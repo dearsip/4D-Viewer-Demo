@@ -11942,7 +11942,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 504302957}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 322209023}
+        m_MethodName: doLoad
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &504302957
@@ -12225,7 +12236,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 512522324}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 322209023}
+        m_MethodName: doQuit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &512522324
@@ -14007,7 +14029,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &603488266
 Transform:
   m_ObjectHideFlags: 0
@@ -18285,7 +18307,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 110, y: 45, z: 5}
-  m_Center: {x: 55, y: -22.5, z: 0}
+  m_Center: {x: 55, y: 22.5, z: 0}
 --- !u!114 &717678818
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21715,7 +21737,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 110, y: 45, z: 5}
-  m_Center: {x: 55, y: -22.5, z: 0}
+  m_Center: {x: 0, y: 22.5, z: 0}
 --- !u!114 &857757543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31796,7 +31818,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1000011817404238, guid: a4e357c9bf84fa7438984def3c9d2d94, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224000013577827562, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -31931,32 +31953,32 @@ PrefabInstance:
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: -20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: -20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4074129722683132244, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -31991,27 +32013,27 @@ PrefabInstance:
     - target: {fileID: 224000013440901968, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000013440901968, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.00000019562542
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000013440901968, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.00000019562542
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -33253,7 +33275,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 110, y: 45, z: 5}
-  m_Center: {x: 55, y: -22.5, z: 0}
+  m_Center: {x: 0, y: 22.5, z: 0}
 --- !u!114 &1272959639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36905,7 +36927,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1449005051
 Transform:
   m_ObjectHideFlags: 0

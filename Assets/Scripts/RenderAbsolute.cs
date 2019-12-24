@@ -358,7 +358,7 @@ public class RenderAbsolute
 
     private void addFace(int[] p, int dir)
     {
-        if (texture[0]) addTexture(p, dir, Color.white, 0.9999);
+        if (texture[0]) addTexture(p, dir, Color.white, 0.999999);
 
         Color color = colorizer.getColor(p, dir);
         Color color5 = Color.clear;

@@ -46,7 +46,7 @@ public class OptionsMap // implements IValidate
     // --- implementation of IValidate ---
 
     public const int DIM_MAP_MIN = 1;
-    public const int DIM_MAP_MAX = 1;
+    public const int DIM_MAP_MAX = 4;
 
     public const int SIZE_MIN = 2;
     public const int SIZE_UNUSED = 1;

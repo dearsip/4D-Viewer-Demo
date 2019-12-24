@@ -120,6 +120,7 @@ public class Geom
     {
 
         void unglue(List<ShapeInterface> c);
+        void unglue(Stack c);
         ShapeInterface copySI();
         void setNoUserMove();
         // move interface functions go here
@@ -150,6 +151,11 @@ public class Geom
         public ShapeInterface getComponent(int i) { return component[i]; } // usually not OK
 
         public void unglue(List<ShapeInterface> c)
+        {
+            for (int i = 0; i < component.Length; i++) component[i].unglue(c);
+        }
+
+        public void unglue(Stack c)
         {
             for (int i = 0; i < component.Length; i++) component[i].unglue(c);
         }
@@ -330,7 +336,7 @@ public class Geom
         public double[][] axis; // for block motion only
         public Shape ideal;
         public bool systemMove;
-        public bool noUserMove;
+        public bool isNoUserMove;
         public HintInterface hint;
         public Cell bottomFace; // for railcars only
 
@@ -381,6 +387,11 @@ public class Geom
             c.Add(this);
         }
 
+        public void unglue(Stack c)
+        {
+            c.Push(this);
+        }
+
         public ShapeInterface copySI()
         {
             return copy();
@@ -415,12 +426,12 @@ public class Geom
 
         public void setNoUserMove()
         {
-            noUserMove = true;
+            isNoUserMove = true;
         }
 
-        public bool NoUserMove()
+        public bool noUserMove()
         {
-            return noUserMove;
+            return isNoUserMove;
         }
 
         public void reset()
@@ -597,10 +608,10 @@ public class Geom
         public void calculate()
         {
             calcCenters();
-            calcSubfaces();
+            if (face == null && getDimension() == 4) calcSubfacesAndFaces(); else calcSubfaces();
             calcNeighbors();
 
-            int dim = /*getDimension()=*/4;
+            int dim = getDimension();
 
             shapecenter = new double[dim];
             for (int i = 0; i < vertex.Length; i++) Vec.add(shapecenter, shapecenter, vertex[i]);
@@ -617,7 +628,7 @@ public class Geom
 
         public void calcRadius()
         {
-            double[] temp = new double[/*getDimension()=*/4];
+            double[] temp = new double[getDimension()];
             double r = 0;
             for (int i = 0; i < vertex.Length; i++)
             {
@@ -728,7 +739,7 @@ public class Geom
             // in common.
 
             List<Subface> list = new List<Subface>();
-            int nGoal = /*(getDimension() == 3) ? 1 :*/ 2; // only place we test dimension!
+            int nGoal = (getDimension() == 3) ? 1 : 2; // only place we test dimension!
 
             for (int i1 = 0; i1 < cell.Length - 1; i1++)
             {
@@ -763,6 +774,83 @@ public class Geom
                 }
             }
             return n;
+        }
+
+        public void calcSubfacesAndFaces()
+        {
+
+            // in 3D, we get a subface when two cells have an edge in common.
+            // in 4D, we get a subface when two cells have two or more edges
+            // in common.
+
+            List<Subface> list = new List<Subface>();
+            List<int>[] cfList = new List<int>[cell.Length];
+            for (int i = 0; i < cell.Length; i++) cfList[i] = new List<int>();
+            List<Face> faceList = new List<Face>();
+            List<Edge> edgeList = new List<Edge>();
+            int nGoal = (getDimension() == 3) ? 1 : 2; // only place we test dimension!
+
+            for (int i1 = 0; i1 < cell.Length - 1; i1++)
+            {
+                for (int i2 = i1 + 1; i2 < cell.Length; i2++)
+                {
+                    if (getEdgesInCommon(cell[i1].ie, cell[i2].ie, edgeList).Count >= nGoal)
+                    {
+                        Subface sf = new Subface();
+                        sf.ic1 = i1;
+                        sf.ic2 = i2;
+                        list.Add(sf);
+
+                        Face f = new Face();
+                        f.iv[0] = edgeList[0].iv1;
+                        f.iv[1] = edgeList[0].iv2;
+                        int n = 0;
+                        for (int i = 2; i < edgeList.Count; i++)
+                        {
+                            f.iv[i] = findNextVertex(edgeList, f.iv[i - 1], ref n);
+                        }
+                        faceList.Add(f);
+                        cfList[i1].Add(faceList.Count - 1);
+                        cfList[i2].Add(faceList.Count - 1);
+                    }
+                }
+            }
+
+            subface = list.ToArray();
+            face = faceList.ToArray();
+            for (int i = 0; i < cell.Length; i++) cell[i].ifa = cfList[i].ToArray();
+        }
+
+        public List<Edge> getEdgesInCommon(int[] ie1, int[] ie2, List<Edge> list)
+        {
+            list.Clear();
+            for (int i1 = 0; i1 < ie1.Length; i1++)
+            {
+                for (int i2 = 0; i2 < ie2.Length; i2++)
+                {
+                    if (ie1[i1] == ie2[i2]) list.Add(edge[ie1[i1]]);
+                }
+            }
+            return list;
+        }
+
+        public int findNextVertex(List<Edge> list, int dest, ref int except)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (i == except) continue;
+                if (dest == list[i].iv1)
+                {
+                    except = i;
+                    return list[i].iv2;
+                }
+                if (dest == list[i].iv2)
+                {
+                    except = i;
+                    return list[i].iv1;
+                }
+            }
+            return -1;
         }
 
         public void calcNeighbors()
@@ -910,7 +998,7 @@ public class Geom
 
     public interface CustomTexture
     {
-        void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin);
+        void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency);
     }
 
     // --- texture ---
@@ -924,12 +1012,15 @@ public class Geom
 
         public Edge[] edge;
         public double[][] vertex;
+        public double[] reg1, reg2;
 
         public Texture() { }
         public Texture(Edge[] edge, double[][] vertex)
         {
             this.edge = edge;
             this.vertex = vertex;
+            reg1 = new double[getDimension()];
+            reg2 = new double[getDimension()];
         }
 
         public Texture copy()
@@ -984,12 +1075,18 @@ public class Geom
             }
         }
 
-        public void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin)
+        public void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency)
         {
+            Polygon poly = new Polygon();
+            poly.vertex = new double[2][];
             for (int i = 0; i < edge.Length; i++)
             {
                 Edge e = edge[i];
-                currentDraw.drawLine(vertex[e.iv1], vertex[e.iv2], getColor(e.color, cell.color), origin);
+                poly.vertex[0] = vertex[e.iv1];
+                poly.vertex[1] = vertex[e.iv2];
+                poly.color = getColor(e.color, cell.color);
+                poly.color.a = (float)transparency;
+                currentDraw.drawPolygon(poly, origin);
             }
         }
 
@@ -1141,11 +1238,10 @@ public class Geom
         private int[] aiv;
         private int alen;
 
-        public Builder(bool v, bool e, bool f, bool c, int amax)
+        public Builder(bool v, bool e, bool c, int amax)
         {
             if (v) vnew = new List<double[]>();
             if (e) enew = new List<Edge>();
-            if (f) fnew = new List<Face>();
             if (c) cnew = new List<Cell>();
             if (amax != -1) aiv = new int[amax];
         }
@@ -1226,11 +1322,6 @@ public class Geom
         // two-dimensional object, so there's just one face, not
         // one per edge, and the normals aren't in the face plane.
 
-        public Face makeFace(int[] iv)
-        {
-            //return makeFace(iv, iv.Length);
-        }
-
         public Cell makeCell(int[] iv)
         {
             return makeCell(iv, iv.Length);
@@ -1268,11 +1359,6 @@ public class Geom
 
             cnew.Add(f);
             return f;
-        }
-
-        public Face[] toFaceArray()
-        {
-            return fnew.ToArray();
         }
 
         public Cell[] toCellArray()

@@ -363,11 +363,15 @@ public class Clip
 
         public BoundaryList bl;
         public IDraw next;
+        public Result clipResult;
+        public double[] temp;
         public List<Polygon> list;
 
         public Draw(int dim)
         {
             // bl and next vary now
+            clipResult = new Result();
+            temp = new double[dim];
             list = new List<Polygon>();
         }
 
@@ -380,6 +384,27 @@ public class Clip
         {
             this.next = next;
             return this; // convenience
+        }
+
+        public void drawLine(double[] p1, double[] p2, Color color, double[] origin)
+        {
+            if (clip(p1, p2, bl, clipResult) == Clip.KEEP_LINE)
+            {
+                next.drawLine(p1, p2, color, origin);
+            }
+            else
+            {
+                if (clipResult.hasSegA())
+                {
+                    clipResult.getPointA(temp, p1, p2);
+                    next.drawLine(p1, temp, color, origin);
+                }
+                if (clipResult.hasSegB())
+                {
+                    clipResult.getPointB(temp, p1, p2);
+                    next.drawLine(temp, p2, color, origin);
+                }
+            }
         }
 
         public void drawPolygon(Polygon polygon, double[] origin)

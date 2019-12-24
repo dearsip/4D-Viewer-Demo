@@ -52,7 +52,7 @@ public class Engine : IMove
     private SideTransform st;
     private CrossTransform ct;
 
-    private double[] reg5;
+    private double[] reg5, reg6;
     private List<Vector3> verts;
     private List<int> tris;
     private List<Color> cols;
@@ -136,7 +136,7 @@ public class Engine : IMove
         //}
         //else
         {
-            //objRetina = objRetina3;
+            objRetina = objRetina3;
             objCross = objCross3;
             objWin = objWin3;
             //objDead = objDead3;
@@ -154,6 +154,7 @@ public class Engine : IMove
         ct = new CrossTransform(reg3);
 
         reg5 = new double[3];
+        reg6 = new double[3];
         verts = new List<Vector3>();
         tris = new List<int>();
         cols = new List<Color>();
@@ -177,7 +178,7 @@ public class Engine : IMove
         if (win && !atFinish())
         {
             win = false;
-            RenderRelative();
+            //RenderRelative();
         }
     }
 
@@ -604,7 +605,7 @@ public class Engine : IMove
     {
         model.animate();
         model.render(origin);
-        RenderRelative();
+        RenderRelative(eyeVector);
         bufRelative.sort(eyeVector);
     }
 
@@ -630,21 +631,21 @@ public class Engine : IMove
         }
     }
 
-    private void RenderRelative()
+    private void RenderRelative(double[] eyeVector)
     {
-        //if (OptionsFisheye.of.fisheye)
-        //{
-        //    renderPrepare();
-        //    if (OptionsFisheye.of.rainbow && dimSpaceCache == 4)
-        //    {
-        //        renderRainbow();
-        //    }
-        //    else
-        //    {
-        //        renderFisheye();
-        //    }
-        //}
-        //else
+        if (OptionsFisheye.of.fisheye)
+        {
+            renderPrepare();
+            if (OptionsFisheye.of.rainbow && dimSpaceCache == 4)
+            {
+                renderRainbow();
+            }
+            else
+            {
+                renderFisheye();
+            }
+        }
+        else
         {
             renderRelative.run(axis);
             //renderObject(bufRelative, objRetina);
@@ -655,7 +656,7 @@ public class Engine : IMove
         //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
 
         //renderDisplay();
-        convert();
+        convert(eyeVector);
     }
 
     private void renderPrepare()
@@ -748,7 +749,8 @@ public class Engine : IMove
     //    displayInterface.nextFrame();
     //}
 
-    private void convert()
+    private double width = 0.05;
+    private void convert(double[] eyeVector)
     {
         int count = 0;
         Polygon p;
@@ -759,17 +761,51 @@ public class Engine : IMove
         {
             p = bufRelative.get(i);
             int v = p.vertex.Length;
-            for (int j = 0; j < v; j++)
+            if (v == 2)
             {
-                reg5 = p.vertex[j];
+                v = 4;
+                Vec.sub(reg5, p.vertex[1], p.vertex[0]);
+                Vec.cross(reg6, reg5, eyeVector);
+                Vec.normalize(reg6, reg6);
+                Vec.scale(reg6, reg6, width);
+
+                Vec.add(reg5, p.vertex[0], reg6);
                 verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
                 cols.Add(p.color);
-            }
-            for (int j = 0; j < v - 2; j++)
-            {
+
+                Vec.addScaled(reg5, p.vertex[0], reg6, -1);
+                verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                cols.Add(p.color);
+
+                Vec.add(reg5, p.vertex[1], reg6);
+                verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                cols.Add(p.color);
+
+                Vec.addScaled(reg5, p.vertex[1], reg6, -1);
+                verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                cols.Add(p.color);
+
                 tris.Add(count);
-                tris.Add(count + j + 1);
-                tris.Add(count + j + 2);
+                tris.Add(count + 1);
+                tris.Add(count + 2);
+                tris.Add(count + 2);
+                tris.Add(count + 1);
+                tris.Add(count + 3);
+            }
+            else
+            {
+                for (int j = 0; j < v; j++)
+                {
+                    reg5 = p.vertex[j];
+                    verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                    cols.Add(p.color);
+                }
+                for (int j = 0; j < v - 2; j++)
+                {
+                    tris.Add(count);
+                    tris.Add(count + j + 1);
+                    tris.Add(count + j + 2);
+                }
             }
             count += v;
         }
@@ -801,7 +837,7 @@ public class Engine : IMove
 
         new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
         new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
-        
+
         new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
         new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
 

@@ -4,14 +4,15 @@ using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
+using System.IO;
 using SimpleFileBrowser;
 
-public delegate void Command();
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(Interactable))]
 public class Core : MonoBehaviour
 {
+    public delegate void Command();
     private Options optDefault;
     private Options opt; // the next three are used only during load
     private int dim;
@@ -126,8 +127,8 @@ public class Core : MonoBehaviour
         posLeft = pose.GetLocalPosition(left); rotLeft = pose.GetLocalRotation(left);
         posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
 
-        optDefault = new Options();
-        opt = new Options();
+        optDefault = ScriptableObject.CreateInstance<Options>();
+        opt = ScriptableObject.CreateInstance<Options>();
         // ロード
         load();
         // dim and rest of oa are initialized when new game started
@@ -150,6 +151,8 @@ public class Core : MonoBehaviour
         reg4 = new double[4];
 
         FileBrowser.HideDialog();
+        menuPanel.gameObject.SetActive(false);
+        Debug.Log(Directory.GetCurrentDirectory());
     }
 
     private void addEvevts()
@@ -169,15 +172,13 @@ public class Core : MonoBehaviour
         menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
             openMenu();
-        }, left);
+        }, right);
     }
 
     private void openMenu()
     {
         SteamVR_Actions.controll.Deactivate(left);
         SteamVR_Actions.controll.Deactivate(right);
-        SteamVR_Actions._default.Activate(left);
-        SteamVR_Actions._default.Activate(right);
         menuPanel.Activate(oa);
     }
 
@@ -195,8 +196,8 @@ public class Core : MonoBehaviour
         IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov());
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
 
-        setOptionsMotion(/*oa.opt.okc,*/ ot());
-        setFrameRate(ot().frameRate);
+        updateOptions();
+        setOptions();
 
         target = engine;
         saveOrigin = new double[dim];
@@ -282,9 +283,9 @@ public class Core : MonoBehaviour
         for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
         Vec.normalize(eyeVector, eyeVector);
     }
-    private double limitAng = 60;
+    private double limitAng = 30;
 
-    private double limit = 0.2;
+    private double limit = 0.1;
     private void controll()
     {
         // save state
@@ -299,19 +300,18 @@ public class Core : MonoBehaviour
                 for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                 Array.Copy(reg2, reg3, 3);
-                relarot = rotLeft * Quaternion.Inverse(lastRotLeft);
+                relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
                 reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
                 reg3[3] /= Math.Max(limitAng * Math.PI / 180, reg3[3]);
-                Debug.Log(Vec.ToString(reg3));
                 if (alignMode)
                 {
-                    for(int i = 0; i < reg3.Length; i++)
+                    for (int i = 0; i < reg3.Length; i++)
                     {
                         if (Math.Abs(reg3[i]) > 0.8)
                         {
                             nActive = nMove;
                             ad0 = Dir.forAxis(i, reg3[i] < 0);
-                            command = alignMove;
+                            if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
                         }
                     }
                 }
@@ -332,23 +332,24 @@ public class Core : MonoBehaviour
                         if (Math.Abs(reg2[i]) > 0.8)
                         {
                             nActive = nRotate;
-                            ad0 = Dir.forAxis(dim);
-                            ad0 = Dir.forAxis(i, reg2[i] < 0);
+                            ad0 = Dir.forAxis(dim - 1);
+                            ad1 = Dir.forAxis(i, reg2[i] < 0);
                             command = alignRotate;
                             break;
                         }
                     }
                     if (command == null)
                     {
-                        relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                        relarot = rotRight * Quaternion.Inverse(fromRotRight);
                         for (int i = 0; i < 3; i++)
                         {
-                            float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng * Mathf.PI / 180;
+                            float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
+                            Debug.Log(i + ": " + f);
                             if (Mathf.Abs(f) > 0.8)
                             {
                                 nActive = nRotate;
                                 ad0 = Dir.forAxis((i + 1) % 3);
-                                ad0 = Dir.forAxis((i + 2) % 3, f < 0);
+                                ad1 = Dir.forAxis((i + 2) % 3, f < 0);
                                 command = alignRotate;
                                 break;
                             }
@@ -413,10 +414,10 @@ public class Core : MonoBehaviour
             //    alignActive = null; // not a big deal but let's do it
             //}
 
-            //if (alignMode && !target.isAligned())
-            //{
-            //    alignMode = false;
-            //}
+            if (alignMode && !target.isAligned())
+            {
+                alignMode = false;
+            }
         }
     }
 
@@ -447,9 +448,9 @@ public class Core : MonoBehaviour
 
     public void align()
     {
-        if(alignMode || engine.getSaveType() == IModel.SAVE_ACTION
-                     || engine.getSaveType() == IModel.SAVE_BLOCK
-                     || engine.getSaveType() == IModel.SAVE_SHOOT)
+        if (engine.getSaveType() == IModel.SAVE_ACTION
+         || engine.getSaveType() == IModel.SAVE_BLOCK
+         || engine.getSaveType() == IModel.SAVE_SHOOT)
         {
             command = null;
             return;
@@ -522,11 +523,271 @@ public class Core : MonoBehaviour
 
     public void closeMenu()
     {
-        SteamVR_Actions._default.Deactivate(left);
-        SteamVR_Actions._default.Deactivate(right);
         SteamVR_Actions.controll.Activate(left);
         SteamVR_Actions.controll.Activate(right);
         menuPanel.gameObject.SetActive(false);
+    }
+
+    public void doQuit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE
+        UnityEngine.Application.Quit();
+#endif
+    }
+
+    public void doLoad()
+    {
+        StartCoroutine(ShowLoadDialogCoroutine());
+    }
+
+    IEnumerator ShowLoadDialogCoroutine()
+    {
+        yield return FileBrowser.WaitForLoadDialog(false, null, "Load File", "Load");
+
+        Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
+
+        if (FileBrowser.Success) doLoadGeom(FileBrowser.Result);
+    }
+
+    private void doLoadGeom(string file)
+    {
+        try
+        {
+            loadGeom(file);
+        }
+        catch (Exception t)
+        {
+            String s = "";
+            if (t is LanguageException)
+            {
+                LanguageException e = (LanguageException)t;
+                //t = e.getCause();
+                s = e.getFile() + "\n" + e.getDetail() + "\n";
+                Debug.Log(s);
+                Debug.Log(e);
+            }
+            //t.printStackTrace();
+            //JOptionPane.showMessageDialog(this, s + t.getClass().getName() + "\n" + t.getMessage(), App.getString("Maze.s25"), JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void loadGeom(string file) //throws Exception
+    {
+
+        // read file
+
+        Context c = DefaultContext.create();
+        c.libDirs.Add("data" + Path.DirectorySeparatorChar + "lib");
+        Language.include(c, file);
+
+        // build the model
+
+        GeomModel model = buildModel(c);
+        // run this before changing anything since it can fail
+
+        // switch to geom
+
+        dim = model.getDimension();
+
+        // no need to modify omCurrent, just leave it with previous maze values
+        oa.ocCurrent = null;
+        oa.ovCurrent = null;
+        // no need to modify oeCurrent or oeNext
+
+        bool[] texture = model.getDesiredTexture();
+        if (texture != null)
+        { // model -> ov
+            OptionsView ovLoad = new OptionsView();
+            OptionsView.copy(ovLoad, ov(), texture);
+            oa.ovCurrent = ovLoad;
+            // careful, if you set ovCurrent earlier
+            // then ov() will return the wrong thing
+        }
+        else
+        { // ov -> model
+            texture = ov().texture;
+        }
+        model.setTexture(texture);
+
+        // model already constructed
+        engine.newGame(dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+
+        updateOptions();
+        setOptions();
+        //controller.setOptions(oa.opt.okc, ot());
+        //controller.setKeysNew(model);
+        //controller.setAlwaysRun(model.isAnimated());
+        //clock.setFrameRate(ot().frameRate);
+
+        //keyMapper().releaseAll(); // sync up key mapper, which may have changed with dim
+
+        //controller.reset(dim, model.getAlignMode(/* defaultAlignMode = */ ok().startAlignMode));
+        // clock will stop when controller reports idle
+    }
+
+    public static GeomModel buildModel(Context c) //throws Exception
+    {
+
+        DimensionAccumulator da = new DimensionAccumulator();
+        //Track track = null;
+        //LinkedList tlist = new LinkedList();
+        List<IScenery> scenery = new List<IScenery>();
+        List<Geom.ShapeInterface> slist = new List<Geom.ShapeInterface>();
+        //LinkedList elist = new LinkedList();
+        Struct.ViewInfo viewInfo = null;
+        Struct.DrawInfo drawInfo = null;
+
+        Struct.FinishInfo finishInfo = null;
+        Struct.FootInfo footInfo = null;
+        //Struct.BlockInfo blockInfo = null;
+
+        // scan for items
+
+        foreach (object o in c.stack)
+        {
+            if (o is IDimension)
+            {
+                da.putDimension(((IDimension)o).getDimension());
+            }
+            else if (o is IDimensionMultiSrc)
+            {
+                ((IDimensionMultiSrc)o).getDimension(da);
+            }
+            // this is just a quick check to catch the most obvious mistakes.
+            // I can't be bothered to add dimension accessors to the scenery.
+
+            if (o == null)
+            {
+                throw new Exception("Unused null object on stack.");
+            }
+            //else if (o is Track) {
+            //    if (track != null) throw new Exception("Only one track object allowed (but it can have disjoint loops).");
+            //    track = (Track)o;
+            //} else if (o is Train) {
+            //    tlist.add(o);
+            //} 
+            else if (o is IScenery)
+            {
+                scenery.Add((IScenery)o);
+            }
+            else if (o is Geom.ShapeInterface)
+            { // Shape or CompositeShape
+                ((Geom.ShapeInterface)o).unglue(slist);
+            }
+            else if (o is Struct.ViewInfo)
+            {
+                if (viewInfo != null) throw new Exception("Only one viewinfo command allowed.");
+                viewInfo = (Struct.ViewInfo)o;
+            }
+            else if (o is Struct.DrawInfo)
+            {
+                if (drawInfo != null) throw new Exception("Only one drawinfo command allowed.");
+                drawInfo = (Struct.DrawInfo)o;
+            }
+            else if (o is Struct.DimensionMarker)
+            {
+                // ignore, we're done with it
+            }
+            else if (o is Struct.FinishInfo)
+            {
+                if (finishInfo != null) throw new Exception("Only one finishInfo command allowed.");
+                finishInfo = (Struct.FinishInfo)o;
+            }
+            else if (o is Struct.FootInfo)
+            {
+                footInfo = (Struct.FootInfo)o;
+            }
+            //else if (o is Struct.BlockInfo)
+            //{
+            //    blockInfo = (Struct.BlockInfo)o;
+            //}
+            //else if (o is Enemy)
+            //{
+            //    elist.add(o);
+            //}
+            else
+            {
+                throw new Exception("Unused object on stack (" + o.GetType().Name + ").");
+            }
+        }
+
+        // use items to make model
+
+        if (da.first) throw new Exception("Scene doesn't contain any objects.");
+        if (da.error) throw new Exception("The number of dimensions is not consistent.");
+        int dtemp = da.dim; // we shouldn't change the Core dim variable yet
+
+        Geom.Shape[] shapes = (Geom.Shape[])slist.ToArray();
+        //Train[] trains = (Train[])tlist.toArray(new Train[tlist.size()]);
+        //Enemy[] enemies = (Enemy[])elist.toArray(new Enemy[elist.size()]);
+
+        //if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
+
+        if (scenery.Count == 0) scenery.Add((dtemp == 3) ? new Mat.Mat3() : (IScenery)new Mat.Mat4());
+        //if (track != null) scenery.add(track); // add last so it draws over other scenery
+
+        GeomModel model;
+        //if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
+        //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
+        //else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
+        //else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
+        /*:*/
+        model = new GeomModel(dtemp, shapes, drawInfo, viewInfo);
+        model.addAllScenery(scenery);
+
+        // gather dictionary info
+
+        List<Color> availableColors = new List<Color>();
+        List<Shapes> availableShapes = new List<Shapes>();
+        Dictionary<string, Color> colorNames = new Dictionary<string, Color>();
+        Dictionary<string, Geom.Shape> idealNames = new Dictionary<string, Geom.Shape>();
+
+        //foreach (KeyValuePair<string, object> entry in c.dict)
+        //{
+        //    object o = entry.Value;
+        //    if (o is Color)
+        //    {
+
+        //        availableColors.Add(entry);
+
+        //        String name = (String)entry.getKey();
+        //        if (!c.topLevelDef.contains(name))
+        //        {
+        //            colorNames.Add(name, (Color)o);
+        //        }
+
+        //    }
+        //    else if (o is Geom.Shape)
+        //    { // not ShapeInterface, at least for now
+        //        Geom.Shape shape = (Geom.Shape)o;
+        //        if (shape.getDimension() == dtemp)
+        //        {
+
+        //            availableShapes.add(new NamedObject(entry));
+
+        //            String name = (String)entry.getKey();
+        //            if (!c.topLevelDef.contains(name))
+        //            {
+        //                idealNames.put(shape.ideal, name);
+        //            }
+        //        }
+        //    }
+        //    // else it's not something we're interested in
+        //}
+
+        //Collections.sort(availableColors);
+        //Collections.sort(availableShapes);
+
+        //model.setAvailableColors(availableColors);
+        //model.setAvailableShapes(availableShapes);
+
+        model.setSaveInfo(c.topLevelInclude, colorNames, idealNames);
+
+        // done
+
+        return model;
     }
 
     private void load()

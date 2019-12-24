@@ -3,7 +3,6 @@
  */
 using System;
 using System.Diagnostics;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 //import java.awt.Color;
@@ -18,7 +17,8 @@ using UnityEngine;
  * A model that lets the user move around geometric shapes.
  */
 
-public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
+public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
+{
 
     // --- fields ---
 
@@ -49,19 +49,21 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
     protected Clip.Result clipResult;
     private IDraw currentDraw;
 
-    private List<Color> availableColors;
-    private List<Geom.Shape> availableShapes;
+    private List<NamedObject<Color>> availableColors;
+    private List<NamedObject<Geom.Shape>> availableShapes;
     private Color addColor;
     protected Geom.Shape addShape;
     private Color paintColor;
     private int paintMode; // default 0, correct
 
     private List<string> topLevelInclude;
-    private Dictionary<Color, string> colorNames;
-    private Dictionary<Geom.Shape, string> idealNames;
+    private Dictionary<string, Color> colorNames;
+    private Dictionary<string, Geom.Shape> idealNames;
 
     protected int faceNumber; // extra result from findShape
     protected int shapeNumber; // extra result from canMove
+
+    private double transparency;
 
     // --- construction ---
 
@@ -117,7 +119,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         scenery.AddRange(c);
     }
 
-    public void setSaveInfo(List<string> topLevelInclude, Dictionary<Color, string> colorNames, Dictionary<Geom.Shape, string> idealNames)
+    public void setSaveInfo(List<string> topLevelInclude, Dictionary<string, Color> colorNames, Dictionary<string, Geom.Shape> idealNames)
     {
         this.topLevelInclude = topLevelInclude;
         this.colorNames = colorNames;
@@ -144,12 +146,12 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         return topLevelInclude;
     }
 
-    public Dictionary<Color, string> retrieveColorNames()
+    public Dictionary<string, Color> retrieveColorNames()
     {
         return colorNames;
     }
 
-    public Dictionary<Geom.Shape, string> retrieveIdealNames()
+    public Dictionary<string, Geom.Shape> retrieveIdealNames()
     {
         return idealNames;
     }
@@ -239,7 +241,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
     private bool isMobile(Geom.Shape shape)
     {
-        return (shape.systemMove || shape.noUserMove || shape == selectedShape);
+        return (shape.systemMove || shape.isNoUserMove || shape == selectedShape);
     }
 
     protected int indexOf(Geom.Shape shape)
@@ -249,7 +251,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         {
             if (shapes[i] == shape) return i;
         }
-        throw new RuntimeException("Shape not in table.");
+        throw new /*Runtime*/Exception("Shape not in table.");
     }
 
     private void mobilize(Geom.Shape shape)
@@ -296,7 +298,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
         // can we select it?
 
-        if (shape.noUserMove)
+        if (shape.isNoUserMove)
         {
             clickNoUserMove(shape, origin, viewAxis);
             return null;
@@ -368,13 +370,13 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
     /**
      * @param todo Can be null if you want everything in one list.
      */
-    private void listShapes(LinkedList todo, LinkedList done)
+    private void listShapes(List<Geom.Shape> todo, List<Geom.Shape> done)
     {
         for (int i = 0; i < shapes.Length; i++)
         {
             if (shapes[i] == null || shapes[i].systemMove) continue; // ignore trains
 
-            if (todo == null || shapes[i].noUserMove)
+            if (todo == null || shapes[i].isNoUserMove)
             {
                 done.Add(shapes[i]);
             }
@@ -396,8 +398,8 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         // we want to scramble according to the align mode of the user, not the
         // align mode of the selected shape.
 
-        LinkedList todo = new LinkedList();
-        LinkedList done = new LinkedList();
+        List<Geom.Shape> todo = new List<Geom.Shape>();
+        List<Geom.Shape> done = new List<Geom.Shape>();
         listShapes(todo, done);
         Scramble.scramble(todo, done, alignMode, origin, gjk);
 
@@ -437,17 +439,19 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         if (mod != 0) len += 10 - mod;
 
         Geom.Shape[] shapesNew = new Geom.Shape[len];
-        System.arraycopy(shapes, 0, shapesNew, 0, shapes.Length);
+        Array.Copy(shapes, 0, shapesNew, 0, shapes.Length);
         // the rest start null
 
         Clip.Draw[] clipUnitsNew = new Clip.Draw[len];
-        System.arraycopy(clipUnits, 0, clipUnitsNew, 0, shapes.Length);
+        Array.Copy(clipUnits, 0, clipUnitsNew, 0, shapes.Length);
         for (int i = shapes.Length; i < len; i++) clipUnitsNew[i] = new Clip.Draw(dim);
 
-        bool[][] inFrontNew = new bool[len][len];
+        bool[][] inFrontNew = new bool[len][];
+        for (int i = 0; i < len; i++) inFrontNew[i] = new bool[len];
         // just a temporary register, no need to copy anything
 
-        Geom.Separator[][] separatorsNew = new Geom.Separator[len][len];
+        Geom.Separator[][] separatorsNew = new Geom.Separator[len][];
+        for (int i = 0; i < len; i++) separatorsNew[i] = new Geom.Separator[len];
         for (int i = 0; i < shapes.Length - 1; i++)
         {
             for (int j = i + 1; j < shapes.Length; j++)
@@ -464,26 +468,33 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         separators = separatorsNew;
     }
 
-    private static Object pickFrom(List available)
+    private static System.Random random = new System.Random();
+    private static Color pickFrom(List<NamedObject<Color>> available)
     {
-        int count = available.size();
-        int i = (int)(count * Math.random());
-        NamedObject nobj = (NamedObject)available.get(i);
-        return nobj.object;
+        int count = available.Count;
+        int i = random.Next(count);
+        return available[i].obj;
+    }
+
+    private static Geom.Shape pickFrom(List<NamedObject<Geom.Shape>> available)
+    {
+        int count = available.Count;
+        int i = random.Next(count);
+        return available[i].obj;
     }
 
     private Geom.Shape createShape()
     {
 
         Geom.Shape shape = addShape;
-        if (shape == null) shape = (Geom.Shape)pickFrom(availableShapes);
+        if (shape == null) shape = pickFrom(availableShapes);
 
         shape = shape.copy(); // essentially pulling out of dictionary
 
         Color color = addColor;
         if (color != null)
         {
-            if (color == ISelectShape.RANDOM_COLOR) color = (Color)pickFrom(availableColors);
+            if (color == /*ISelectShape.RANDOM_COLOR*/Color.clear) color = pickFrom(availableColors);
             shape.setShapeColor(color);
         }
 
@@ -492,7 +503,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
     public bool canAddShapes()
     {
-        return (selectedShape == null && availableShapes.size() > 0 && availableColors.size() > 0);
+        return (selectedShape == null && availableShapes.Count > 0 && availableColors.Count > 0);
         // no real reason for checking selectedShape,
         // except I want to see the align mode of the user, not the shape.
         // have to check available colors in case user picks random color.
@@ -515,8 +526,8 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
         int index = 0;
 
-        LinkedList todo = new LinkedList();
-        LinkedList done = new LinkedList();
+        List<Geom.Shape> todo = new List<Geom.Shape>();
+        List<Geom.Shape> done = new List<Geom.Shape>();
         listShapes(null, done);
 
         for (int i = 0; i < quantity; i++)
@@ -540,7 +551,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         Geom.Shape shape = findShape(origin, viewAxis);
         if (shape == null) return;
 
-        if (shape.noUserMove) return; // could allow deleting platforms but not trains
+        if (shape.isNoUserMove) return; // could allow deleting platforms but not trains
 
         // now delete it
 
@@ -567,8 +578,8 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
     public bool canPaint()
     {
-        return (availableColors.size() > 0); // in case the color is random.
-                                             // allow painting when a shape is selected, that's a natural action.
+        return (availableColors.Count > 0); // in case the color is random.
+                                            // allow painting when a shape is selected, that's a natural action.
     }
 
     public void paint(double[] origin, double[] viewAxis)
@@ -585,8 +596,8 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         if (shape == null) return; // no shape
 
         Color useColor;
-        if (paintColor == ISelectShape.RANDOM_COLOR) useColor = (Color)pickFrom(availableColors);
-        else if (paintColor == ISelectShape.REMOVE_COLOR) useColor = null;
+        if (paintColor == Color.clear) useColor = pickFrom(availableColors);
+        //else if (paintColor == ISelectShape.REMOVE_COLOR) useColor = null;
         else useColor = paintColor;
 
         if (paintShape)
@@ -608,22 +619,22 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
     // the first two aren't in the interface,
     // but they're closely related
 
-    public void setAvailableColors(LinkedList availableColors)
+    public void setAvailableColors(List<NamedObject<Color>> availableColors)
     {
-        this.availableColors = new List(availableColors);
+        this.availableColors = new List<NamedObject<Color>>(availableColors);
     }
 
-    public void setAvailableShapes(LinkedList availableShapes)
+    public void setAvailableShapes(List<NamedObject<Geom.Shape>> availableShapes)
     {
-        this.availableShapes = new List(availableShapes);
+        this.availableShapes = new List<NamedObject<Geom.Shape>>(availableShapes);
     }
 
-    public List getAvailableColors()
+    public List<NamedObject<Color>> getAvailableColors()
     {
         return availableColors;
     }
 
-    public List getAvailableShapes()
+    public List<NamedObject<Geom.Shape>> getAvailableShapes()
     {
         return availableShapes;
     }
@@ -680,21 +691,31 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         // checking for collisions along whole path is too much for now
     }
 
-    public void move(int a, double d)
+    public void move(/*int a, double d*/double[] d)
     {
-        Vec.zero(reg1);
-        Dir.apply(axisDirection[a], reg1, d);
-        selectedShape.translateFrame(reg1);
+        //Vec.zero(reg1);
+        //Dir.apply(axisDirection[a], reg1, d);
+        //selectedShape.translateFrame(reg1);
+        selectedShape.translateFrame(d);
     }
 
-    public void rotateAngle(int a1, int a2, double theta)
+    readonly double[] reg = new double[] { 1, 1, 1, -1 };
+    public void rotateAngle(/*int a1, int a2, double theta*/double[] from, double[] to)
     {
         // third-person view is just too weird.  the natural mapping is reversed.
         // and, actually the same intuition you have about the forward direction
         // applies in 4D to the outward direction, so we have to reverse z then too.
         // so, everything except xy rotations!
-        if (a1 >= 2 || a2 >= 2) theta = -theta;
-        selectedShape.rotateFrame(axisDirection[a1], axisDirection[a2], theta, null);
+        //if (a1 >= 2 || a2 >= 2) theta = -theta;
+        //selectedShape.rotateFrame(axisDirection[a1], axisDirection[a2], theta, null);
+
+        Vec.fromAxisCoordinates(reg1, from, selectedShape.axis);
+        Vec.fromAxisCoordinates(reg2, to, selectedShape.axis);
+        Vec.normalize(reg1, reg1);
+        Vec.normalize(reg2, reg2);
+        Vec.scaleMultiCo(reg1, reg1, reg);
+        Vec.scaleMultiCo(reg2, reg2, reg);
+        selectedShape.rotateFrame(reg1, reg2, null, from, to);
     }
 
     public Align align()
@@ -757,7 +778,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
     // --- implementation of IModel ---
 
-    public void initPlayer(double[] origin, double[][] axis)
+    public override void initPlayer(double[] origin, double[][] axis)
     {
         if (viewInfo != null)
         {
@@ -802,15 +823,15 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         }
     }
 
-    public void testOrigin(double[] origin, int[] reg1, int[] reg2) throws ValidationException
+    public override void testOrigin(double[] origin, int[] reg1, int[] reg2) //throws ValidationException
     {
     }
 
-    public void setColorMode(int colorMode)
+    public override void setColorMode(int colorMode)
     {
     }
 
-    public void setDepth(int depth)
+    public override void setDepth(int depth)
     {
     }
 
@@ -819,7 +840,7 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         return (drawInfo != null) ? drawInfo.texture : null;
     }
 
-    public void setTexture(bool[] texture)
+    public override void setTexture(bool[] texture)
     {
         for (int i = 0; i < 10; i++)
         {
@@ -828,22 +849,32 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         // I forget why we copy rather than share, but that's what RenderAbsolute does
     }
 
-    public void setOptions(OptionsColor oc, long seed, int depth, bool[] texture)
+    public override void setTransparency(double transparency)
     {
-        setTexture(texture);
+        this.transparency = transparency;
     }
 
-    public bool isAnimated()
+    public override void setOptions(OptionsColor oc, int seed, int depth, bool[] texture, OptionsDisplay od)
+    {
+        setTexture(texture);
+        setTransparency(od.transparency);
+        useEdgeColor = od.useEdgeColor;
+        hideSel = od.hidesel;
+        invertNormals = od.invertNormals;
+        useSeparation = od.separate;
+    }
+
+    public override bool isAnimated()
     {
         return false;
     }
 
-    public int getSaveType()
+    public override int getSaveType()
     {
         return IModel.SAVE_GEOM;
     }
 
-    public bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2)
+    public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2)
     {
 
         if (!useSeparation) return true;
@@ -885,23 +916,23 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         return true;
     }
 
-    public bool atFinish(double[] origin, int[] reg1, int[] reg2)
+    public override bool atFinish(double[] origin, int[] reg1, int[] reg2)
     {
         return false;
     }
 
-    public bool dead() { return false; }
+    public override bool dead() { return false; }
 
-    public void setBuffer(PolygonBuffer buf)
+    public override void setBuffer(PolygonBuffer buf)
     {
         this.buf = buf;
     }
 
-    public void animate()
+    public override void animate()
     {
     }
 
-    public void render(double[] origin)
+    public override void render(double[] origin)
     {
         renderer(origin);
     }
@@ -923,9 +954,9 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
         }
 
         // currentDraw includes all objects, scenery must be distant
-        for (int i = 0; i < scenery.size(); i++)
+        for (int i = 0; i < scenery.Count; i++)
         {
-            ((IScenery)scenery.get(i)).draw(currentDraw, origin);
+            (scenery[i]).draw(currentDraw, origin);
         }
 
         calcInFront();
@@ -945,64 +976,69 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
 
     private void calcVisShape(Geom.Shape shape)
     {
-        for (int i = 0; i < shape.face.Length; i++) calcVisFace(shape.face[i]);
+        for (int i = 0; i < shape.face.Length; i++) shape.face[i].visible = false;
+        for (int i = 0; i < shape.cell.Length; i++)
+            if (calcVisCell(shape.cell[i]))
+                for (int j = 0; j < shape.cell[i].ifa.Length; j++)
+                    shape.face[shape.cell[i].ifa[j]].visible = true;
     }
 
-    private void calcVisFace(Geom.Face face)
+    private bool calcVisCell(Geom.Cell cell)
     {
-        if (face.normal != null)
+        if (cell.normal != null)
         {
 
             // late to be adding an epsilon here, but without this you can sometimes
             // see a flat face between two other faces that ought to be in contact.
             // the example is geom3-project4b (delete the front face and slide right).
-            final double epsilon = -1e-9;
+            const double epsilon = -1e-9;
 
-            Vec.sub(reg1, face.center, origin); // vector from origin to face center
-            face.visible = (Vec.dot(reg1, face.normal) < epsilon) ^ invertNormals;
+            Vec.sub(reg1, cell.center, origin); // vector from origin to face center
+            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon);
         }
         else
         {
-            face.visible = true; // glass
+            cell.visible = true; // glass
         }
+        return cell.visible;
     }
 
     private void drawShape(Geom.Shape shape)
     {
-        for (int i = 0; i < shape.face.Length; i++) drawFace(shape, shape.face[i]);
+        for (int i = 0; i < shape.cell.Length; i++) drawCell(shape, shape.cell[i]);
     }
 
-    private void drawFace(Geom.Shape shape, Geom.Face face)
+    private void drawCell(Geom.Shape shape, Geom.Cell cell)
     {
 
-        if (!face.visible) return;
+        if (!cell.visible) return;
 
         if (texture[0])
         {
-            if (useEdgeColor) drawEdgeColor(shape, face, 1);
-            else drawTexture(shape, face, Color.white, 1);
+            if (useEdgeColor) drawEdgeColor(shape, cell, 0.999999);
+            else drawTexture(shape, cell, Color.white, 0.999999);
         }
 
         bool selected = (shape == selectedShape) && !hideSel;
-        Color faceColor = Geom.getColor(face.color);
+        Color cellColor = Geom.getColor(cell.color);
 
-        if (face.customTexture != null)
+        if (cell.customTexture != null)
         {
-            face.customTexture.draw(shape, face, currentDraw, origin);
+            cell.customTexture.draw(shape, cell, currentDraw, origin, transparency);
         }
         else
         {
             for (int i = 1; i < 10; i++)
             {
                 if (i == 5 && selected) continue;
-                if (texture[i]) drawTexture(shape, face, faceColor, 0.1 * i);
+                if (texture[i]) drawTexture(shape, cell, cellColor, 0.1 * i);
             }
         }
 
         if (selected)
         {
-            Color color = faceColor.equals(COLOR_SELECTED) ? COLOR_SELECTED_ALTERNATE : COLOR_SELECTED;
-            drawTexture(shape, face, color, 0.5);
+            Color color = cellColor.Equals(COLOR_SELECTED) ? COLOR_SELECTED_ALTERNATE : COLOR_SELECTED;
+            drawTexture(shape, cell, color, 0.5);
             // slightly different behavior than in RenderAbsolute:
             // change to alternate color even if texture 5 not on.
         }
@@ -1011,25 +1047,39 @@ public class GeomModel : IModel, IMove, /*IKeysNew, ISelectShape*/ {
     private static Color COLOR_SELECTED = Color.yellow;
     private static Color COLOR_SELECTED_ALTERNATE = Color.red;
 
-    private void drawEdgeColor(Geom.Shape shape, Geom.Face face, double scale)
+    private void drawEdgeColor(Geom.Shape shape, Geom.Cell cell, double scale)
     {
-        for (int i = 0; i < face.ie.Length; i++)
+        Polygon poly = new Polygon();
+        for (int i = 0; i < cell.ifa.Length; i++)
         {
-            Geom.Edge edge = shape.edge[face.ie[i]];
-            Vec.mid(reg1, face.center, shape.vertex[edge.iv1], scale);
-            Vec.mid(reg2, face.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, Geom.getColor(edge.color, face.color), origin);
+            Geom.Face face = shape.face[cell.ifa[i]];
+            poly.vertex = new double[face.iv.Length][];
+            for (int j = 0; j < face.iv.Length; j++)
+            {
+                poly.vertex[i] = new double[getDimension()];
+                Vec.mid(poly.vertex[i], cell.center, shape.vertex[face.iv[j]], scale);
+            }
+            poly.color = Geom.getColor(/*edge.color, */cell.color);
+            poly.color.a = (float)transparency;
+            currentDraw.drawPolygon(poly, origin);
         }
     }
 
-    private void drawTexture(Geom.Shape shape, Geom.Face face, Color color, double scale)
+    private void drawTexture(Geom.Shape shape, Geom.Cell cell, Color color, double scale)
     {
-        for (int i = 0; i < face.ie.Length; i++)
+        Polygon poly = new Polygon();
+        for (int i = 0; i < cell.ifa.Length; i++)
         {
-            Geom.Edge edge = shape.edge[face.ie[i]];
-            Vec.mid(reg1, face.center, shape.vertex[edge.iv1], scale);
-            Vec.mid(reg2, face.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, color, origin);
+            Geom.Face face = shape.face[cell.ifa[i]];
+            poly.vertex = new double[face.iv.Length][];
+            for (int j = 0; j < face.iv.Length; j++)
+            {
+                poly.vertex[i] = new double[getDimension()];
+                Vec.mid(poly.vertex[i], cell.center, shape.vertex[face.iv[j]], scale);
+            }
+            poly.color = color;
+            poly.color.a = (float)transparency;
+            currentDraw.drawPolygon(poly, origin);
         }
     }
 

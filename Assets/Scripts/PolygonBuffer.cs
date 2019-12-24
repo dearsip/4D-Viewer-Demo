@@ -62,6 +62,15 @@ public class PolygonBuffer : IDraw
         for (int i = 0; i < polygon.vertex.Length; i++) Vec.sub(polygon.vertex[i], polygon.vertex[i], origin);
     }
 
+    public void drawLine(double[] p1, double[] p2, Color color, double[] origin)
+    {
+        Polygon poly = getNext();
+        poly.vertex[0] = p1;
+        poly.vertex[1] = p2;
+        poly.color = color;
+        for (int i = 0; i < poly.vertex.Length; i++) Vec.sub(poly.vertex[i], poly.vertex[i], origin);
+    }
+
     public int getSize() { return size; }
 
     public Polygon get(int i)

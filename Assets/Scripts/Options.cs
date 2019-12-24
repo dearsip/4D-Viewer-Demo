@@ -25,7 +25,7 @@ public class Options : ScriptableObject //implements IValidate
 
     // --- construction ---
 
-    public Options()
+    void OnEnable()
     {
 
         //om3 = new OptionsMap(3);

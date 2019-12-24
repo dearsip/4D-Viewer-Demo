@@ -40,6 +40,20 @@ namespace Valve.VR.InteractionSystem
         {
         }
 
+        protected override float CalculateLinearMapping(Transform updateTransform)
+        {
+            Vector3 direction = endPosition.position - startPosition.position;
+            float length = direction.magnitude;
+            direction.Normalize();
+
+            RaycastHit hit;
+            Physics.Raycast(updateTransform.position, updateTransform.forward, out hit, 100f);
+            Vector3 position = (hit.collider) ? hit.point : updateTransform.position;
+            Vector3 displacement = position - startPosition.position;
+
+            return Vector3.Dot(displacement, direction) / length;
+        }
+
         protected override void UpdateLinearMapping(Transform updateTransform)
         {
             prevMapping = linearMapping.value;
