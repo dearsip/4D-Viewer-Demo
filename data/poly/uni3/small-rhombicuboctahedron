@@ -1,0 +1,6 @@
+"uni3/small-rhombicuboctahedron" include
+
+[0.5 2.5 -4.5] [X+ Y+ Z+] viewinfo
+
+small-rhombicuboctahedron [0 2 0] translate
+

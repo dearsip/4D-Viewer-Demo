@@ -749,7 +749,7 @@ public class Engine : IMove
     //    displayInterface.nextFrame();
     //}
 
-    private double width = 0.05;
+    private double width = 0.005;
     private void convert(double[] eyeVector)
     {
         int count = 0;

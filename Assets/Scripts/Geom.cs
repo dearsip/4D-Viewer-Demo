@@ -340,7 +340,7 @@ public class Geom
         public HintInterface hint;
         public Cell bottomFace; // for railcars only
 
-        private Shape() { }
+        public Shape() { }
 
         // 各要素を指定してShapeを生成する。
         public Shape(double[][] vertex, int[][] eiv, int[][] fiv, int[][] cie, int[][] cif, double[][] cn, Color[] color)
@@ -402,7 +402,7 @@ public class Geom
             Shape s = new Shape();
 
             s.cell = clone2(cell);
-            s.face = clone2(face);
+            if (face != null) s.face = clone2(face);
             s.subface = subface; // share
             s.edge = clone2(edge);
             s.vertex = clone2(vertex);
@@ -794,7 +794,8 @@ public class Geom
             {
                 for (int i2 = i1 + 1; i2 < cell.Length; i2++)
                 {
-                    if (getEdgesInCommon(cell[i1].ie, cell[i2].ie, edgeList).Count >= nGoal)
+                    int ne;
+                    if ((ne = getEdgesInCommon(cell[i1].ie, cell[i2].ie, edgeList).Count) >= nGoal)
                     {
                         Subface sf = new Subface();
                         sf.ic1 = i1;
@@ -802,6 +803,7 @@ public class Geom
                         list.Add(sf);
 
                         Face f = new Face();
+                        f.iv = new int[ne];
                         f.iv[0] = edgeList[0].iv1;
                         f.iv[1] = edgeList[0].iv2;
                         int n = 0;

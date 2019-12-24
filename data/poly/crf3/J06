@@ -1,0 +1,6 @@
+"crf3/J06" include
+
+[0.5 3.5 -6.5] [X+ Y+ Z+] viewinfo
+
+J06 [0 3 0] translate
+

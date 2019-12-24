@@ -1,0 +1,6 @@
+"reg3/icosahedron" include
+
+[0.5 2.5 -3.5] [X+ Y+ Z+] viewinfo
+
+icosahedron [0 2 0] translate
+

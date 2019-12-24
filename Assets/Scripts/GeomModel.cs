@@ -32,6 +32,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private Geom.Separator[][] separators;
     private bool useEdgeColor;
     protected Geom.Shape selectedShape;
+    protected int hitShape, drawing;
     private int[] axisDirection; // direction of each axis, chosen when shape selected
     private bool useSeparation;
     private bool invertNormals;
@@ -44,6 +45,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private Stopwatch sw = new Stopwatch();
 
     protected double[] origin;
+    protected double[][] axis;
     protected double[] reg1;
     protected double[] reg2;
     protected Clip.Result clipResult;
@@ -94,6 +96,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         //file = new File("../separateLog.txt");
 
         origin = new double[dim];
+        axis = new double[dim][];
+        for (int i = 0; i < dim; i++) axis[i] = new double[dim];
         reg1 = new double[dim];
         reg2 = new double[dim];
         clipResult = new Clip.Result();
@@ -310,8 +314,18 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         {
             mobilize(shape);
             Align.computeDirs(axisDirection, axisArray);
+            setAxis();
             selectedShape = shape;
             return this;
+        }
+    }
+
+    protected void setAxis()
+    {
+        for (int i = 0; i < dim; i++)
+        {
+            Vec.unitVector(axis[i], Dir.getAxis(axisDirection[i]));
+            Vec.scale(axis[i], axis[i], Dir.getSign(axisDirection[i]));
         }
     }
 
@@ -693,13 +707,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     public void move(/*int a, double d*/double[] d)
     {
-        //Vec.zero(reg1);
-        //Dir.apply(axisDirection[a], reg1, d);
-        //selectedShape.translateFrame(reg1);
-        selectedShape.translateFrame(d);
+        Vec.fromAxisCoordinates(reg1, d, axis);
+        selectedShape.translateFrame(reg1);
     }
-
-    readonly double[] reg = new double[] { 1, 1, 1, -1 };
+    
     public void rotateAngle(/*int a1, int a2, double theta*/double[] from, double[] to)
     {
         // third-person view is just too weird.  the natural mapping is reversed.
@@ -709,13 +720,11 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         //if (a1 >= 2 || a2 >= 2) theta = -theta;
         //selectedShape.rotateFrame(axisDirection[a1], axisDirection[a2], theta, null);
 
-        Vec.fromAxisCoordinates(reg1, from, selectedShape.axis);
-        Vec.fromAxisCoordinates(reg2, to, selectedShape.axis);
+        Vec.fromAxisCoordinates(reg1, from, axis);
+        Vec.fromAxisCoordinates(reg2, to, axis);
         Vec.normalize(reg1, reg1);
         Vec.normalize(reg2, reg2);
-        Vec.scaleMultiCo(reg1, reg1, reg);
-        Vec.scaleMultiCo(reg2, reg2, reg);
-        selectedShape.rotateFrame(reg1, reg2, null, from, to);
+        selectedShape.rotateFrame(reg2, reg1, null, from, to);
     }
 
     public Align align()
@@ -762,8 +771,13 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         for (int i = 0; i < shapes.Length; i++)
         {
             if (shapes[i] == null || shapes[i] == shape || shapes[i].systemMove) continue;
-            if (!Clip.isSeparated(shape, shapes[i], gjk)) return false;
+            if (!Clip.isSeparated(shape, shapes[i], gjk))
+            {
+                hitShape = i;
+                return false;
+            }
         }
+        hitShape = -1;
         // note, we don't handle the case where we're already collided.
         // that's part of why there's a command to turn off separation.
 
@@ -963,6 +977,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
         for (int i = 0; i < shapes.Length; i++)
         {
+            drawing = i;
             if (shapes[i] == null) continue;
             currentDraw = buf;
             for (int h = 0; h < shapes.Length; h++)
@@ -1016,7 +1031,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         if (texture[0])
         {
             if (useEdgeColor) drawEdgeColor(shape, cell, 0.999999);
-            else drawTexture(shape, cell, Color.white, 0.999999);
+            else drawTexture(shape, cell, getColor(Color.white), 0.999999);
         }
 
         bool selected = (shape == selectedShape) && !hideSel;
@@ -1031,7 +1046,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             for (int i = 1; i < 10; i++)
             {
                 if (i == 5 && selected) continue;
-                if (texture[i]) drawTexture(shape, cell, cellColor, 0.1 * i);
+                if (texture[i]) drawTexture(shape, cell, getColor(cellColor), 0.1 * i);
             }
         }
 
@@ -1042,6 +1057,11 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             // slightly different behavior than in RenderAbsolute:
             // change to alternate color even if texture 5 not on.
         }
+    }
+
+    private Color getColor(Color color)
+    {
+        return hitShape == drawing ? color.Equals(COLOR_SELECTED) ? COLOR_SELECTED_ALTERNATE : COLOR_SELECTED : color;
     }
 
     private static Color COLOR_SELECTED = Color.yellow;
@@ -1056,11 +1076,22 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             poly.vertex = new double[face.iv.Length][];
             for (int j = 0; j < face.iv.Length; j++)
             {
-                poly.vertex[i] = new double[getDimension()];
-                Vec.mid(poly.vertex[i], cell.center, shape.vertex[face.iv[j]], scale);
+                poly.vertex[j] = new double[getDimension()];
+                Vec.mid(poly.vertex[j], cell.center, shape.vertex[face.iv[j]], scale);
             }
-            poly.color = Geom.getColor(/*edge.color, */cell.color);
+            poly.color = getColor(Geom.getColor(/*edge.color, */cell.color));
             poly.color.a = (float)transparency;
+            currentDraw.drawPolygon(poly, origin);
+        }
+        for (int i = 0; i < cell.ie.Length; i++)
+        {
+            Geom.Edge edge = shape.edge[cell.ie[i]];
+            poly.vertex = new double[2][];
+            poly.vertex[0] = new double[getDimension()];
+            Vec.mid(poly.vertex[0], cell.center, shape.vertex[edge.iv1], scale);
+            poly.vertex[1] = new double[getDimension()];
+            Vec.mid(poly.vertex[1], cell.center, shape.vertex[edge.iv2], scale);
+            poly.color = Geom.getColor(/*edge.color, */cell.color);
             currentDraw.drawPolygon(poly, origin);
         }
     }
@@ -1074,11 +1105,22 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             poly.vertex = new double[face.iv.Length][];
             for (int j = 0; j < face.iv.Length; j++)
             {
-                poly.vertex[i] = new double[getDimension()];
-                Vec.mid(poly.vertex[i], cell.center, shape.vertex[face.iv[j]], scale);
+                poly.vertex[j] = new double[getDimension()];
+                Vec.mid(poly.vertex[j], cell.center, shape.vertex[face.iv[j]], scale);
             }
             poly.color = color;
             poly.color.a = (float)transparency;
+            currentDraw.drawPolygon(poly, origin);
+        }
+        for (int i = 0; i < cell.ie.Length; i++)
+        {
+            Geom.Edge edge = shape.edge[cell.ie[i]];
+            poly.vertex = new double[2][];
+            poly.vertex[0] = new double[getDimension()];
+            Vec.mid(poly.vertex[0], cell.center, shape.vertex[edge.iv1], scale);
+            poly.vertex[1] = new double[getDimension()];
+            Vec.mid(poly.vertex[1], cell.center, shape.vertex[edge.iv2], scale);
+            poly.color = color;
             currentDraw.drawPolygon(poly, origin);
         }
     }

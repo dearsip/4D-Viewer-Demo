@@ -172,6 +172,7 @@ public class Clip
         bool _np;
         for (int i = 1; i < size; i++)
         {
+            if (polygon.vertex[i] == null) Debug.Log(i + " in " + size);
             _np = Vec.dot(polygon.vertex[i], n) - t > epsilon;
             if (np ^ _np) // 変化あり
             {
@@ -388,7 +389,7 @@ public class Clip
 
         public void drawLine(double[] p1, double[] p2, Color color, double[] origin)
         {
-            if (clip(p1, p2, bl, clipResult) == Clip.KEEP_LINE)
+            if (clip(p1, p2, bl, clipResult) == KEEP_LINE)
             {
                 next.drawLine(p1, p2, color, origin);
             }

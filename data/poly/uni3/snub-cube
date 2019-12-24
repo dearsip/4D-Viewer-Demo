@@ -1,0 +1,6 @@
+"uni3/snub-cube" include
+
+[0.5 2.5 -3.5] [X+ Y+ Z+] viewinfo
+
+snub-cube [0 2 0] translate
+

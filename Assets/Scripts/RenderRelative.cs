@@ -81,9 +81,19 @@ public class RenderRelative
             reg.vertex[i] = new double[4];
             Vec.toAxisCoordinates(reg.vertex[i], src.vertex[i], axis);
         }
-        for (int i = 0; i < clip.Length; i++)
+        if (reg.vertex.Length == 2)
         {
-            if (Clip.clip(reg, clip[i])) return false;
+            for (int i = 0; i < clip.Length; i++)
+            {
+                if (Vec.clip(reg.vertex[0], reg.vertex[1], clip[i].n)) return false;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < clip.Length; i++)
+            {
+                if (Clip.clip(reg, clip[i])) return false;
+            }
         }
 
         dest.vertex = new double[reg.vertex.Length][];

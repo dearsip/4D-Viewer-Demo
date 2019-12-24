@@ -1,0 +1,6 @@
+"uni3/truncated-cube" include
+
+[0.5 2.5 -4.5] [X+ Y+ Z+] viewinfo
+
+truncated-cube [0 2 0] translate
+

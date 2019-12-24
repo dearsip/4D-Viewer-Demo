@@ -25,6 +25,7 @@ public class Core : MonoBehaviour
 
     private Mesh mesh;
 
+    private bool engineAlignMode;
     private bool active, excluded;
     private int[] param;
     private int nMove;
@@ -152,7 +153,6 @@ public class Core : MonoBehaviour
 
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
-        Debug.Log(Directory.GetCurrentDirectory());
     }
 
     private void addEvevts()
@@ -172,6 +172,14 @@ public class Core : MonoBehaviour
         menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
             openMenu();
+        }, right);
+        trigger.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            if (engine.getSaveType() == IModel.SAVE_GEOM
+             || engine.getSaveType() == IModel.SAVE_NONE)
+            {
+                command = click;
+            }
         }, right);
     }
 
@@ -318,7 +326,7 @@ public class Core : MonoBehaviour
                 else
                 {
                     Vec.scale(reg3, reg3, dMove);
-                    engine.move(reg3);
+                    target.move(reg3);
                 }
             }
             if (rightMove)
@@ -344,7 +352,6 @@ public class Core : MonoBehaviour
                         for (int i = 0; i < 3; i++)
                         {
                             float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
-                            Debug.Log(i + ": " + f);
                             if (Mathf.Abs(f) > 0.8)
                             {
                                 nActive = nRotate;
@@ -463,6 +470,22 @@ public class Core : MonoBehaviour
         }
     }
 
+    public void click()
+    {
+        target = ((GeomModel)engine.retrieveModel()).click(engine.getOrigin(), engine.getViewAxis(), engine.getAxisArray());
+        if (target != null)
+        {
+            engineAlignMode = alignMode; // save
+            alignMode = target.isAligned(); // reasonable default
+        }
+        else
+        {
+            target = engine;
+            alignMode = engineAlignMode; // restore
+        }
+        command = null;
+    }
+
     public OptionsAll getOptionsAll()
     {
         return oa;
@@ -526,6 +549,8 @@ public class Core : MonoBehaviour
         SteamVR_Actions.controll.Activate(left);
         SteamVR_Actions.controll.Activate(right);
         menuPanel.gameObject.SetActive(false);
+        lastLeftTrigger = true;
+        lastRightTrigger = true;
     }
 
     public void doQuit()
@@ -548,26 +573,26 @@ public class Core : MonoBehaviour
 
         Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
 
-        if (FileBrowser.Success) doLoadGeom(FileBrowser.Result);
+        if (FileBrowser.Success) menuCommand = doLoadGeom;
     }
 
-    private void doLoadGeom(string file)
+    private void doLoadGeom()
     {
         try
         {
-            loadGeom(file);
+            loadGeom(FileBrowser.Result);
         }
         catch (Exception t)
         {
-            String s = "";
+            string s = "";
             if (t is LanguageException)
             {
                 LanguageException e = (LanguageException)t;
                 //t = e.getCause();
                 s = e.getFile() + "\n" + e.getDetail() + "\n";
                 Debug.Log(s);
-                Debug.Log(e);
             }
+                Debug.Log(t);
             //t.printStackTrace();
             //JOptionPane.showMessageDialog(this, s + t.getClass().getName() + "\n" + t.getMessage(), App.getString("Maze.s25"), JOptionPane.ERROR_MESSAGE);
         }
@@ -583,10 +608,10 @@ public class Core : MonoBehaviour
         Language.include(c, file);
 
         // build the model
-
+        Debug.Log("try");
         GeomModel model = buildModel(c);
         // run this before changing anything since it can fail
-
+        Debug.Log("complete");
         // switch to geom
 
         dim = model.getDimension();
@@ -644,7 +669,6 @@ public class Core : MonoBehaviour
         //Struct.BlockInfo blockInfo = null;
 
         // scan for items
-
         foreach (object o in c.stack)
         {
             if (o is IDimension)
@@ -719,7 +743,11 @@ public class Core : MonoBehaviour
         if (da.error) throw new Exception("The number of dimensions is not consistent.");
         int dtemp = da.dim; // we shouldn't change the Core dim variable yet
 
-        Geom.Shape[] shapes = (Geom.Shape[])slist.ToArray();
+        Geom.ShapeInterface[] list = slist.ToArray();
+
+        //Geom.Shape[] shapes = (Geom.Shape[])slist.ToArray();
+        Geom.Shape[] shapes = new Geom.Shape[slist.Count];
+        for (int i = 0; i < slist.Count; i++) shapes[i] = (Geom.Shape)slist[i];
         //Train[] trains = (Train[])tlist.toArray(new Train[tlist.size()]);
         //Enemy[] enemies = (Enemy[])elist.toArray(new Enemy[elist.size()]);
 

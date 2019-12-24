@@ -162,7 +162,8 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            int len = Array.IndexOf(c.stack.ToArray(), arrayMark) - 1;
+            Array arr = c.stack.ToArray();
+            int len = Array.IndexOf(arr, arrayMark);
             if (len < 0) throw new Exception("Array start not found.");
             Type cl = c.stack.Peek().GetType();
             object array;
@@ -357,12 +358,8 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       []
-       a = (double[]
-       [])c.stack.Pop();
-            double[]
-       d = (double[])c.stack.Pop();
+            double[][] a = (double[][])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.Shape shape = (Geom.Shape)c.stack.Peek();
             shape.place(d, a);
         }
@@ -372,8 +369,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.MoveInterface shape = (Geom.MoveInterface)c.stack.Peek();
             checkUserMove(shape);
             shape.translate(d);
@@ -384,8 +380,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.MoveInterface shape = (Geom.MoveInterface)c.stack.Peek();
             checkUserMove(shape);
             shape.scale(d);
@@ -396,8 +391,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.Shape shape = (Geom.Shape)c.stack.Peek();
             shape.setAlignCenter(d);
         }
@@ -409,8 +403,7 @@ public class Command
         public Rotate(bool setOrigin) { this.setOrigin = setOrigin; }
         public void exec(Context c) //throws Exception
         {
-            double[]
-       origin = setOrigin ? (double[])c.stack.Pop() : null;
+            double[] origin = setOrigin ? (double[])c.stack.Pop() : null;
             double theta = toDbl(c.stack.Pop());
             int dir2 = toInt(c.stack.Pop());
             int dir1 = toInt(c.stack.Pop());
@@ -465,8 +458,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       value = (double[])c.stack.Pop();
+            double[] value = (double[])c.stack.Pop();
             int mode = toInt(c.stack.Pop());
             Geom.Texture texture = (Geom.Texture)c.stack.Pop();
             int j = toInt(c.stack.Pop());
@@ -479,10 +471,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       []
-       vertex = (double[]
-       [])c.stack.Pop();
+            double[][] vertex = (double[][])c.stack.Pop();
             Geom.Shape shape = GeomUtil.genpoly(vertex);
             c.stack.Push(shape);
         }
@@ -514,8 +503,7 @@ public class Command
             // just peek at everything.
             // we can modify the array in place.
 
-            double[]
-       d = (double[])c.stack.Peek();
+            double[] d = (double[])c.stack.Peek();
             int size = c.stack.Count;
             int n = toInt(c.stack.ToArray()[size - 3]);
             double r = toDbl(c.stack.ToArray()[size - 4]);
@@ -532,8 +520,7 @@ public class Command
         {
             int n = toInt(c.stack.Pop());
             double r = toDbl(c.stack.Pop());
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.Shape shape = GeomUtil.polygon(d[0], d[1], r, n, offset);
             c.stack.Push(shape);
         }
@@ -553,10 +540,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       []
-       d = (double[]
-       [])c.stack.Pop();
+            double[][] d = (double[][])c.stack.Pop();
             c.stack.Push(GeomUtil.rect(d));
         }
     }
@@ -565,8 +549,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             int a = toInt(c.stack.Pop());
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Pop();
             shape = shape.prism(a, d[0], d[1]);
@@ -578,11 +561,9 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             int a = toInt(c.stack.Pop());
-            double[]
-       p = (double[])c.stack.Pop();
+            double[] p = (double[])c.stack.Pop();
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Pop();
             shape = shape.frustum(p, a, d[0], d[1], d[2]);
             c.stack.Push(shape);
@@ -593,11 +574,9 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             int a = toInt(c.stack.Pop());
-            double[]
-       p = (double[])c.stack.Pop();
+            double[] p = (double[])c.stack.Pop();
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Pop();
             shape = shape.cone(p, a, d[0], d[1]);
             c.stack.Push(shape);
@@ -610,13 +589,11 @@ public class Command
         public Antiprism(double offset) { this.offset = offset; }
         public void exec(Context c) //throws Exception
         {
-            double[]
-       m = (double[])c.stack.Pop();
+            double[] m = (double[])c.stack.Pop();
             int a = toInt(c.stack.Pop());
             int n = toInt(c.stack.Pop());
             double r = toDbl(c.stack.Pop());
-            double[]
-       d = (double[])c.stack.Pop();
+            double[] d = (double[])c.stack.Pop();
             Geom.Shape shape = GeomUtil.antiprism(d[0], d[1], r, n, offset, a, m[0], m[1]);
             c.stack.Push(shape);
         }

@@ -65,8 +65,11 @@ public class PolygonBuffer : IDraw
     public void drawLine(double[] p1, double[] p2, Color color, double[] origin)
     {
         Polygon poly = getNext();
-        poly.vertex[0] = p1;
-        poly.vertex[1] = p2;
+        poly.vertex = new double[2][];
+        poly.vertex[0] = new double[p1.Length];
+        poly.vertex[1] = new double[p1.Length];
+        Vec.copy(poly.vertex[0], p1);
+        Vec.copy(poly.vertex[1], p2);
         poly.color = color;
         for (int i = 0; i < poly.vertex.Length; i++) Vec.sub(poly.vertex[i], poly.vertex[i], origin);
     }

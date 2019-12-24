@@ -158,24 +158,24 @@ public class DefaultContext
       //c.dict.Add("PS_THIN",      new Double(Platform.PS_THIN      ));
       //c.dict.Add("PS_THIN_ROUND",new Double(Platform.PS_THIN_ROUND));
 
-      c.dict.Add("PROJ_NONE",   Vec.PROJ_NONE   );
-      c.dict.Add("PROJ_NORMAL", Vec.PROJ_NORMAL );
-      c.dict.Add("PROJ_ORTHO",  Vec.PROJ_ORTHO  );
-      c.dict.Add("PROJ_PERSPEC",Vec.PROJ_PERSPEC);
+      c.dict.Add("PROJ_NONE",   (double)Vec.PROJ_NONE   );
+      c.dict.Add("PROJ_NORMAL", (double)Vec.PROJ_NORMAL );
+      c.dict.Add("PROJ_ORTHO",  (double)Vec.PROJ_ORTHO  );
+      c.dict.Add("PROJ_PERSPEC",(double)Vec.PROJ_PERSPEC);
 
-      c.dict.Add("x",0);
-      c.dict.Add("y",1);
-      c.dict.Add("z",2);
-      c.dict.Add("w",3);
+      c.dict.Add("x",0.0);
+      c.dict.Add("y",1.0);
+      c.dict.Add("z",2.0);
+      c.dict.Add("w",3.0);
 
-      c.dict.Add("x+",0);
-      c.dict.Add("x-",1);
-      c.dict.Add("y+",2);
-      c.dict.Add("y-",3);
-      c.dict.Add("z+",4);
-      c.dict.Add("z-",5);
-      c.dict.Add("w+",6);
-      c.dict.Add("w-",7);
+      c.dict.Add("x+",0.0);
+      c.dict.Add("x-",1.0);
+      c.dict.Add("y+",2.0);
+      c.dict.Add("y-",3.0);
+      c.dict.Add("z+",4.0);
+      c.dict.Add("z-",5.0);
+      c.dict.Add("w+",6.0);
+      c.dict.Add("w-",7.0);
 
       //c.dict.Add("STAND",       new Double(Enemy.STAND      ));
       //c.dict.Add("STAND_SHOOT", new Double(Enemy.STAND_SHOOT));
