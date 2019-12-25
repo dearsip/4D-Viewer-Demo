@@ -609,7 +609,7 @@ public class Engine : IMove
         bufRelative.sort(eyeVector);
     }
 
-    private readonly Color white = new Color(1, 1, 1, 0.05f);
+    private readonly Color white = Color.white;
     private void renderObject(PolygonBuffer buf, double[][] obj)
     {
         renderObject(buf, obj, white);
@@ -617,17 +617,21 @@ public class Engine : IMove
 
     private void renderObject(PolygonBuffer buf, double[][] obj, Color color)
     {
-        for (int i = 0; i < obj.Length; i += 3)
-        {
-            Polygon poly = buf.getNext();
+        //for (int i = 0; i < obj.Length; i += 3)
+        //{
+        //    Polygon poly = buf.getNext();
 
-            poly.vertex = new double[3][];
-            for (int j = 0; j < 3; j++)
-            {
-                poly.vertex[j] = new double[3];
-                Vec.copy(poly.vertex[j], obj[i + j]);
-            }
-            poly.color = color;
+        //    poly.vertex = new double[3][];
+        //    for (int j = 0; j < 3; j++)
+        //    {
+        //        poly.vertex[j] = new double[3];
+        //        Vec.copy(poly.vertex[j], obj[i + j]);
+        //    }
+        //    poly.color = color;
+        //}
+        for (int i = 0; i < obj.Length; i += 2)
+        {
+            buf.add(obj[i], obj[i + 1], color);
         }
     }
 
@@ -648,7 +652,7 @@ public class Engine : IMove
         else
         {
             renderRelative.run(axis);
-            //renderObject(bufRelative, objRetina);
+            renderObject(bufRelative, objRetina);
             renderObject(bufRelative, objCross);
         }
 
@@ -831,25 +835,41 @@ public class Engine : IMove
     //      new double[] {-1, 1}, new double[] {-1,-1}
     //};
 
+    //private static readonly double[][] objRetina3 = new double[][] {
+    //    new double[] {-1,-1,-1}, new double[] { 1,-1,-1}, new double[] {-1, 1,-1},
+    //    new double[] {-1, 1,-1}, new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
+
+    //    new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
+    //    new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+
+    //    new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
+    //    new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
+
+    //    new double[] {-1, 1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1,-1},
+    //    new double[] {-1,-1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
+
+    //    new double[] {-1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1,-1},
+    //    new double[] { 1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
+
+    //    new double[] { 1,-1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1, 1},
+    //    new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] {-1, 1, 1}
+    //};
     private static readonly double[][] objRetina3 = new double[][] {
-        new double[] {-1,-1,-1}, new double[] { 1,-1,-1}, new double[] {-1, 1,-1},
-        new double[] {-1, 1,-1}, new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
+      new double[] {-1,-1,-1}, new double[] { 1,-1,-1},
+         new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
+         new double[] { 1, 1,-1}, new double[] {-1, 1,-1},
+         new double[] {-1, 1,-1}, new double[] {-1,-1,-1},
 
-        new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
-        new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+         new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
+         new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+         new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
+         new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
 
-        new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
-        new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
-
-        new double[] {-1, 1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1,-1},
-        new double[] {-1,-1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
-
-        new double[] {-1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1,-1},
-        new double[] { 1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
-
-        new double[] { 1,-1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1, 1},
-        new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] {-1, 1, 1}
-    };
+         new double[] {-1,-1,-1}, new double[] {-1,-1, 1},
+         new double[] { 1,-1,-1}, new double[] { 1,-1, 1},
+         new double[] { 1, 1,-1}, new double[] { 1, 1, 1},
+         new double[] {-1, 1,-1}, new double[] {-1, 1, 1}
+   };
 
     private const double B = 0.04;
     // private static readonly double[][] objCross2 = new double[][] {
@@ -858,20 +878,25 @@ public class Engine : IMove
     //};
 
     private const double C = 0.1;
+    //private static readonly double[][] objCross3 = new double[][] {
+    //    new double[] {-C, 0, 0 }, new double[] { 0, B, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] {-C, 0, 0 }, new double[] { 0,-B, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { C, 0, 0 }, new double[] { 0, B, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { C, 0, 0 }, new double[] { 0,-B, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { 0,-C, 0 }, new double[] { 0, 0, B }, new double[] { 0, 0, 0 },
+    //    new double[] { 0,-C, 0 }, new double[] { 0, 0,-B }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, C, 0 }, new double[] { 0, 0, B }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, C, 0 }, new double[] { 0, 0,-B }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, 0,-C }, new double[] { B, 0, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, 0,-C }, new double[] {-B, 0, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, 0, C }, new double[] { B, 0, 0 }, new double[] { 0, 0, 0 },
+    //    new double[] { 0, 0, C }, new double[] {-B, 0, 0 }, new double[] { 0, 0, 0 },
+    //};
     private static readonly double[][] objCross3 = new double[][] {
-        new double[] {-C, 0, 0 }, new double[] { 0, B, 0 }, new double[] { 0, 0, 0 },
-        new double[] {-C, 0, 0 }, new double[] { 0,-B, 0 }, new double[] { 0, 0, 0 },
-        new double[] { C, 0, 0 }, new double[] { 0, B, 0 }, new double[] { 0, 0, 0 },
-        new double[] { C, 0, 0 }, new double[] { 0,-B, 0 }, new double[] { 0, 0, 0 },
-        new double[] { 0,-C, 0 }, new double[] { 0, 0, B }, new double[] { 0, 0, 0 },
-        new double[] { 0,-C, 0 }, new double[] { 0, 0,-B }, new double[] { 0, 0, 0 },
-        new double[] { 0, C, 0 }, new double[] { 0, 0, B }, new double[] { 0, 0, 0 },
-        new double[] { 0, C, 0 }, new double[] { 0, 0,-B }, new double[] { 0, 0, 0 },
-        new double[] { 0, 0,-C }, new double[] { B, 0, 0 }, new double[] { 0, 0, 0 },
-        new double[] { 0, 0,-C }, new double[] {-B, 0, 0 }, new double[] { 0, 0, 0 },
-        new double[] { 0, 0, C }, new double[] { B, 0, 0 }, new double[] { 0, 0, 0 },
-        new double[] { 0, 0, C }, new double[] {-B, 0, 0 }, new double[] { 0, 0, 0 },
-    };
+      new double[] {-C, 0, 0}, new double[] { C, 0, 0},
+         new double[] { 0,-C, 0}, new double[] { 0, C, 0},
+         new double[] { 0, 0,-C}, new double[] { 0, 0, C}
+   };
 
     // private static readonly double[][] objWin2 = new double[][] {
     //   new double[] {-0.8, 0.4}, new double[] {-0.8,-0.4},
@@ -888,18 +913,33 @@ public class Engine : IMove
     //      new double[] { 0.8,-0.4}, new double[] { 0.8, 0.4}
     //};
 
+    // private static readonly double[][] objWin3 = new double[][] {
+    //     new double[] {-0.8, 0.4,-1}, new double[] {-0.7,-0.4,-1}, new double[] {-0.9, 0.4,-1},
+    //     new double[] {-0.7,-0.4,-1}, new double[] {-0.6, 0.1,-1}, new double[] {-0.6, 0.2,-1},
+    //     new double[] {-0.6, 0.1,-1}, new double[] {-0.5,-0.4,-1}, new double[] {-0.6, 0.2,-1},
+    //     new double[] {-0.5,-0.4,-1}, new double[] {-0.4, 0.4,-1}, new double[] {-0.3, 0.4,-1},
+
+    //     new double[] {-0.05, 0.4,-1}, new double[] { 0.05, 0.4,-1}, new double[] { 0,   0,  -1},
+    //     new double[] {-0.05,-0.4,-1}, new double[] { 0.05,-0.4,-1}, new double[] { 0,   0,  -1},
+
+    //     new double[] { 0.4,-0.4,-1}, new double[] { 0.4, 0.4,-1}, new double[] { 0.5,-0.4,-1},
+    //     new double[] { 0.4, 0.4,-1}, new double[] { 0.8,-0.4,-1}, new double[] { 0.8,-0.3,-0.999},
+    //     new double[] { 0.8,-0.4,-1}, new double[] { 0.8, 0.4,-1}, new double[] { 0.7, 0.4,-1}
+    //};
+
     private static readonly double[][] objWin3 = new double[][] {
-        new double[] {-0.8, 0.4,-1}, new double[] {-0.7,-0.4,-1}, new double[] {-0.9, 0.4,-1},
-        new double[] {-0.7,-0.4,-1}, new double[] {-0.6, 0.1,-1}, new double[] {-0.6, 0.2,-1},
-        new double[] {-0.6, 0.1,-1}, new double[] {-0.5,-0.4,-1}, new double[] {-0.6, 0.2,-1},
-        new double[] {-0.5,-0.4,-1}, new double[] {-0.4, 0.4,-1}, new double[] {-0.3, 0.4,-1},
+      new double[] {-0.8, 0.4,1}, new double[] {-0.8,-0.4,1},
+         new double[] {-0.8,-0.4,1}, new double[] {-0.6, 0,  1},
+         new double[] {-0.6, 0,  1}, new double[] {-0.4,-0.4,1},
+         new double[] {-0.4,-0.4,1}, new double[] {-0.4, 0.4,1},
 
-        new double[] {-0.05, 0.4,-1}, new double[] { 0.05, 0.4,-1}, new double[] { 0,   0,  -1},
-        new double[] {-0.05,-0.4,-1}, new double[] { 0.05,-0.4,-1}, new double[] { 0,   0,  -1},
+         new double[] {-0.1, 0.4,1}, new double[] { 0.1, 0.4,1},
+         new double[] { 0,   0.4,1}, new double[] { 0,  -0.4,1},
+         new double[] {-0.1,-0.4,1}, new double[] { 0.1,-0.4,1},
 
-        new double[] { 0.4,-0.4,-1}, new double[] { 0.4, 0.4,-1}, new double[] { 0.5,-0.4,-1},
-        new double[] { 0.4, 0.4,-1}, new double[] { 0.8,-0.4,-1}, new double[] { 0.8,-0.3,-0.999},
-        new double[] { 0.8,-0.4,-1}, new double[] { 0.8, 0.4,-1}, new double[] { 0.7, 0.4,-1}
+         new double[] { 0.4,-0.4,1}, new double[] { 0.4, 0.4,1},
+         new double[] { 0.4, 0.4,1}, new double[] { 0.8,-0.4,1},
+         new double[] { 0.8,-0.4,1}, new double[] { 0.8, 0.4,1}
    };
 
     // private static readonly double[][] objDead2 = new double[][] {

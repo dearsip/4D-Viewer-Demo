@@ -710,7 +710,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         Vec.fromAxisCoordinates(reg1, d, axis);
         selectedShape.translateFrame(reg1);
     }
-    
+
     public void rotateAngle(/*int a1, int a2, double theta*/double[] from, double[] to)
     {
         // third-person view is just too weird.  the natural mapping is reversed.
@@ -1086,13 +1086,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
-            poly.vertex = new double[2][];
-            poly.vertex[0] = new double[getDimension()];
-            Vec.mid(poly.vertex[0], cell.center, shape.vertex[edge.iv1], scale);
-            poly.vertex[1] = new double[getDimension()];
-            Vec.mid(poly.vertex[1], cell.center, shape.vertex[edge.iv2], scale);
-            poly.color = Geom.getColor(/*edge.color, */cell.color);
-            currentDraw.drawPolygon(poly, origin);
+            Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
+            Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
+            currentDraw.drawLine(reg1, reg2, Geom.getColor(/*edge.color, */cell.color), origin);
         }
     }
 
@@ -1115,13 +1111,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
-            poly.vertex = new double[2][];
-            poly.vertex[0] = new double[getDimension()];
-            Vec.mid(poly.vertex[0], cell.center, shape.vertex[edge.iv1], scale);
-            poly.vertex[1] = new double[getDimension()];
-            Vec.mid(poly.vertex[1], cell.center, shape.vertex[edge.iv2], scale);
-            poly.color = color;
-            currentDraw.drawPolygon(poly, origin);
+            Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
+            Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
+            currentDraw.drawLine(reg1, reg2, color, origin);
         }
     }
 

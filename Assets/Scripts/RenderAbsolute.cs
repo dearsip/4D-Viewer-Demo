@@ -156,10 +156,33 @@ public class RenderAbsolute
         }
     }
 
+    private void addLine(double[] p1, double[] p2, Color color)
+    {
+        Polygon poly = buf.getNext();
+
+        poly.vertex = new double[2][];
+        poly.vertex[0] = new double[dim];
+        poly.vertex[1] = new double[dim];
+        Vec.sub(poly.vertex[0], p1, origin);
+        Vec.sub(poly.vertex[1], p2, origin);
+        poly.color = color;
+
+        for (int i = 0; i < OptionsView.DEPTH_MAX; i++)
+        {
+            if (useClip[i] && Vec.clip(poly.vertex[0], poly.vertex[1], boundary[i].n))
+            { // fully clipped?
+                buf.unget();
+                return;
+            }
+        }
+    }
+
     // --- faces ---
 
     private void addSquare(double[] p1, double[] p2, int a1, int a2, Color color, double edge)
     {
+        // face
+
         reg5 = new double[4][];
         for (int i = 0; i < reg5.Length; i++) reg5[i] = new double[dim];
         Vec.copy(reg5[0], p1);
@@ -174,10 +197,30 @@ public class RenderAbsolute
         Vec.copy(reg5[3], p1);
         p1[a2] -= edge;
         addPolygon(reg5, color);
+
+        // edge
+
+        p2[a1] += edge;
+        addLine(p1, p2, color);
+        p1[a1] += edge;
+
+        p2[a2] += edge;
+        addLine(p1, p2, color);
+        p1[a2] += edge;
+
+        p2[a1] -= edge;
+        addLine(p1, p2, color);
+        p1[a1] -= edge;
+
+        p2[a2] -= edge;
+        addLine(p1, p2, color);
+        p1[a2] -= edge;
     }
 
     private void addLines(double[] p1, double[] p2, int a1, int a2, Color color, double edge)
     {
+        // face
+
         reg5 = new double[4][];
         for (int i = 0; i < reg5.Length; i++) reg5[i] = new double[dim];
         Vec.copy(reg5[0], p1);
@@ -217,6 +260,24 @@ public class RenderAbsolute
         Vec.copy(reg5[2], p2);
         Vec.copy(reg5[3], p1);
         addPolygon(reg5, color);
+
+        // edge
+
+        p2[a1] += edge;
+        p1[a1] += edge;
+        addLine(p1, p2, color);
+
+        p2[a2] += edge;
+        p1[a2] += edge;
+        addLine(p1, p2, color);
+
+        p2[a1] -= edge;
+        p1[a1] -= edge;
+        addLine(p1, p2, color);
+
+        p2[a2] -= edge;
+        p1[a2] -= edge;
+        addLine(p1, p2, color);
     }
 
     private void addVector(int[] p, int dir1, int dir2, Color color)

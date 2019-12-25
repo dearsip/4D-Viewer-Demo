@@ -90,7 +90,7 @@ public class Geom
 
     public static Color getColor(Color c1)
     {
-        if (c1 != null) return c1;
+        if (c1.a != 0) return c1;
         return Color.green; // the default color
     }
 

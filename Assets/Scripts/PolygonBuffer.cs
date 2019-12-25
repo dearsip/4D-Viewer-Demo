@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System;
 /**
  * A line buffer that reuses line objects to avoid memory allocation.
  */
@@ -53,6 +53,18 @@ public class PolygonBuffer : IDraw
     {
         Polygon polygon = getNext();
         polygon.copy(poly);
+    }
+
+    public void add(double[] p1, double[] p2, Color color)
+    {
+        Polygon polygon = getNext();
+
+        polygon.vertex = new double[2][];
+        polygon.vertex[0] = new double[dim];
+        polygon.vertex[1] = new double[dim];
+        Array.Copy(p1, 0, polygon.vertex[0], 0, dim);
+        Array.Copy(p2, 0, polygon.vertex[1], 0, dim);
+        polygon.color = color;
     }
 
     public void drawPolygon(Polygon face, double[] origin)
