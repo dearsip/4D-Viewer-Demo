@@ -18,6 +18,7 @@ public class RenderAbsolute
     private int dim;
     private Map map;
     private IColorize colorizer;
+    public bool useEdgeColor;
 
     private int depthMax;
     private bool[] texture;
@@ -300,6 +301,8 @@ public class RenderAbsolute
             a5 = i;
         }
 
+        // face
+
         Vec.copy(reg2, reg1);
 
         if (dir1 != dir2)
@@ -360,6 +363,37 @@ public class RenderAbsolute
                 reg2[a5] -= 0.25 * (i / 4 % 2 * 2 - 1);
             }
         }
+
+        // edge
+
+        Vec.copy(reg2, reg1);
+
+        if (dir1 != dir2) Dir.apply(dir2, reg2, -0.5);
+        reg2[a3] += 0.25;
+        addLine(reg1, reg2, color);
+
+        reg2[a3] -= 0.5;
+        addLine(reg1, reg2, color);
+        if (a4 >= 0)
+        {
+
+            reg2[a3] += 0.25;
+            reg2[a4] += 0.25;
+            addLine(reg1, reg2, color);
+
+            reg2[a4] -= 0.5;
+            addLine(reg1, reg2, color);
+        }
+        if (a5 >= 0)
+        {
+
+            reg2[a4] += 0.25;
+            reg2[a5] += 0.25;
+            addLine(reg1, reg2, color);
+
+            reg2[a5] -= 0.5;
+            addLine(reg1, reg2, color);
+        }
     }
 
     private void addTexture(int[] p, int dir, Color color, double edge)
@@ -419,10 +453,10 @@ public class RenderAbsolute
 
     private void addFace(int[] p, int dir)
     {
-        if (texture[0]) addTexture(p, dir, Color.white, 0.999999);
-
         Color color = colorizer.getColor(p, dir);
         Color color5 = Color.clear;
+
+        if (texture[0]) addTexture(p, dir, useEdgeColor ? color : Color.white, 0.999999);
 
         if (Grid.equals(p, map.getStart()))
         {

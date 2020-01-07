@@ -223,6 +223,11 @@ public class Menu : MonoBehaviour
         core.command = core.align;
     }
 
+    public void doNewGame()
+    {
+        core.menuCommand = core.newGame;
+    }
+
     private void put(InputField inputField, Slider slider, double value)
     {
         slider.value = (float)value;

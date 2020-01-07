@@ -928,18 +928,18 @@ public class Engine : IMove
     //};
 
     private static readonly double[][] objWin3 = new double[][] {
-      new double[] {-0.8, 0.4,1}, new double[] {-0.8,-0.4,1},
-         new double[] {-0.8,-0.4,1}, new double[] {-0.6, 0,  1},
-         new double[] {-0.6, 0,  1}, new double[] {-0.4,-0.4,1},
-         new double[] {-0.4,-0.4,1}, new double[] {-0.4, 0.4,1},
-
-         new double[] {-0.1, 0.4,1}, new double[] { 0.1, 0.4,1},
-         new double[] { 0,   0.4,1}, new double[] { 0,  -0.4,1},
-         new double[] {-0.1,-0.4,1}, new double[] { 0.1,-0.4,1},
-
+         new double[] { 0.8, 0.4,1}, new double[] { 0.8,-0.4,1},
+         new double[] { 0.8,-0.4,1}, new double[] { 0.6, 0,  1},
+         new double[] { 0.6, 0,  1}, new double[] { 0.4,-0.4,1},
          new double[] { 0.4,-0.4,1}, new double[] { 0.4, 0.4,1},
-         new double[] { 0.4, 0.4,1}, new double[] { 0.8,-0.4,1},
-         new double[] { 0.8,-0.4,1}, new double[] { 0.8, 0.4,1}
+
+         new double[] { 0.1, 0.4,1}, new double[] {-0.1, 0.4,1},
+         new double[] { 0,   0.4,1}, new double[] { 0,  -0.4,1},
+         new double[] { 0.1,-0.4,1}, new double[] {-0.1,-0.4,1},
+
+         new double[] {-0.4,-0.4,1}, new double[] {-0.4, 0.4,1},
+         new double[] {-0.4, 0.4,1}, new double[] {-0.8,-0.4,1},
+         new double[] {-0.8,-0.4,1}, new double[] {-0.8, 0.4,1}
    };
 
     // private static readonly double[][] objDead2 = new double[][] {

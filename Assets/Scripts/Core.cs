@@ -190,6 +190,11 @@ public class Core : MonoBehaviour
         menuPanel.Activate(oa);
     }
 
+    public void newGame()
+    {
+        newGame(0);
+    }
+
     private void newGame(int dim)
     {
         if (dim != 0) this.dim = dim; // allow zero to mean "keep the same"
@@ -208,14 +213,14 @@ public class Core : MonoBehaviour
         setOptions();
 
         target = engine;
-        saveOrigin = new double[dim];
-        saveAxis = new double[dim][];
-        for (int i = 0; i < dim; i++) saveAxis[i] = new double[dim];
+        saveOrigin = new double[this.dim];
+        saveAxis = new double[this.dim][];
+        for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
     }
 
     IEnumerator tick()
     {
-        int base_ = System.Environment.TickCount;
+        int base_ = Environment.TickCount;
         while (true)
         {
             calcInput();
@@ -225,7 +230,7 @@ public class Core : MonoBehaviour
             engine.renderAbsolute(eyeVector);
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
-            int now = System.Environment.TickCount;
+            int now = Environment.TickCount;
             int next = base_ + interval; // unsynchronized use of interval is OK
 
             if (now < next)

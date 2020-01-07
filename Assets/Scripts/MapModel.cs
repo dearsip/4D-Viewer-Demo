@@ -84,6 +84,7 @@ public class MapModel : IModel
         renderAbsolute.setDepth(depth);
         renderAbsolute.setTexture(texture);
         renderAbsolute.setTransparency(od.transparency);
+        renderAbsolute.useEdgeColor = od.useEdgeColor;
     }
 
     public override bool isAnimated()
