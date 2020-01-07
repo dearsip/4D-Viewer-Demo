@@ -86,6 +86,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         for (int i = 0; i < shapes.Length; i++) separators[i] = new Geom.Separator[shapes.Length];
         useEdgeColor = (drawInfo != null) ? drawInfo.useEdgeColor : true;
         selectedShape = null;
+        hitShape = -1;
         axisDirection = new int[dim];
         useSeparation = true;
         invertNormals = false;

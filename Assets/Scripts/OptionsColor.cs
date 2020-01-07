@@ -51,28 +51,29 @@ public class OptionsColor //implements IValidate
 
     // the following table must be kept in sync with the numbers
 
-    public static readonly Color ORANGE = new Color(255, 165, 0);
-    public static readonly Color PINK = new Color(255, 192, 203);
-    public static readonly Color DARKGRAY = new Color(169, 169, 169);
-    public static readonly Color RIGHTGRAY = new Color(211, 211, 211);
+    public static readonly Color ORANGE = new Color(1, 0.645f, 0);
+    public static readonly Color PINK = new Color(1, 0.75f, 0.793f);
+    public static readonly Color DARKGRAY = new Color(0.25f, 0.25f, 0.25f);
+    public static readonly Color RIGHTGRAY = new Color(0.75f, 0.75f, 0.75f);
+    private static readonly Color fixer = new Color(5.3f, 5f, 4f);
 
     private static readonly Color[] table = {
 
-      Color.red,
-      Color.green,
-      Color.blue,
+      Color.red * fixer,
+      Color.green * fixer,
+      Color.blue * fixer,
 
-      Color.cyan,
-      Color.magenta,
-      Color.yellow,
+      Color.cyan * fixer,
+      Color.magenta * fixer,
+      Color.yellow * fixer,
 
-      ORANGE,
-      PINK,
+      ORANGE * fixer,
+      PINK * fixer,
 
-      DARKGRAY,
-      Color.gray,
-      RIGHTGRAY,
-      Color.white
+      DARKGRAY * fixer,
+      Color.gray * fixer,
+      RIGHTGRAY * fixer,
+      Color.white * fixer
 };
 
 // --- construction ---

@@ -609,7 +609,7 @@ public class Engine : IMove
         bufRelative.sort(eyeVector);
     }
 
-    private readonly Color white = Color.white;
+    private readonly Color white = new Color(0, 0, 0);
     private void renderObject(PolygonBuffer buf, double[][] obj)
     {
         renderObject(buf, obj, white);
