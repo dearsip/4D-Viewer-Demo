@@ -165,11 +165,11 @@ public class Core : MonoBehaviour
         {
             fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
         }, right);
-        menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
             openMenu();
         }, left);
-        menu.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
             openMenu();
         }, right);
@@ -1049,7 +1049,7 @@ public class Core : MonoBehaviour
 
         opt.ot4.frameRate = 20;
         opt.ot4.timeMove = 1;
-        opt.ot4.timeRotate = 1;
+        opt.ot4.timeRotate = 0.8;
         opt.ot4.timeAlignMove = 2;
         opt.ot4.timeAlignRotate = 2;
 

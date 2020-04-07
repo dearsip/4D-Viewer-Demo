@@ -9,12 +9,15 @@ using UnityEngine.UI;
 public class Menu : MonoBehaviour
 {
     public Core core;
-    public SteamVR_Action_Boolean interactUI;
+    public SteamVR_Action_Boolean interactUI, menu;
     public SteamVR_Input_Sources left, right;
     public Hand leftHand, rightHand;
     public GameObject leftLaser, rightLaser;
     private Options optDefault;
     private OptionsAll oaResult;
+
+    public Transform parent;
+    public Transform head;
 
     public Slider dimSlider, sizeSlider, densitySlider, twistProbabilitySlider, branchProbabilitySlider, loopCrossProbabilitySlider,
         dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider,
@@ -54,6 +57,20 @@ public class Menu : MonoBehaviour
                 rightHand.useRaycastHover = true;
             }
         }, right);
+        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            if (gameObject.activeSelf)
+            {
+                doCancel();
+            }
+        }, left);
+        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            if (gameObject.activeSelf)
+            {
+                doCancel();
+            }
+        }, right);
     }
 
     public void Activate(OptionsAll oa)
@@ -63,6 +80,9 @@ public class Menu : MonoBehaviour
         gameObject.SetActive(true);
         rightLaser.SetActive(true);
         rightHand.useRaycastHover = true;
+
+        parent.LookAt(head);
+        parent.LookAt(new Vector3(parent.forward.x, 0, parent.forward.z) + parent.position);
 
         put(dimCurrent, oa.omCurrent.dimMap);
         put(dimNext, dimSlider, oa.opt.om4.dimMap);

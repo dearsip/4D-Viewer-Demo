@@ -12,6 +12,9 @@ using WebSocketSharp;
 
 public class FourDDemo
 {
+    private bool error = true; // 振動装置と接続しているときはfalseにする
+    private string adrr = "ws://172.20.10.6:9999";
+
     private Geom.Shape[][] shapelist;
 
     private Geom.Shape[] shapes;
@@ -72,7 +75,6 @@ public class FourDDemo
     private double count = 0;
 
     private WebSocket ws;
-    private bool error = true; // 振動装置と接続しているときはfalseにする
 
     public FourDDemo()
     {
@@ -106,7 +108,7 @@ public class FourDDemo
 
         if (!error)
         {
-            this.ws = new WebSocket("ws://192.168.0.17:9999");
+            this.ws = new WebSocket(adrr);
             this.ws.OnMessage += (object sender, MessageEventArgs e) =>
             {
                 Debug.Log(e.Data);
