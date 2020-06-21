@@ -16,6 +16,17 @@ public class MapModel : IModel
     private Map map;
     private Colorizer colorizer;
     private RenderAbsolute renderAbsolute;
+    private GeomModel geomModel;
+    private PolygonBuffer bufAbsolute;
+    public  PolygonBuffer bufRelative;
+    private RenderRelative geomRelative;
+
+    private readonly double retina = 1.0/20;
+    private readonly double distance = 80;
+    private int count;
+    private double[] reg;
+    private double[][] axis;
+    public bool showMap;
 
     // --- construction ---
 
@@ -24,7 +35,15 @@ public class MapModel : IModel
 
         map = new Map(dimSpace, om, oe.mapSeed);
         colorizer = new Colorizer(dimSpace, om.dimMap, om.size, oc, oe.colorSeed);
-        renderAbsolute = new RenderAbsolute(dimSpace, map, colorizer, ov);
+        renderAbsolute = new RenderAbsolute(dimSpace, map, colorizer, ov, this);
+        bufAbsolute = new PolygonBuffer(dimSpace);
+        bufRelative = new PolygonBuffer(dimSpace - 1);
+
+        geomModel = new GeomModel(dimSpace, new Geom.Shape[om.size[0] * om.size[1] * om.size[2] * om.size[3]], null, null);
+        geomModel.setBuffer(bufAbsolute);
+        geomRelative = new RenderRelative(bufAbsolute, bufRelative, dimSpace, retina);
+        count = 0;
+        reg = new double[dimSpace];
     }
 
     // --- implementation of IModel ---
@@ -39,6 +58,8 @@ public class MapModel : IModel
         // everything else is random, so it's OK for the axes to be deterministic
         //
         for (int a = 0; a < axis.Length; a++) Vec.unitVector(axis[a], (a + 1) % axis.Length);
+
+        this.axis = axis;
     }
 
     public override void testOrigin(double[] origin, int[] reg1, int[] reg2)
@@ -85,6 +106,8 @@ public class MapModel : IModel
         renderAbsolute.setTexture(texture);
         renderAbsolute.setTransparency(od.transparency);
         renderAbsolute.useEdgeColor = od.useEdgeColor;
+        geomModel.setOptions(oc, seed, depth, texture, od);
+        showMap = od.map;
     }
 
     public override bool isAnimated()
@@ -120,10 +143,41 @@ public class MapModel : IModel
     {
     }
 
+    private Polygon p;
     public override void render(double[] origin)
     {
         renderAbsolute.run(origin);
+        if (showMap) {
+            Vec.addScaled(reg, origin, axis[3], -distance);
+            geomModel.render(reg);
+            geomRelative.run(axis);
+            UnityEngine.Debug.Log(bufRelative.getSize());
+            for (int i = 0; i < bufRelative.getSize(); i++)
+            {
+                p = bufRelative.get(i);
+                foreach (double[] v in p.vertex)
+                {
+                    v[0] -= 2;
+                    v[1] -= 1;
+                }
+            }
+        }
     }
 
+    private Geom.Shape cube = GeomUtil.rect(new double[][] { new double[] { 0, 1 },
+                                                             new double[] { 0, 1 },
+                                                             new double[] { 0, 1 },
+                                                             new double[] { 0, 1 } });
+    public void addShape(int[] pos)
+    {
+        UnityEngine.Debug.Log(Vec.ToString(pos));
+        Geom.Shape s = cube.copy();
+        s.translate(new double[] { pos[0], pos[1], pos[2], pos[3] });
+        for (int i = 0; i < pos.Length * 2; i++)
+        {
+            s.cell[i].color = colorizer.getColor(pos, i);
+        }
+        geomModel.shapes[count++] = s;
+    }
 }
 

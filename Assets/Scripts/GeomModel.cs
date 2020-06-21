@@ -23,7 +23,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     // --- fields ---
 
     protected int dim;
-    protected Geom.Shape[] shapes;
+    public Geom.Shape[] shapes;
     private List<IScenery> scenery;
     private bool[] texture;
     protected PolygonBuffer buf;

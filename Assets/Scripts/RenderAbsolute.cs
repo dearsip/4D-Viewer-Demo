@@ -35,9 +35,11 @@ public class RenderAbsolute
     private int[] reg4;
     private double[][] reg5;
 
+    MapModel mapModel;
+
     // --- construction ---
 
-    public RenderAbsolute(int dim, Map map, IColorize colorizer, OptionsView ov)
+    public RenderAbsolute(int dim, Map map, IColorize colorizer, OptionsView ov, MapModel mapModel)
     {
 
         // buf is set shortly after construction
@@ -59,6 +61,8 @@ public class RenderAbsolute
         reg2 = new double[dim];
         reg3 = new int[dim];
         reg4 = new int[dim];
+
+        this.mapModel = mapModel;
     }
 
     public void setBuffer(PolygonBuffer buf)
@@ -312,9 +316,9 @@ public class RenderAbsolute
             Vec.copy(reg5[0], reg1);
             Dir.apply(dir2, reg2, -0.5);
             reg2[a3] += 0.25;
-            Vec.copy(reg5[1], reg2);
-            reg2[a3] -= 0.25;
             reg2[a4] += 0.25;
+            Vec.copy(reg5[1], reg2);
+            reg2[a3] -= 0.5;
             Vec.copy(reg5[2], reg2);
             addPolygon(reg5, color);
 
@@ -322,8 +326,7 @@ public class RenderAbsolute
             for (int i = 0; i < reg5.Length; i++) reg5[i] = new double[dim];
             Vec.copy(reg5[0], reg1);
             Vec.copy(reg5[1], reg2);
-            reg2[a4] -= 0.25;
-            reg2[a3] -= 0.25;
+            reg2[a4] -= 0.5;
             Vec.copy(reg5[2], reg2);
             addPolygon(reg5, color);
 
@@ -331,8 +334,7 @@ public class RenderAbsolute
             for (int i = 0; i < reg5.Length; i++) reg5[i] = new double[dim];
             Vec.copy(reg5[0], reg1);
             Vec.copy(reg5[1], reg2);
-            reg2[a3] += 0.25;
-            reg2[a4] -= 0.25;
+            reg2[a3] += 0.5;
             Vec.copy(reg5[2], reg2);
             addPolygon(reg5, color);
 
@@ -340,8 +342,7 @@ public class RenderAbsolute
             for (int i = 0; i < reg5.Length; i++) reg5[i] = new double[dim];
             Vec.copy(reg5[0], reg1);
             Vec.copy(reg5[1], reg2);
-            reg2[a4] += 0.25;
-            reg2[a3] += 0.25;
+            reg2[a4] += 0.5;
             Vec.copy(reg5[2], reg2);
             addPolygon(reg5, color);
         }
@@ -537,6 +538,7 @@ public class RenderAbsolute
         Vec.copy(this.origin, origin);
 
         int dir = Grid.toCell(reg3, reg4, origin);
+        if (colorizer.getTrace(reg3) == -1) mapModel.addShape(reg3);
         colorizer.setTrace(reg3);
         if (dir == Dir.DIR_NONE)
         {

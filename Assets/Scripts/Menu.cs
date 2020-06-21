@@ -27,7 +27,7 @@ public class Menu : MonoBehaviour
         dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField,
         transparencyField, borderField, frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField,
         width, flare, rainbowGap;
-    public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, invertLeftAndRight, invertForward,
+    public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, moveType, rotateType;
@@ -120,6 +120,7 @@ public class Menu : MonoBehaviour
         put(hideSel, oa.opt.od.hidesel);
         put(invertNormals, oa.opt.od.invertNormals);
         put(separate, oa.opt.od.separate);
+        put(map, oa.opt.od.map);
         put(trainSpeedField, trainSpeedSlider, oa.opt.od.trainSpeed);
 
         put(moveType, oa.opt.oo.moveInputType);
@@ -165,6 +166,7 @@ public class Menu : MonoBehaviour
             oa.opt.od.hidesel = getBool(hideSel);
             oa.opt.od.invertNormals = getBool(invertNormals);
             oa.opt.od.separate = getBool(separate);
+            oa.opt.od.map = getBool(map);
             oa.opt.od.trainSpeed = getInt(trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
 
             oa.opt.oo.sliceMode = getBool(sliceMode);

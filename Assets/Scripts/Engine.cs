@@ -660,6 +660,12 @@ public class Engine : IMove
         if (win) renderObject(bufRelative, objWin);
         //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
 
+        if (getSaveType() == IModel.SAVE_MAZE  && ((MapModel)model).showMap)
+        {
+            bufRelative.add(((MapModel)model).bufRelative);
+            renderObject(bufRelative, objCrossMap);
+        }
+
         //renderDisplay();
         bufRelative.sort(eyeVector);
         convert(eyeVector, sliceMode);
@@ -963,6 +969,12 @@ public class Engine : IMove
       new double[] {-C, 0, 0}, new double[] { C, 0, 0},
          new double[] { 0,-C, 0}, new double[] { 0, C, 0},
          new double[] { 0, 0,-C}, new double[] { 0, 0, C}
+   };
+
+    private static readonly double[][] objCrossMap = new double[][] {
+      new double[] {-C-2, -1, 0}, new double[] { C-2, -1, 0},
+         new double[] { -2,-C-1, 0}, new double[] { -2, C-1, 0},
+         new double[] { -2, -1,-C}, new double[] { -2, -1, C}
    };
 
     // private static readonly double[][] objWin2 = new double[][] {

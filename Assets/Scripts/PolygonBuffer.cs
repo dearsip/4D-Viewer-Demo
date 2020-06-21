@@ -55,6 +55,15 @@ public class PolygonBuffer : IDraw
         polygon.copy(poly);
     }
 
+    public void add(PolygonBuffer buf)
+    {
+        for (int i = 0; i < buf.getSize(); i++)
+        {
+            Polygon polygon = getNext();
+            polygon.copy(buf.get(i));
+        }
+    }
+
     public void add(double[] p1, double[] p2, Color color)
     {
         Polygon polygon = getNext();

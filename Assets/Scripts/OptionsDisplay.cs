@@ -7,7 +7,7 @@ public class OptionsDisplay// : IValidate
     
     public double transparency;
     public double border;
-    public bool useEdgeColor, hidesel, invertNormals, separate;
+    public bool useEdgeColor, hidesel, invertNormals, separate, map;
     public int trainSpeed;
 
     // --- construction ---
@@ -26,6 +26,7 @@ public class OptionsDisplay// : IValidate
         dest.hidesel = src.hidesel;
         dest.invertNormals = src.invertNormals;
         dest.separate = src.separate;
+        dest.map = src.map;
         dest.trainSpeed = src.trainSpeed;
     }
 
