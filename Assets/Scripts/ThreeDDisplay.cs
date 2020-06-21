@@ -65,7 +65,7 @@ public class ThreeDDisplay : MonoBehaviour
     {
         calcInput();
         soft.Run(ref vertices, ref triangles, ref colors, ref haptics, rotate, 
-            eyeVector, cursor, cursorAxis, grab.GetStateDown(hand) && edit, spin); // ソフトの出力が vertices, triangles に収められる
+            eyeVector, cursor, cursorAxis, grab.GetStateDown(hand) && edit, edit, spin); // ソフトの出力が vertices, triangles に収められる
         hapticsTester.draw(haptics);
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {

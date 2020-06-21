@@ -52,7 +52,7 @@ public class Engine : IMove
     private SideTransform st;
     private CrossTransform ct;
 
-    private double[] reg5, reg6;
+    private double[] reg5, reg6, reg7, reg8;
     private List<Vector3> verts;
     private List<int> tris;
     private List<Color> cols;
@@ -155,6 +155,8 @@ public class Engine : IMove
 
         reg5 = new double[3];
         reg6 = new double[3];
+        reg7 = new double[3];
+        reg8 = new double[3];
         verts = new List<Vector3>();
         tris = new List<int>();
         cols = new List<Color>();
@@ -601,12 +603,11 @@ public class Engine : IMove
 
     // --- rendering ---
 
-    public void renderAbsolute(double[] eyeVector)
+    public void renderAbsolute(double[] eyeVector, bool sliceMode)
     {
         model.animate();
         model.render(origin);
-        RenderRelative(eyeVector);
-        bufRelative.sort(eyeVector);
+        RenderRelative(eyeVector, sliceMode);
     }
 
     private readonly Color white = new Color(0, 0, 0);
@@ -635,7 +636,7 @@ public class Engine : IMove
         }
     }
 
-    private void RenderRelative(double[] eyeVector)
+    private void RenderRelative(double[] eyeVector, bool sliceMode)
     {
         if (OptionsFisheye.of.fisheye)
         {
@@ -660,7 +661,8 @@ public class Engine : IMove
         //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
 
         //renderDisplay();
-        convert(eyeVector);
+        bufRelative.sort(eyeVector);
+        convert(eyeVector, sliceMode);
     }
 
     private void renderPrepare()
@@ -754,7 +756,9 @@ public class Engine : IMove
     //}
 
     private double width = 0.005;
-    private void convert(double[] eyeVector)
+    private float t3 = 0.2f;
+    private float t2 = 1f;
+    private void convert(double[] eyeVector, bool sliceMode)
     {
         int count = 0;
         Polygon p;
@@ -765,6 +769,7 @@ public class Engine : IMove
         {
             p = bufRelative.get(i);
             int v = p.vertex.Length;
+            if (sliceMode) p.color.a *= t3;
             if (v == 2)
             {
                 v = 4;
@@ -809,6 +814,68 @@ public class Engine : IMove
                     tris.Add(count);
                     tris.Add(count + j + 1);
                     tris.Add(count + j + 2);
+                }
+                if (sliceMode)
+                {
+                    int k = 0;
+                    for (int j = 0; j < v - 1; j++)
+                    {
+                        if (p.vertex[j][2] * p.vertex[j + 1][2] < 0)
+                        {
+                            if (k == 0)
+                            {
+                                reg7[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg7[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg7[2] = 0;
+                            }
+                            else
+                            {
+                                reg8[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg8[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg8[2] = 0;
+                            }
+                            k += 1;
+                        }
+                    }
+                    if (k == 1)
+                    {
+                        reg8[0] = (p.vertex[0][0] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][0] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
+                        reg8[1] = (p.vertex[0][1] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][1] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
+                        reg8[2] = 0;
+                    }
+                    if (k > 0)
+                    {
+                        count += v;
+                        p.color.a = t2;
+                        v = 4;
+                        Vec.sub(reg5, reg8, reg7);
+                        Vec.cross(reg6, reg5, eyeVector);
+                        Vec.normalize(reg6, reg6);
+                        Vec.scale(reg6, reg6, width * 3);
+
+                        Vec.add(reg5, reg7, reg6);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.addScaled(reg5, reg7, reg6, -1);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.add(reg5, reg8, reg6);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.addScaled(reg5, reg8, reg6, -1);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        tris.Add(count);
+                        tris.Add(count + 1);
+                        tris.Add(count + 2);
+                        tris.Add(count + 2);
+                        tris.Add(count + 1);
+                        tris.Add(count + 3);
+                    }
                 }
             }
             count += v;

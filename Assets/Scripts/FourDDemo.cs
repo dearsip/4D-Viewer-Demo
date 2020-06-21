@@ -252,7 +252,7 @@ public class FourDDemo
     }
 
     public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, ref double[] haptics,
-        double[][] rotate, double[] eyeVector, double[] cursor, double[][] cursorAxis, bool edit, bool spin)
+        double[][] rotate, double[] eyeVector, double[] cursor, double[][] cursorAxis, bool edit, bool select, bool spin)
     {
         if (spin) this.spin();
 
@@ -277,7 +277,7 @@ public class FourDDemo
                 error = true;
             }
         }
-        click(cursor, edit);
+        click(cursor, edit, select);
 
         buf.clear();
 
@@ -449,7 +449,7 @@ public class FourDDemo
             Vec.fromAxisCoordinates(reg5, reg4, cursorAxis); // 向きを変更
             for (int j = 0; j < 3; j++) reg0[j] = reg5[j]; // reg0[3] (= 0) は編集されない
             Vec.add(reg0, cursor, reg0);
-            haptics[i] = click(reg0, false);
+            haptics[i] = click(reg0, false, false);
             haptics[i] = 1 - haptics[i]; // 近いほど大きく
         }
         double max = Vec.max(haptics); // 最も近い点
@@ -470,7 +470,7 @@ public class FourDDemo
         //Debug.Log(max_);
     }
 
-    public double click(double[] vector, bool edit)
+    public double click(double[] vector, bool edit, bool select)
     {
         Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
         Vec.addScaled(reg2, origin, reg3, 10000); // infinity
@@ -492,7 +492,7 @@ public class FourDDemo
                 }
             }
         }
-        if (dMin < 1)
+        if (dMin < 1 && select)
         {
             if (edit)
             {

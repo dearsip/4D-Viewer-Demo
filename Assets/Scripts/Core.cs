@@ -227,7 +227,7 @@ public class Core : MonoBehaviour
             menuCommand?.Invoke();
             menuCommand = null;
             controll();
-            engine.renderAbsolute(eyeVector);
+            engine.renderAbsolute(eyeVector, opt.oo.sliceMode);
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             int now = Environment.TickCount;
@@ -311,6 +311,7 @@ public class Core : MonoBehaviour
             if (leftMove)
             {
                 for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
+                if (opt.oo.limit3D) reg2[2] = 0;
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                 Array.Copy(reg2, reg3, 3);
                 relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
@@ -339,6 +340,7 @@ public class Core : MonoBehaviour
                 if (alignMode)
                 {
                     for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    if (opt.oo.limit3D) reg2[2] = 0;
                     Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                     for (int i = 0; i < reg2.Length; i++)
                     {
@@ -354,6 +356,7 @@ public class Core : MonoBehaviour
                     if (command == null)
                     {
                         relarot = rotRight * Quaternion.Inverse(fromRotRight);
+                        if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                         for (int i = 0; i < 3; i++)
                         {
                             float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
@@ -372,6 +375,7 @@ public class Core : MonoBehaviour
                 {
                     Vec.unitVector(reg3, 3);
                     for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    if (opt.oo.limit3D) reg2[2] = 0;
                     double t = Vec.norm(reg2);
                     if (t != 0)
                     {
@@ -383,6 +387,7 @@ public class Core : MonoBehaviour
                     }
 
                     relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                    if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                     float f;
                     relarot.ToAngleAxis(out f, out reg0);
                     //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
@@ -397,7 +402,7 @@ public class Core : MonoBehaviour
                     reg4[3] = 0;
                     Vec.normalize(reg3, reg3);
                     Vec.normalize(reg4, reg4);
-                    target.rotateAngle(reg3, reg4);
+                    target.rotateAngle(reg4, reg3);
                 }
             }
             if (leftTrigger)
@@ -1049,7 +1054,7 @@ public class Core : MonoBehaviour
 
         opt.ot4.frameRate = 20;
         opt.ot4.timeMove = 1;
-        opt.ot4.timeRotate = 0.8;
+        opt.ot4.timeRotate = 0.7;
         opt.ot4.timeAlignMove = 2;
         opt.ot4.timeAlignRotate = 2;
 
@@ -1067,7 +1072,7 @@ public class Core : MonoBehaviour
         //opt.ov3.retina = 1.45;
         //opt.ov3.scale = 0.95;
 
-        opt.ov4.depth = 2;
+        opt.ov4.depth = 5;
         opt.ov4.texture[0] = false;
         opt.ov4.texture[1] = false;
         opt.ov4.texture[2] = false;

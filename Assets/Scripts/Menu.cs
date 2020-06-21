@@ -28,7 +28,7 @@ public class Menu : MonoBehaviour
         transparencyField, borderField, frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField,
         width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, invertLeftAndRight, invertForward,
-        alignMode, fisheye, custom, rainbow;
+        alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, moveType, rotateType;
 
@@ -127,6 +127,8 @@ public class Menu : MonoBehaviour
         put(invertLeftAndRight, oa.opt.oo.invertLeftAndRight);
         put(invertForward, oa.opt.oo.invertForward);
         put(alignMode, core.alignMode);
+        put(sliceMode, oa.opt.oo.sliceMode);
+        put(limit3D, oa.opt.oo.limit3D);
 
         put(frameRateField, frameRateSlider, oa.opt.ot4.frameRate);
         put(timeMoveField, timeMoveSlider, oa.opt.ot4.timeMove);
@@ -164,6 +166,9 @@ public class Menu : MonoBehaviour
             oa.opt.od.invertNormals = getBool(invertNormals);
             oa.opt.od.separate = getBool(separate);
             oa.opt.od.trainSpeed = getInt(trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
+
+            oa.opt.oo.sliceMode = getBool(sliceMode);
+            oa.opt.oo.limit3D = getBool(limit3D);
 
             OptionsFisheye ofTemp = new OptionsFisheye();
             ofTemp.fisheye = getBool(fisheye);

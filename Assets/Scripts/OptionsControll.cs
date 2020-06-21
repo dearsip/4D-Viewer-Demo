@@ -6,7 +6,7 @@ public class OptionsControll// : IValidate
     // --- fields ---
 
     public int moveInputType, rotateInputType;
-    public bool invertLeftAndRight, invertForward;
+    public bool invertLeftAndRight, invertForward, sliceMode, limit3D;
 
     // --- constants ---
 
@@ -27,6 +27,8 @@ public class OptionsControll// : IValidate
         dest.rotateInputType = src.rotateInputType;
         dest.invertLeftAndRight = src.invertLeftAndRight;
         dest.invertForward = src.invertForward;
+        dest.sliceMode = src.sliceMode;
+        dest.limit3D = src.limit3D;
     }
 
 }
