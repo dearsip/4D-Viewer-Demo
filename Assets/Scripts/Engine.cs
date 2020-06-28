@@ -857,7 +857,7 @@ public class Engine : IMove
                         Vec.sub(reg5, reg8, reg7);
                         Vec.cross(reg6, reg5, eyeVector);
                         Vec.normalize(reg6, reg6);
-                        Vec.scale(reg6, reg6, width * 3);
+                        Vec.scale(reg6, reg6, width * 2);
 
                         Vec.add(reg5, reg7, reg6);
                         verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
@@ -972,9 +972,9 @@ public class Engine : IMove
    };
 
     private static readonly double[][] objCrossMap = new double[][] {
-      new double[] {-C-2, -1, 0}, new double[] { C-2, -1, 0},
-         new double[] { -2,-C-1, 0}, new double[] { -2, C-1, 0},
-         new double[] { -2, -1,-C}, new double[] { -2, -1, C}
+      new double[] {-C-3, 0, 0}, new double[] { C-3, 0, 0},
+         new double[] { -3,-C, 0}, new double[] { -3, C, 0},
+         new double[] { -3, 0,-C}, new double[] { -3, 0, C}
    };
 
     // private static readonly double[][] objWin2 = new double[][] {

@@ -21,8 +21,8 @@ public class MapModel : IModel
     public  PolygonBuffer bufRelative;
     private RenderRelative geomRelative;
 
-    private readonly double retina = 1.0/20;
-    private readonly double distance = 80;
+    private readonly double retina = 0.8;
+    private readonly double distance = 7;
     private int count;
     private double[] reg;
     private double[][] axis;
@@ -151,14 +151,13 @@ public class MapModel : IModel
             Vec.addScaled(reg, origin, axis[3], -distance);
             geomModel.render(reg);
             geomRelative.run(axis);
-            UnityEngine.Debug.Log(bufRelative.getSize());
             for (int i = 0; i < bufRelative.getSize(); i++)
             {
                 p = bufRelative.get(i);
                 foreach (double[] v in p.vertex)
                 {
-                    v[0] -= 2;
-                    v[1] -= 1;
+                    Vec.scale(v, v, 2);
+                    v[0] -= 3;
                 }
             }
         }
@@ -172,11 +171,13 @@ public class MapModel : IModel
     {
         UnityEngine.Debug.Log(Vec.ToString(pos));
         Geom.Shape s = cube.copy();
+        s.scale(new double[] { 0.999, 0.999, 0.999, 0.999 } );
         s.translate(new double[] { pos[0], pos[1], pos[2], pos[3] });
         for (int i = 0; i < pos.Length * 2; i++)
         {
             s.cell[i].color = colorizer.getColor(pos, i);
         }
+        s.glass();
         geomModel.shapes[count++] = s;
     }
 }

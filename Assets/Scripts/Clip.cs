@@ -141,7 +141,11 @@ public class Clip
     // 出力は複数の凸多角形になるので、list に入れる。
     public static void clip(Polygon polygon, BoundaryList boundaryList, List<Polygon> list)
     {
-
+        if (boundaryList.getSize() == 0)
+        {
+            list.Add(polygon);
+            return;
+        }
         for (int i = 0; i < boundaryList.getSize(); i++)
         {
             Boundary boundary = boundaryList.getBoundary(i);

@@ -1081,12 +1081,12 @@ public class Core : MonoBehaviour
         opt.ov4.texture[5] = false;
         opt.ov4.texture[6] = false;
         opt.ov4.texture[7] = false;
-        opt.ov4.texture[8] = true;
-        opt.ov4.texture[9] = false;
+        opt.ov4.texture[8] = false;
+        opt.ov4.texture[9] = true;
         opt.ov4.retina = 1.8;
         opt.ov4.scale = 0.6;
 
-        opt.od.transparency = 0.3;
+        opt.od.transparency = 0.1;
         opt.od.border = 1;
         opt.od.useEdgeColor = false;
         opt.od.hidesel = false;
