@@ -32,7 +32,6 @@ public class MapModel : IModel
 
     public MapModel(int dimSpace, OptionsMap om, OptionsColor oc, OptionsSeed oe, OptionsView ov)
     {
-
         map = new Map(dimSpace, om, oe.mapSeed);
         colorizer = new Colorizer(dimSpace, om.dimMap, om.size, oc, oe.colorSeed);
         renderAbsolute = new RenderAbsolute(dimSpace, map, colorizer, ov, this);
@@ -169,7 +168,6 @@ public class MapModel : IModel
                                                              new double[] { 0, 1 } });
     public void addShape(int[] pos)
     {
-        UnityEngine.Debug.Log(Vec.ToString(pos));
         Geom.Shape s = cube.copy();
         s.scale(new double[] { 0.999, 0.999, 0.999, 0.999 } );
         s.translate(new double[] { pos[0], pos[1], pos[2], pos[3] });

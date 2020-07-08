@@ -105,9 +105,7 @@ public class Menu : MonoBehaviour
         put(enable, oa.opt.oc4.enable);
 
         put(mazeCurrent, oa.oeCurrent.mapSeed);
-        put(mazeNext, oa.oeNext.mapSeed);
         put(colorCurrent, oa.oeCurrent.colorSeed);
-        put(colorNext, oa.oeNext.colorSeed);
 
         put(depthField, depthSlider, oa.opt.ov4.depth);
         put(texture, oa.opt.ov4.texture);
@@ -199,10 +197,23 @@ public class Menu : MonoBehaviour
             oa.opt.om4.allowLoops = getBool(allowLoopsNext);
             oa.opt.om4.loopCrossProbability = getDouble(loopCrossProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
 
-            oa.oeNext.mapSeed = getInt(mazeNext);
-            oa.oeCurrent.colorSeed = getInt(colorCurrent);
-            oa.oeCurrent.forceSpecified();
-            oa.oeNext.colorSeed = getInt(colorNext);
+            if (mazeNext.text.Length > 0)
+            {
+                oa.oeNext.mapSeedSpecified = true;
+                oa.oeNext.mapSeed = getInt(mazeNext);
+            }
+            else oa.oeNext.mapSeedSpecified = false;
+            if(colorCurrent.text.Length > 0)
+            {
+                oa.oeCurrent.colorSeed = getInt(colorCurrent);
+                oa.oeCurrent.forceSpecified();
+            }
+            if(colorNext.text.Length > 0)
+            {
+                oa.oeNext.colorSeedSpecified = true;
+                oa.oeNext.colorSeed = getInt(colorNext);
+            }
+            else oa.oeNext.colorSeedSpecified = false;
 
             oa.opt.oo.moveInputType = getInt(moveType);
             oa.opt.oo.rotateInputType = getInt(rotateType);
