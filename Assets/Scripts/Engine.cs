@@ -636,6 +636,19 @@ public class Engine : IMove
         }
     }
 
+    private void renderPolygon(PolygonBuffer buf, double[][] obj, int n, Color color)
+    {
+        Polygon poly = new Polygon();
+        poly.vertex = new double[n][];
+        for (int i = 0; i < obj.Length; i += n)
+        {
+            for (int j = 0; j < n; j++) poly.vertex[j] = obj[i + j];
+            poly.color = color;
+            buf.add(poly);
+        }
+    }
+
+    private readonly Color trans = new Color(0, 0, 0, 0);
     private void RenderRelative(double[] eyeVector, bool sliceMode)
     {
         if (OptionsFisheye.of.fisheye)
@@ -654,7 +667,9 @@ public class Engine : IMove
         {
             renderRelative.run(axis);
             renderObject(bufRelative, objRetina);
+            renderPolygon(bufRelative, objRetinaPoly, 3, trans);
             renderObject(bufRelative, objCross);
+            renderPolygon(bufRelative, objCrossPoly, 4, trans);
         }
 
         if (win) renderObject(bufRelative, objWin);
@@ -664,6 +679,7 @@ public class Engine : IMove
         {
             bufRelative.add(((MapModel)model).bufRelative);
             renderObject(bufRelative, objCrossMap);
+            renderPolygon(bufRelative, objCrossMapPoly, 4, trans);
         }
 
         //renderDisplay();
@@ -908,25 +924,25 @@ public class Engine : IMove
     //      new double[] {-1, 1}, new double[] {-1,-1}
     //};
 
-    //private static readonly double[][] objRetina3 = new double[][] {
-    //    new double[] {-1,-1,-1}, new double[] { 1,-1,-1}, new double[] {-1, 1,-1},
-    //    new double[] {-1, 1,-1}, new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
+    private static readonly double[][] objRetinaPoly = new double[][] {
+        //new double[] {-1,-1,-1}, new double[] { 1,-1,-1}, new double[] {-1, 1,-1},
+        //new double[] {-1, 1,-1}, new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
 
-    //    new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
-    //    new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+        new double[] { 1,-1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1,-1},
+        new double[] { 1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
 
-    //    new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
-    //    new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
+        new double[] { 1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1,-1},
+        new double[] {-1, 1,-1}, new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
 
-    //    new double[] {-1, 1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1,-1},
-    //    new double[] {-1,-1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
+        new double[] {-1, 1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1,-1},
+        new double[] {-1,-1,-1}, new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
 
-    //    new double[] {-1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1,-1},
-    //    new double[] { 1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
+        new double[] {-1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1,-1},
+        new double[] { 1,-1,-1}, new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
 
-    //    new double[] { 1,-1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1, 1},
-    //    new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] {-1, 1, 1}
-    //};
+        //new double[] { 1,-1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1, 1},
+        //new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] {-1, 1, 1}
+    };
     private static readonly double[][] objRetina3 = new double[][] {
       new double[] {-1,-1,-1}, new double[] { 1,-1,-1},
          new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
@@ -971,10 +987,26 @@ public class Engine : IMove
          new double[] { 0, 0,-C}, new double[] { 0, 0, C}
    };
 
+    private static readonly double[][] objCrossPoly = new double[][] {
+      new double[] {-C, 0, -C}, new double[] { C, 0, -C},
+      new double[] { C, 0, C}, new double[] { -C, 0, C},
+
+         new double[] { 0,-C, -C}, new double[] { 0, C, -C},
+         new double[] { 0, C, C}, new double[] { 0, -C, C}
+   };
+
     private static readonly double[][] objCrossMap = new double[][] {
       new double[] {-C-3, 0, 0}, new double[] { C-3, 0, 0},
          new double[] { -3,-C, 0}, new double[] { -3, C, 0},
          new double[] { -3, 0,-C}, new double[] { -3, 0, C}
+   };
+
+    private static readonly double[][] objCrossMapPoly = new double[][] {
+      new double[] {-C-3, 0, -C}, new double[] { C-3, 0, -C},
+      new double[] { C-3, 0, C}, new double[] { -C-3, 0, C},
+
+         new double[] { 0-3,-C, -C}, new double[] { 0-3, C, -C},
+         new double[] { 0-3, C, C}, new double[] { 0-3, -C, C}
    };
 
     // private static readonly double[][] objWin2 = new double[][] {
