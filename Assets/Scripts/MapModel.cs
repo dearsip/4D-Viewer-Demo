@@ -24,7 +24,9 @@ public class MapModel : IModel
     private readonly double retina = 0.8;
     private readonly double distance = 7;
     private int count;
-    private double[] reg;
+    private double[] reg, reg3, reg4, reg5, reg6;
+    private int[] reg7, reg8, reg9;
+    private double[] origin;
     private double[][] axis;
     public bool showMap;
 
@@ -43,6 +45,13 @@ public class MapModel : IModel
         geomRelative = new RenderRelative(bufAbsolute, bufRelative, dimSpace, retina);
         count = 0;
         reg = new double[dimSpace];
+        reg3 = new double[dimSpace];
+        reg4 = new double[dimSpace];
+        reg5 = new double[dimSpace];
+        reg6 = new double[dimSpace];
+        reg7 = new int[dimSpace];
+        reg8 = new int[dimSpace];
+        reg9 = new int[dimSpace];
     }
 
     // --- implementation of IModel ---
@@ -59,6 +68,7 @@ public class MapModel : IModel
         for (int a = 0; a < axis.Length; a++) Vec.unitVector(axis[a], (a + 1) % axis.Length);
 
         this.axis = axis;
+        this.origin = origin;
     }
 
     public override void testOrigin(double[] origin, int[] reg1, int[] reg2)
@@ -132,6 +142,33 @@ public class MapModel : IModel
     }
 
     public override bool dead() { return false; }
+
+    public override double touch(double[] vector)
+    {
+        Vec.addScaled(reg3, axis[3], vector, retina);
+        Vec.addScaled(reg4, origin, reg3, 10000); // infinity
+        double d = 0;
+        for (int i = 0; i < 4; i++) reg7[i] = Math.Sign(reg4[i] - origin[i]);
+        int a = Grid.toCell(reg8, reg9, origin);
+        if (a != Dir.DIR_NONE) reg8 = (reg7[Dir.getAxis(a)] == 1) ? reg9 : reg8;
+        for (int i = 0; i < 4; i++)
+        {
+            if (reg7[i] == 0) { reg6[i] = 1; continue; }
+            reg5[i] = (reg7[i] == 1) ? Math.Ceiling(origin[i]) : Math.Floor(origin[i]);
+            reg6[i] = (reg5[i] - origin[i]) / (reg4[i] - origin[i]);
+        }
+        d = reg6[0]; a = 0;
+        while (d < 1)
+        {
+            for (int i = 0; i < 4; i++) if (d > reg6[i]) { d = reg6[i]; a = i; }
+            reg8[a] += reg7[a];
+            if (!map.isOpen(reg8)) return d;
+            reg5[a] += reg7[a];
+            reg6[a] = (reg5[a] - origin[a]) / (reg4[a] - origin[a]);
+            d = reg6[a];
+        }
+        return 1;
+    }
 
     public override void setBuffer(PolygonBuffer buf)
     {

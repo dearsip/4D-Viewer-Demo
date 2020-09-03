@@ -6,6 +6,8 @@ using Valve.VR.InteractionSystem;
 using System;
 using System.IO;
 using SimpleFileBrowser;
+using static FourDDemo;
+using WebSocketSharp;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -59,11 +61,23 @@ public class Core : MonoBehaviour
     public Menu menuPanel;
 
     private Vector3 reg0, reg1;
-    private double[] reg2, reg3, reg4;
+    private double[] reg2, reg3, reg4, reg5, reg6;
     public Player player;
     private double[] eyeVector;
     private double[] cursor;
     private double[][] cursorAxis;
+
+    private bool error = true; // 振動装置と接続しているときはfalseにする
+    private string adrr = "ws://172.20.10.6:9999";
+    public bool hapActive;
+    private double[] haptics;
+    private bool[] cutting; // 手の形を調べる v手の形
+    private float[] output;
+    private static int opFrame = 20; // 出力フレーム
+    private int opf;
+    private double max_;
+    private WebSocket ws;
+    public HapticsTester hapticsTester;
 
     // --- option accessors ---
 
@@ -143,16 +157,20 @@ public class Core : MonoBehaviour
         mesh = new Mesh();
         engine = new Engine(mesh);
 
+        initHaptics();
+
         newGame(dim);
         active = true;
-        StartCoroutine(tick());
 
         reg2 = new double[3];
         reg3 = new double[4];
         reg4 = new double[4];
+        reg5 = new double[3];
+        reg6 = new double[4];
 
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
+        StartCoroutine(tick());
     }
 
     private void addEvevts()
@@ -181,6 +199,28 @@ public class Core : MonoBehaviour
                 command = click;
             }
         }, right);
+    }
+
+    private void initHaptics()
+    {
+        hapActive = true;
+        cursor = new double[4];
+        cursorAxis = new double[3][];
+        for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
+        haptics = new double[hNum3];
+        for (int i = 0; i < hNum3; i++) if (!cut[i]) haptics[i] = 0;
+        cutting = new bool[hNum3];
+        for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
+        output = new float[outputNum.Length];
+        if (!error)
+        {
+            ws = new WebSocket(adrr);
+            ws.OnMessage += (object sender, MessageEventArgs e) =>
+            {
+                Debug.Log(e.Data);
+            };
+            ws.Connect();
+        }
     }
 
     private void openMenu()
@@ -228,6 +268,7 @@ public class Core : MonoBehaviour
             menuCommand = null;
             controll();
             engine.renderAbsolute(eyeVector, opt.oo.sliceMode);
+            doHaptics();
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             int now = Environment.TickCount;
@@ -282,6 +323,88 @@ public class Core : MonoBehaviour
         }
     }
 
+    private void doHaptics()
+    {
+        if (hapActive) calcHaptics(cursor, cursorAxis);
+        else Vec.zero(haptics);
+        for (int i = 0; i < output.Length; i++) output[i] = (haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
+        if (!error && (opf = ++opf % opFrame) == 0)
+        {
+            try {
+                ws.Send(Vec.ToString(output));
+            } catch (InvalidOperationException e)
+            {
+                Debug.Log(e);
+                error = true;
+            }
+        }
+        hapticsTester.draw(haptics);
+    }
+
+    private List<Vector3> verts;
+    private List<int> tris;
+    private List<Color> cols;
+    private void calcHaptics(double[] cursor, double[][] cursorAxis)
+    {
+        verts = new List<Vector3>(mesh.vertices);
+        tris = new List<int>(mesh.triangles);
+        cols = new List<Color>(mesh.colors);
+        int count = mesh.vertices.Length;
+        for (int i = 0; i < haptics.Length; i++) if (cut[i])
+        {
+            reg2[0] = i % hNum - hNumh; // 立方体形に配置
+            reg2[1] = i / hNum % hNum - hNumh;
+            reg2[2] = i / hNum2 - hNumh;
+            Vec.scale(reg2, reg2, 0.2 / hNumh / opt.ov4.scale); // 解像度・画面サイズに合わせて縮小
+            reg2[0] = reg2[0] + 0.07 / opt.ov4.scale; // 手の位置へ平行移動
+            reg2[1] = reg2[1] + 0.08 / opt.ov4.scale;
+            reg2[2] = reg2[2] - 0.12 / opt.ov4.scale;
+            Vec.fromAxisCoordinates(reg5, reg2, cursorAxis); // 向きを変更
+            for (int j = 0; j < 3; j++) reg4[j] = reg5[j]; // reg4[3] (= 0) は編集されない
+            if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
+            Vec.add(reg4, cursor, reg4);
+            verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
+            verts.Add(new Vector3((float)reg4[0]+0.03f, (float)reg4[1], (float)reg4[2]));
+            verts.Add(new Vector3((float)reg4[0], (float)reg4[1]+0.03f, (float)reg4[2]));
+                tris.Add(count++);
+                tris.Add(count++);
+                tris.Add(count++);
+                cols.Add(Color.white);
+                cols.Add(Color.white);
+                cols.Add(Color.white);
+            if (Vec.max(reg4) <= 1 && Vec.min(reg4) >= -1) haptics[i] = engine.retrieveModel().touch(reg4);
+            else haptics[i] = 1;
+            haptics[i] = 1 - haptics[i]; // 近いほど大きく
+        }
+        if (verts.Count < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
+        {
+            mesh.triangles = tris.ToArray();
+            mesh.vertices = verts.ToArray();
+        }
+        else
+        {
+            mesh.vertices = verts.ToArray();
+            mesh.triangles = tris.ToArray();
+        }
+        mesh.colors = cols.ToArray();
+        double max = Vec.max(haptics); // 最も近い点
+        if (max > 0) for (int i = 0; i < hNum3; i++) if (cut[i]) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
+        max = 0; // 総和が小さい->一部しか触れていない->高圧力と考える
+        int touch = 0;
+        for (int i = 0; i < hNum3; i++)
+        {
+            if (haptics[i] != 0)
+            {
+                max += haptics[i];
+                touch++;
+                cutting[i] = true;
+            }
+        }
+        if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
+        //max_ = Math.Max(Vec.max(haptics), max_);
+        //Debug.Log(max_);
+    }
+
     private void calcInput()
     {
         lastPosLeft = posLeft; lastPosRight = posRight;
@@ -292,9 +415,18 @@ public class Core : MonoBehaviour
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
-        reg1 = this.transform.position - player.hmdTransform.position;
-        for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
+        reg1 = transform.position - player.hmdTransform.position;
+        for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
+
+        reg1 = (pose.GetLocalPosition(right) - transform.position) / 0.3f * 1.2f / (float)opt.ov4.scale;
+        for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
+        reg1 = pose.GetLocalRotation(right)*Vector3.right;
+        for (int i = 0; i < 3; i++) cursorAxis[0][i] = reg1[i];
+        reg1 = pose.GetLocalRotation(right)*Vector3.up;
+        for (int i = 0; i < 3; i++) cursorAxis[1][i] = reg1[i];
+        reg1 = pose.GetLocalRotation(right)*Vector3.forward;
+        for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
     private double limitAng = 30;
 

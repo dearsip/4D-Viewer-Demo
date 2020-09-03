@@ -938,6 +938,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     public override bool dead() { return false; }
 
+    public override double touch(double[] vector) { return 1; }
+
     public override void setBuffer(PolygonBuffer buf)
     {
         this.buf = buf;
