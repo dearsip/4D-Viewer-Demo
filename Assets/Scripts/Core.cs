@@ -363,30 +363,30 @@ public class Core : MonoBehaviour
             for (int j = 0; j < 3; j++) reg4[j] = reg5[j]; // reg4[3] (= 0) は編集されない
             if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
             Vec.add(reg4, cursor, reg4);
-            verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
-            verts.Add(new Vector3((float)reg4[0]+0.03f, (float)reg4[1], (float)reg4[2]));
-            verts.Add(new Vector3((float)reg4[0], (float)reg4[1]+0.03f, (float)reg4[2]));
-                tris.Add(count++);
-                tris.Add(count++);
-                tris.Add(count++);
-                cols.Add(Color.white);
-                cols.Add(Color.white);
-                cols.Add(Color.white);
+            //verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
+            //verts.Add(new Vector3((float)reg4[0]+0.03f, (float)reg4[1], (float)reg4[2]));
+            //verts.Add(new Vector3((float)reg4[0], (float)reg4[1]+0.03f, (float)reg4[2]));
+            //    tris.Add(count++);
+            //    tris.Add(count++);
+            //    tris.Add(count++);
+            //    cols.Add(Color.white);
+            //    cols.Add(Color.white);
+            //    cols.Add(Color.white);
             if (Vec.max(reg4) <= 1 && Vec.min(reg4) >= -1) haptics[i] = engine.retrieveModel().touch(reg4);
             else haptics[i] = 1;
             haptics[i] = 1 - haptics[i]; // 近いほど大きく
         }
-        if (verts.Count < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
-        {
-            mesh.triangles = tris.ToArray();
-            mesh.vertices = verts.ToArray();
-        }
-        else
-        {
-            mesh.vertices = verts.ToArray();
-            mesh.triangles = tris.ToArray();
-        }
-        mesh.colors = cols.ToArray();
+        //if (verts.Count < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
+        //{
+        //    mesh.triangles = tris.ToArray();
+        //    mesh.vertices = verts.ToArray();
+        //}
+        //else
+        //{
+        //    mesh.vertices = verts.ToArray();
+        //    mesh.triangles = tris.ToArray();
+        //}
+        //mesh.colors = cols.ToArray();
         double max = Vec.max(haptics); // 最も近い点
         if (max > 0) for (int i = 0; i < hNum3; i++) if (cut[i]) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
         max = 0; // 総和が小さい->一部しか触れていない->高圧力と考える

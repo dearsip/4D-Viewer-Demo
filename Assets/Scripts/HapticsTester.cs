@@ -9,6 +9,7 @@ public class HapticsTester : MonoBehaviour
     private Mesh mesh;
     private Vector3[] vertices;
     private Vector3[] centers;
+    private Color[] colors;
     private int[] triangles;
     private int hNum = FourDDemo.hNum;
     private int hNum2 = FourDDemo.hNum2;
@@ -21,6 +22,7 @@ public class HapticsTester : MonoBehaviour
     {
         mesh = new Mesh();
         vertices = new Vector3[hNum3 * 8];
+        colors = new Color[hNum3 * 8];
         triangles = new int[hNum3 * 36];
         centers = new Vector3[hNum3];
         int[] cubeTriangles = new int[]
@@ -43,12 +45,16 @@ public class HapticsTester : MonoBehaviour
             centers[i] = new Vector3();
             centers[i].Set(i % hNum - hNumh, i / hNum % hNum - hNumh, i / hNum2 - hNumh);
             centers[i] *= 1 / hNumh;
-            for (int j = 0; j < 8; j++) vertices[8 * i + j].Set(centers[i].x, centers[i].y, centers[i].z);
-
+            for (int j = 0; j < 8; j++)
+            {
+                vertices[8 * i + j].Set(centers[i].x, centers[i].y, centers[i].z);
+                colors[8 * i + j] = (Array.IndexOf(FourDDemo.outputNum, i) >= 0) ? Color.cyan : Color.white;
+            }
             Array.ConstrainedCopy(cubeTriangles, 0, triangles, 36 * i, 36);
             for (int j = 0; j < 36; j++) cubeTriangles[j] += 8;
         }
         mesh.vertices = vertices;
+        mesh.colors = colors;
         mesh.triangles = triangles;
 
         outputs = new float[hNum3];
