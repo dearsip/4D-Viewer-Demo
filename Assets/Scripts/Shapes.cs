@@ -476,7 +476,7 @@ public class Shapes
         for (int i = 0; i < 8; i++) vertex[i] = new double[] { 1, i % 2 * 2 - 1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1 };
         vertex[8] = new double[] { 0, 0, 0,  -0.5 };
         vertex[9] = new double[] { 0, 0, 0, -1 };
-        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(4.5), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
     }
 
     public static Geom.Shape convex(ShapeBuilder shapeBuilder)
@@ -536,12 +536,12 @@ public class Shapes
                           new int[] { 0, 0, 0, 0, 0, 0, 0 }
             },
             new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 }
+                          new int[] { 1, 1, 1, 1, 1, 1, 1 },
+                          new int[] { 2, 2, 2, 2, 2, 2, 2 },
+                          new int[] { 3, 3, 3, 3, 3, 3, 3 },
+                          new int[] { 4, 4, 4, 4, 4, 4, 4 },
+                          new int[] { 5, 5, 5, 5, 5, 5, 5 },
+                          new int[] { 6, 6, 6, 6, 6, 6, 6 }
             },
             new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0 },
                           new int[] { 0, 0, 0, 0, 0, 0, 0 },
@@ -562,13 +562,13 @@ public class Shapes
                           new int[] { 0, 0, 0, 0, 0, 0, 0 },
                           new int[] { 0, 0, 0, 0, 0, 0, 0 },
             },
-            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
-                          new int[] { 0, 0, 0, 0, 0, 0, 0 },
+            new int[][] { new int[] { 1, 1, 1, 1, 1, 1, 1 },
+                          new int[] { 3, 3, 3, 3, 3, 3, 3 },
+                          new int[] { 4, 4, 4, 4, 4, 4, 4 },
+                          new int[] { 5, 5, 5, 5, 5, 5, 5 },
+                          new int[] { 6, 6, 6, 6, 6, 6, 6 },
+                          new int[] { 2, 2, 2, 2, 2, 2, 2 },
+                          new int[] { 0, 0, 0, 0, 0, 0, 0 }
             },
             new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0 },
                           new int[] { 0, 0, 0, 0, 0, 0, 0 },
@@ -581,11 +581,11 @@ public class Shapes
         },
         new int[][][]
         {
-            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
             },
-            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+            new int[][] { new int[] { 6, 6, 4, 4, 2, 2, 1, 1, 3, 3, 5, 5, 0 }
             },
-            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
             },
         }
     };

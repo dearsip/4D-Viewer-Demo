@@ -88,16 +88,16 @@ public class ShapeBuilder
 
     private void setEdge()
     {
-        double m = 100;
+        double m;
         for (int i = 0; i < vertex.Length; i++)
         {
             for (int j = i + 1; j < vertex.Length; j++)
             {
                 Vec.sub(reg1, vertex[j], vertex[i]);
-                if (Vec.norm(reg1) < m) m = Vec.norm(reg1);
+                m = Vec.norm(reg1);
                 for (int k = 0; k < el.Length; k++)
                 {
-                    if (Vec.norm(reg1) - el[k] < epsilon)
+                    if (Math.Abs(m - el[k]) < epsilon)
                     {
                         ve[i].Add(ev.Count);
                         ve[j].Add(ev.Count);
