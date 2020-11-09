@@ -470,10 +470,103 @@ public class Shapes
         return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
     }
 
+    public static Geom.Shape cone1(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { 1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1, -(i % 2 * 2 - 1) };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape cone2(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { -1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1, i % 2 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape cone3(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i % 2 * 2 - 1, 1, i / 4 * 2 - 1, -(i / 2 % 2 * 2 - 1) };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape cone4(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i % 2 * 2 - 1, -1, i / 4 * 2 - 1, i / 2 % 2 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape cone5(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i % 2 * 2 - 1, i / 2 % 2 * 2 - 1, 1, -(i / 4 * 2 - 1) };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape cone6(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[9][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i % 2 * 2 - 1, i / 2 % 2 * 2 - 1, -1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0, 0 };
+        return shapeBuilder.build(vertex, new double[] { 2 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
     public static Geom.Shape flat(ShapeBuilder shapeBuilder)
     {
         double[][] vertex = new double[10][];
         for (int i = 0; i < 8; i++) vertex[i] = new double[] { 1, i % 2 * 2 - 1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0,  -0.5 };
+        vertex[9] = new double[] { 0, 0, 0, -1 };
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape flat1(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[10][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { -(i % 2 * 2 - 1), 1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0,  -0.5 };
+        vertex[9] = new double[] { 0, 0, 0, -1 };
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape flat2(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[10][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i % 2 * 2 - 1, -1, i / 2 % 2 * 2 - 1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0,  -0.5 };
+        vertex[9] = new double[] { 0, 0, 0, -1 };
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape flat3(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[10][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { -(i / 2 % 2 * 2 - 1), i % 2 * 2 - 1, 1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0,  -0.5 };
+        vertex[9] = new double[] { 0, 0, 0, -1 };
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape flat4(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[10][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { i / 2 % 2 * 2 - 1, i % 2 * 2 - 1, -1, i / 4 * 2 - 1 };
+        vertex[8] = new double[] { 0, 0, 0,  -0.5 };
+        vertex[9] = new double[] { 0, 0, 0, -1 };
+        return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });
+    }
+
+    public static Geom.Shape flat5(ShapeBuilder shapeBuilder)
+    {
+        double[][] vertex = new double[10][];
+        for (int i = 0; i < 8; i++) vertex[i] = new double[] { -1, i % 2 * 2 - 1, -(i / 2 % 2 * 2 - 1), i / 4 * 2 - 1 };
         vertex[8] = new double[] { 0, 0, 0,  -0.5 };
         vertex[9] = new double[] { 0, 0, 0, -1 };
         return shapeBuilder.build(vertex, new double[] { Math.Sqrt(5.25), 2, Math.Sqrt(3), 0.5 }, new int[] { 3, 4 }, new int[] { 5, 6 });

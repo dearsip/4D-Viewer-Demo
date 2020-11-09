@@ -40,17 +40,19 @@ public class FourDDemo
     private int shapeNum = 1;
     private int colorNum = 1;
 
-    private float cellAlpha = 0.6f;
+    private float cellAlpha = 0.4f;
     private Color faceColor = Color.white;
-    private double offset = 0.999;
+    private Color edgeColor = Color.white;
+    private double offset = 0.7;
     private double border = -1;
     private int[][] colors;
     private int colorVal;
     private int selectedShape = -1;
     private int selectedCell = -1;
+    //protected Clip.GJKTester gjk;
 
     public bool hapActive;
-    public double size = 1;
+    public double size = 1.4;
     private double[] haptics;
     private bool[] cutting; // 手の形を調べる v手の形
     public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
@@ -95,6 +97,7 @@ public class FourDDemo
         bufRelative = new PolygonBuffer(3);
         renderRelative = new RenderRelative(buf, bufRelative, 4, 1);
         clipResult = new Clip.Result();
+        //gjk = new Clip.GJKTester(4);
 
         faceColor.a = 0.1f;
 
@@ -155,37 +158,51 @@ public class FourDDemo
         for (int i = 1; i < 7; i++) shapelist[6][i].ideal = shapelist[6][i].copy();
 
         shapelist[7][0] = Shapes.flat(sb);
-        for (int i = 1; i < 6; i++) shapelist[7][i] = shapelist[7][0].copy();
-            //Vec.unitVector(reg0, 0);
-            //Vec.scale(reg0, reg0, 0.1);
-            //shapelist[6][0].translateFrame(reg0);
-            //shapelist[6][0].place();
-        Vec.unitVector(reg1, 0);
-        for (int i = 0; i < 4; i++)
-        {
-            Vec.unitVector(reg0, i / 2 + 1);
-            if (i % 2 != 0) Vec.scale(reg0, reg0, -1);
-            shapelist[7][i + 1].rotateFrame(reg1, reg0, zero, reg2, reg3);
-            //Vec.scale(reg0, reg0, 0.2);
-            //shapelist[7][i + 1].translateFrame(reg0);
-            shapelist[7][i + 1].place();
-            Vec.unitMatrix(shapelist[7][i + 1].axis);
-        }
-        for (int i = 0; i < 2; i++) shapelist[7][5].rotateFrame(reg1, reg0, zero, reg2, reg3);
-            //Vec.unitVector(reg0, 0);
-            //Vec.scale(reg0, reg0, -0.1);
-            //shapelist[7][5].translateFrame(reg0);
-        shapelist[7][5].place();
-        Vec.unitMatrix(shapelist[7][5].axis);
-        for (int i = 1; i < 6; i++) shapelist[7][i].ideal = shapelist[7][i].copy();
-        shapelist[7][6] = shapelist[6][0].copy();
-            //Vec.unitVector(reg0, 3);
-            //Vec.scale(reg0, reg0, 0.1);
-            //shapelist[7][6].translateFrame(reg0);
-            //shapelist[7][6].place();
+        //for (int i = 1; i < 6; i++) shapelist[7][i] = shapelist[7][0].copy();
+        //    //Vec.unitVector(reg0, 0);
+        //    //Vec.scale(reg0, reg0, 0.1);
+        //    //shapelist[6][0].translateFrame(reg0);
+        //    //shapelist[6][0].place();
+        //Vec.unitVector(reg1, 0);
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    Vec.unitVector(reg0, i / 2 + 1);
+        //    if (i % 2 != 0) Vec.scale(reg0, reg0, -1);
+        //    shapelist[7][i + 1].rotateFrame(reg1, reg0, zero, reg2, reg3);
+        //    //Vec.scale(reg0, reg0, 0.2);
+        //    //shapelist[7][i + 1].translateFrame(reg0);
+        //    shapelist[7][i + 1].place();
+        //    Vec.unitMatrix(shapelist[7][i + 1].axis);
+        //}
+        //for (int i = 0; i < 2; i++) shapelist[7][5].rotateFrame(reg1, reg0, zero, reg2, reg3);
+        //    //Vec.unitVector(reg0, 0);
+        //    //Vec.scale(reg0, reg0, -0.1);
+        //    //shapelist[7][5].translateFrame(reg0);
+        //shapelist[7][5].place();
+        //Vec.unitMatrix(shapelist[7][5].axis);
+        //for (int i = 1; i < 6; i++) shapelist[7][i].ideal = shapelist[7][i].copy();
+        //shapelist[7][6] = shapelist[6][0].copy();
+        ////Vec.unitVector(reg0, 3);
+        ////Vec.scale(reg0, reg0, 0.1);
+        ////shapelist[7][6].translateFrame(reg0);
+        ////shapelist[7][6].place();
 
-        //Debug.Log(shapelist[7][0].vertex.Length + " vertices " + shapelist[7][0].edge.Length + " edges " + shapelist[7][0].face.Length + " faces " + shapelist[7][0].cell.Length + " cells");
-        //for (int i = 0; i < shapelist[7][0].edge.Length; i++) Debug.Log(shapelist[7][0].edge[i].iv1 + ", " + shapelist[7][0].edge[i].iv2);
+        ////Debug.Log(shapelist[7][0].vertex.Length + " vertices " + shapelist[7][0].edge.Length + " edges " + shapelist[7][0].face.Length + " faces " + shapelist[7][0].cell.Length + " cells");
+        ////for (int i = 0; i < shapelist[7][0].edge.Length; i++) Debug.Log(shapelist[7][0].edge[i].iv1 + ", " + shapelist[7][0].edge[i].iv2);
+        //foreach (Geom.Cell cell in shapelist[7][0].cell) Debug.Log(Vec.ToString(cell.normal));
+        //foreach (Geom.Cell cell in shapelist[7][1].cell) Debug.Log(Vec.ToString(cell.normal));
+        shapelist[6][1] = Shapes.cone1(sb);
+        shapelist[6][2] = Shapes.cone2(sb);
+        shapelist[6][3] = Shapes.cone3(sb);
+        shapelist[6][4] = Shapes.cone4(sb);
+        shapelist[6][5] = Shapes.cone5(sb);
+        shapelist[6][6] = Shapes.cone6(sb);
+        shapelist[7][1] = Shapes.flat1(sb);
+        shapelist[7][2] = Shapes.flat2(sb);
+        shapelist[7][3] = Shapes.flat3(sb);
+        shapelist[7][4] = Shapes.flat4(sb);
+        shapelist[7][5] = Shapes.flat5(sb);
+        shapelist[7][6] = Shapes.cone(sb);
     }
 
     private void initHaptics()
@@ -330,6 +347,7 @@ public class FourDDemo
         }
 
         renderRelative.run(axis);
+        //for (int i = 0; i < objRetina3.Length; i += 2) bufRelative.add(objRetina3[i], objRetina3[i + 1], edgeColor);
 
         bufRelative.sort(eyeVector); // できる限り自然な描画にするために、meshを大まかに並べ替える。
         //applyBorder();
@@ -361,6 +379,7 @@ public class FourDDemo
                     //if (sep == null)
                     {
                         sep = Clip.staticSeparate(s1, s2,/* any = */ false);
+                        //sep = gjk.separate(s1, s2);
                         separators[i][j] = sep;
                     }
 
@@ -376,14 +395,36 @@ public class FourDDemo
         // all the way around.
     }
 
+    private static readonly double[][] objRetina3 = new double[][] {
+      new double[] {-1,-1,-1}, new double[] { 1,-1,-1},
+         new double[] { 1,-1,-1}, new double[] { 1, 1,-1},
+         new double[] { 1, 1,-1}, new double[] {-1, 1,-1},
+         new double[] {-1, 1,-1}, new double[] {-1,-1,-1},
+
+         new double[] {-1,-1, 1}, new double[] { 1,-1, 1},
+         new double[] { 1,-1, 1}, new double[] { 1, 1, 1},
+         new double[] { 1, 1, 1}, new double[] {-1, 1, 1},
+         new double[] {-1, 1, 1}, new double[] {-1,-1, 1},
+
+         new double[] {-1,-1,-1}, new double[] {-1,-1, 1},
+         new double[] { 1,-1,-1}, new double[] { 1,-1, 1},
+         new double[] { 1, 1,-1}, new double[] { 1, 1, 1},
+         new double[] {-1, 1,-1}, new double[] {-1, 1, 1}
+   };
+
     // 見える Cell に属する Face の visible を true にする。
     private void calcVisShape(Geom.Shape shape)
     {
         for (int i = 0; i < shape.face.Length; i++) shape.face[i].visible = false;
+        for (int i = 0; i < shape.edge.Length; i++) shape.edge[i].visible = false;
         for (int i = 0; i < shape.cell.Length; i++)
             if (calcVisCell(shape.cell[i]))
+            {
                 for (int j = 0; j < shape.cell[i].ifa.Length; j++)
                     shape.face[shape.cell[i].ifa[j]].visible = true;
+                for (int j = 0; j < shape.cell[i].ie.Length; j++)
+                    shape.edge[shape.cell[i].ie[j]].visible = true;
+            }
     }
 
     private bool calcVisCell(Geom.Cell cell)
@@ -408,7 +449,8 @@ public class FourDDemo
 
     private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
-        for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        //for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        for (int i = 0; i < shape.edge.Length; i++) if (shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
         for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }
 
@@ -420,6 +462,14 @@ public class FourDDemo
         currentDraw.drawPolygon(polygon, origin);
     }
 
+    private void drawEdge(Geom.Shape shape, Geom.Edge edge)
+    {
+        double[][] vertex = new double[2][];
+        vertex[0] = (double[])shape.vertex[edge.iv1].Clone();
+        vertex[1] = (double[])shape.vertex[edge.iv2].Clone();
+        currentDraw.drawLine(vertex[0], vertex[1], edgeColor, origin);
+    }
+
     // 隙間を空けた胞表示。
     private void drawCell(Geom.Shape shape, Geom.Cell cell, bool selected, double[] eyeVector)
     {
@@ -429,7 +479,7 @@ public class FourDDemo
         Vec.projectRetina(reg4, reg1, renderRelative.getRetina());
         bool beyond = Vec.dot(reg4, eyeVector) < border;
         for (int i = 0; i < cell.ifa.Length; i++) drawFace(shape, cell, shape.face[cell.ifa[i]], selected, beyond);
-        for (int i = 0; i < cell.ie.Length; i++) drawEdge(shape, cell, shape.edge[cell.ie[i]], selected, beyond);
+        //for (int i = 0; i < cell.ie.Length; i++) drawEdge(shape, cell, shape.edge[cell.ie[i]], selected, beyond);
     }
 
     private void drawFace(Geom.Shape shape, Geom.Cell cell, Geom.Face face, bool selected, bool beyond)
@@ -455,8 +505,7 @@ public class FourDDemo
         vertex[1] = new double[shape.vertex[edge.iv2].Length];
         Vec.mid(vertex[1], cell.center, shape.vertex[edge.iv2], offset);
         cell.color.a = (beyond) ? 0.1f : 1.0f;
-        Polygon polygon = new Polygon(vertex, selected ? cell.color +Color.white * 0.2f : cell.color);
-        currentDraw.drawPolygon(polygon, origin);
+        currentDraw.drawLine(vertex[0], vertex[1], cell.color, origin);
     }
 
     private void applyBorder()

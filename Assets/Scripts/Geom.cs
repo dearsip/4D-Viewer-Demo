@@ -1558,6 +1558,7 @@ public class Geom
         public int iv1; // index of vertex 1
         public int iv2; // index of vertex 2
         public Color color;
+        public bool visible;
 
         public Edge() { }
         public Edge(int iv1, int iv2)

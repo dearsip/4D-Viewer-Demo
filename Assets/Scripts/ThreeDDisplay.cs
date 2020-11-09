@@ -24,7 +24,9 @@ public class ThreeDDisplay : MonoBehaviour
     public Transform hand_;
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean grab;
+    public SteamVR_Action_Boolean menu;
     public SteamVR_Action_Pose pose;
+    public GameObject menuPanel;
 
     public Player player;
     private double[] eyeVector;
@@ -59,6 +61,12 @@ public class ThreeDDisplay : MonoBehaviour
         cursorAxis = new double[3][];
         for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
         wRotate = true;
+
+        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        {
+            if (menuPanel.activeSelf) menuPanel.SetActive(false); else menuPanel.SetActive(true);
+            GetComponent<BoxCollider>().enabled = !menuPanel.activeSelf;
+        }, hand);
     }
 
     void Update()
@@ -158,7 +166,7 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void toggleSpin() { spin = !spin; }
 
-    public void toggleHaptics() { soft.hapActive = !soft.hapActive; }
+    public void toggleHaptics() { soft.hapActive = !soft.hapActive; hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive; }
 
     public void reset() { soft.reset(); }
 }
