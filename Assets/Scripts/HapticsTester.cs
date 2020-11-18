@@ -16,6 +16,9 @@ public class HapticsTester : MonoBehaviour
     private int hNum3 = FourDDemo.hNum3;
     private float hNumh = FourDDemo.hNumh;
     private float[] outputs;
+    private float scale = 1.4f;
+    private Color sel = Color.cyan;
+    private Color nosel = Color.white;
 
     // Start is called before the first frame update
     void Start()
@@ -44,11 +47,11 @@ public class HapticsTester : MonoBehaviour
         {
             centers[i] = new Vector3();
             centers[i].Set(i % hNum - hNumh, i / hNum % hNum - hNumh, i / hNum2 - hNumh);
-            centers[i] *= 1 / hNumh;
+            centers[i] *= 1 / hNumh * 1.2f;
             for (int j = 0; j < 8; j++)
             {
                 vertices[8 * i + j].Set(centers[i].x, centers[i].y, centers[i].z);
-                colors[8 * i + j] = (Array.IndexOf(FourDDemo.outputNum, i) >= 0) ? Color.cyan : Color.white;
+                colors[8 * i + j] = (Array.IndexOf(FourDDemo.outputNum, i) >= 0) ? sel : nosel;
             }
             Array.ConstrainedCopy(cubeTriangles, 0, triangles, 36 * i, 36);
             for (int j = 0; j < 36; j++) cubeTriangles[j] += 8;

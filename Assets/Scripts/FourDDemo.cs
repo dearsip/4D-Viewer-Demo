@@ -51,7 +51,7 @@ public class FourDDemo
     private int selectedCell = -1;
     //protected Clip.GJKTester gjk;
 
-    public bool hapActive;
+    public bool hapActive = true;
     public double size = 1.4;
     private double[] haptics;
     private bool[] cutting; // 手の形を調べる v手の形
@@ -80,7 +80,7 @@ public class FourDDemo
 
     public FourDDemo()
     {
-        origin = new double[] { 0, 0, 0, -3 };
+        origin = new double[] { 0, 0, 0, -30 };
         reg0 = new double[4];
         reg1 = new double[4];
         reg2 = new double[4];
@@ -95,7 +95,7 @@ public class FourDDemo
         setShape();
         buf = new PolygonBuffer(4);
         bufRelative = new PolygonBuffer(3);
-        renderRelative = new RenderRelative(buf, bufRelative, 4, 1);
+        renderRelative = new RenderRelative(buf, bufRelative, 4, 2.0/30.0);
         clipResult = new Clip.Result();
         //gjk = new Clip.GJKTester(4);
 
@@ -449,7 +449,7 @@ public class FourDDemo
 
     private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
-        //for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
         for (int i = 0; i < shape.edge.Length; i++) if (shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
         for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }
