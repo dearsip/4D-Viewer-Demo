@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
@@ -66,24 +67,31 @@ public class ThreeDDisplay : MonoBehaviour
         for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
         wRotate = true;
 
-        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        menu.AddOnStateUpListener(ToggleMenu, hand);
+    }
+
+    private void ToggleMenu(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (menuPanel.activeSelf)
         {
-            if (menuPanel.activeSelf)
-            {
-                menuPanel.SetActive(false);
-                laser.SetActive(false);
-                laserHand.useRaycastHover = false;
-            }
-            else
-            {
-                menuPanel.SetActive(true);
-                menuParent.LookAt(head);
-                menuParent.LookAt(new Vector3(menuParent.forward.x, 0, menuParent.forward.z) + menuParent.position);
-                laser.SetActive(true);
-                laserHand.useRaycastHover = true;
-            }
-            GetComponent<BoxCollider>().enabled = !menuPanel.activeSelf;
-        }, hand);
+            menuPanel.SetActive(false);
+            laser.SetActive(false);
+            laserHand.useRaycastHover = false;
+        }
+        else
+        {
+            menuPanel.SetActive(true);
+            menuParent.LookAt(head);
+            menuParent.LookAt(new Vector3(menuParent.forward.x, 0, menuParent.forward.z) + menuParent.position);
+            laser.SetActive(true);
+            laserHand.useRaycastHover = true;
+        }
+        GetComponent<BoxCollider>().enabled = !menuPanel.activeSelf;
+    }
+
+    void OnDestroy()
+    {
+        menu.RemoveOnStateUpListener(ToggleMenu, hand);
     }
 
     void Update()

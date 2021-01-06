@@ -5,6 +5,7 @@ using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Menu : MonoBehaviour
 {
@@ -37,40 +38,48 @@ public class Menu : MonoBehaviour
 
         SteamVR_Actions._default.Deactivate(left);
         SteamVR_Actions._default.Deactivate(right);
-        interactUI.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        interactUI.AddOnStateDownListener(LeftActivate, left);
+        interactUI.AddOnStateDownListener(RightActivate, right);
+        menu.AddOnStateUpListener(CloseMenu, left);
+        menu.AddOnStateUpListener(CloseMenu, right);
+    }
+
+    private void LeftActivate(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (gameObject.activeSelf)
         {
-            if (gameObject.activeSelf)
-            {
-                rightLaser.SetActive(false);
-                rightHand.useRaycastHover = false;
-                leftLaser.SetActive(true);
-                leftHand.useRaycastHover = true;
-            }
-        }, left);
-        interactUI.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+            rightLaser.SetActive(false);
+            rightHand.useRaycastHover = false;
+            leftLaser.SetActive(true);
+            leftHand.useRaycastHover = true;
+        }
+    }
+
+    private void RightActivate(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (gameObject.activeSelf)
         {
-            if (gameObject.activeSelf)
-            {
-                leftLaser.SetActive(false);
-                leftHand.useRaycastHover = false;
-                rightLaser.SetActive(true);
-                rightHand.useRaycastHover = true;
-            }
-        }, right);
-        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+            leftLaser.SetActive(false);
+            leftHand.useRaycastHover = false;
+            rightLaser.SetActive(true);
+            rightHand.useRaycastHover = true;
+        }
+    }
+
+    private void CloseMenu(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (gameObject.activeSelf)
         {
-            if (gameObject.activeSelf)
-            {
-                doCancel();
-            }
-        }, left);
-        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            if (gameObject.activeSelf)
-            {
-                doCancel();
-            }
-        }, right);
+            doCancel();
+        }
+    }
+
+    public void OnDestroy()
+    {
+        interactUI.RemoveOnStateDownListener(LeftActivate, left);
+        interactUI.RemoveOnStateDownListener(RightActivate, right);
+        menu.RemoveOnStateUpListener(CloseMenu, left);
+        menu.RemoveOnStateUpListener(CloseMenu, right);
     }
 
     public void Activate(OptionsAll oa)

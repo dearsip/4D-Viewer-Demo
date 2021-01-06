@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
@@ -175,30 +176,44 @@ public class Core : MonoBehaviour
 
     private void addEvevts()
     {
-        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
+        move.AddOnStateDownListener(LeftDown, left);
+        move.AddOnStateDownListener(RightDown, right);
+        menu.AddOnStateUpListener(OpenMenu_, left);
+        menu.AddOnStateUpListener(OpenMenu_, right);
+        trigger.AddOnStateDownListener(RightClick, right);
+    }
+
+    private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
+    }
+
+    private void RightDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
+    }
+
+    private void OpenMenu_(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        openMenu();
+    }
+
+    private void RightClick(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (engine.getSaveType() == IModel.SAVE_GEOM
+         || engine.getSaveType() == IModel.SAVE_NONE)
         {
-            fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
-        }, left);
-        move.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
-        }, right);
-        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            openMenu();
-        }, left);
-        menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            openMenu();
-        }, right);
-        trigger.AddOnStateDownListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
-        {
-            if (engine.getSaveType() == IModel.SAVE_GEOM
-             || engine.getSaveType() == IModel.SAVE_NONE)
-            {
-                command = click;
-            }
-        }, right);
+            command = click;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        move.RemoveOnStateDownListener(LeftDown, left);
+        move.RemoveOnStateDownListener(RightDown, right);
+        menu.RemoveOnStateUpListener(OpenMenu_, left);
+        menu.RemoveOnStateUpListener(OpenMenu_, right);
+        trigger.RemoveOnStateDownListener(RightClick, right);
     }
 
     private void initHaptics()
