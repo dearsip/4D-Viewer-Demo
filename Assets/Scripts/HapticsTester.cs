@@ -23,6 +23,7 @@ public class HapticsTester : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GetComponent<Transform>().localScale *= scale;
         mesh = new Mesh();
         vertices = new Vector3[hNum3 * 8];
         colors = new Color[hNum3 * 8];

@@ -51,7 +51,7 @@ public class FourDDemo
     private int selectedCell = -1;
     //protected Clip.GJKTester gjk;
 
-    public bool hapActive = true;
+    public bool hapActive = false;
     public double size = 1.4;
     private double[] haptics;
     private bool[] cutting; // 手の形を調べる v手の形
