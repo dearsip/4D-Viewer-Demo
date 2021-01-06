@@ -28,7 +28,11 @@ public class ThreeDDisplay : MonoBehaviour
     public SteamVR_Action_Pose pose;
     public GameObject menuPanel;
 
-    public Player player;
+    public Hand laserHand;
+    public GameObject laser;
+    public Transform menuParent;
+    public Transform head;
+
     private double[] eyeVector;
     private double[] cursor;
     private double[][] cursorAxis;
@@ -64,7 +68,20 @@ public class ThreeDDisplay : MonoBehaviour
 
         menu.AddOnStateUpListener((SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource) =>
         {
-            if (menuPanel.activeSelf) menuPanel.SetActive(false); else menuPanel.SetActive(true);
+            if (menuPanel.activeSelf)
+            {
+                menuPanel.SetActive(false);
+                laser.SetActive(false);
+                laserHand.useRaycastHover = false;
+            }
+            else
+            {
+                menuPanel.SetActive(true);
+                menuParent.LookAt(head);
+                menuParent.LookAt(new Vector3(menuParent.forward.x, 0, menuParent.forward.z) + menuParent.position);
+                laser.SetActive(true);
+                laserHand.useRaycastHover = true;
+            }
             GetComponent<BoxCollider>().enabled = !menuPanel.activeSelf;
         }, hand);
     }
@@ -122,7 +139,7 @@ public class ThreeDDisplay : MonoBehaviour
             Vec.unitVector(rotate[3], 0);
         }
 
-        reg1 = this.transform.position - player.hmdTransform.position;
+        reg1 = this.transform.position - head.position;
         for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
