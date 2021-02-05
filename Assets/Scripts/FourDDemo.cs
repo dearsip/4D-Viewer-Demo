@@ -31,7 +31,7 @@ public class FourDDemo
     private double[] origin;
     private double[][] axis;
     private double[] zero = new double[] { 0, 0, 0, 0 };
-    private double[] reg0, reg1, reg2, reg3, reg4, reg5;
+    private double[] reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg8;
 
     private List<Vector3> verts;
     private List<int> tris;
@@ -40,6 +40,10 @@ public class FourDDemo
     private int shapeNum = 1;
     private int colorNum = 1;
 
+    public bool sliceMode;
+    public bool drEdge;
+    public bool drFace;
+    public bool drCell;
     private float cellAlpha = 0.4f;
     private Color faceColor = Color.white;
     private Color edgeColor = Color.white;
@@ -87,9 +91,16 @@ public class FourDDemo
         reg3 = new double[4];
         reg4 = new double[3];
         reg5 = new double[3];
+        reg6 = new double[3];
+        reg7 = new double[3];
+        reg8 = new double[3];
         axis = new double[4][];
         for (int i = 0; i < 4; i++) axis[i] = new double[4];
         Vec.unitMatrix(axis);
+        drEdge = true;
+        drFace = true;
+        drCell = true;
+        sliceMode = false;
 
         initShape();
         setShape();
@@ -449,9 +460,9 @@ public class FourDDemo
 
     private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
-        for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
-        for (int i = 0; i < shape.edge.Length; i++) if (shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
-        for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
+        if (drFace) for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        if (drEdge) for (int i = 0; i < shape.edge.Length; i++) if (shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
+        if (drCell) for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }
 
     private void drawFace(Geom.Shape shape, Geom.Face face)
@@ -605,6 +616,8 @@ public class FourDDemo
     }
 
     private double width = 0.005;
+    private float t3 = 0.2f;
+    private float t2 = 1f;
     // Polygon の情報を vertices, triangles, colors に変換する。
     private void convert(PolygonBuffer buf, ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, double[] eyeVector)
     {
@@ -617,6 +630,7 @@ public class FourDDemo
         {
             p = buf.get(i);
             int v = p.vertex.Length;
+            if (sliceMode) p.color.a *= t3;
             if (v == 2)
             {
                 v = 4;
@@ -661,6 +675,68 @@ public class FourDDemo
                     tris.Add(count);
                     tris.Add(count + j + 1);
                     tris.Add(count + j + 2);
+                }
+                if (sliceMode)
+                {
+                    int k = 0;
+                    for (int j = 0; j < v - 1; j++)
+                    {
+                        if (p.vertex[j][2] * p.vertex[j + 1][2] < 0)
+                        {
+                            if (k == 0)
+                            {
+                                reg7[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg7[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg7[2] = 0;
+                            }
+                            else
+                            {
+                                reg8[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg8[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
+                                reg8[2] = 0;
+                            }
+                            k += 1;
+                        }
+                    }
+                    if (k == 1)
+                    {
+                        reg8[0] = (p.vertex[0][0] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][0] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
+                        reg8[1] = (p.vertex[0][1] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][1] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
+                        reg8[2] = 0;
+                    }
+                    if (k > 0)
+                    {
+                        count += v;
+                        p.color.a = t2;
+                        v = 4;
+                        Vec.sub(reg5, reg8, reg7);
+                        Vec.cross(reg6, reg5, eyeVector);
+                        Vec.normalize(reg6, reg6);
+                        Vec.scale(reg6, reg6, width * 2);
+
+                        Vec.add(reg5, reg7, reg6);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.addScaled(reg5, reg7, reg6, -1);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.add(reg5, reg8, reg6);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        Vec.addScaled(reg5, reg8, reg6, -1);
+                        verts.Add(new Vector3((float)reg5[0], (float)reg5[1], (float)reg5[2]));
+                        cols.Add(p.color);
+
+                        tris.Add(count);
+                        tris.Add(count + 1);
+                        tris.Add(count + 2);
+                        tris.Add(count + 2);
+                        tris.Add(count + 1);
+                        tris.Add(count + 3);
+                    }
                 }
             }
             count += v;

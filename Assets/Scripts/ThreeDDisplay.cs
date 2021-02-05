@@ -47,7 +47,7 @@ public class ThreeDDisplay : MonoBehaviour
 
     public Slider faceSlider, cellSlider, retinaSlider, sizeSlider, borderSlider, offsetSlider;
     public Transform display;
-    private bool wRotate, edit, spin;
+    private bool wRotate, zRotate, edit, spin;
 
     // Start is called before the first frame update
     void Start()
@@ -66,6 +66,7 @@ public class ThreeDDisplay : MonoBehaviour
         cursorAxis = new double[3][];
         for (int i = 0; i < cursorAxis.Length; i++) cursorAxis[i] = new double[3];
         wRotate = true;
+        zRotate = true;
 
         menu.AddOnStateUpListener(ToggleMenu, hand);
     }
@@ -123,6 +124,7 @@ public class ThreeDDisplay : MonoBehaviour
             if (wRotate)
             {
                 reg1 = pose.GetLocalPosition(hand) - pose.GetLastLocalPosition(hand); // コントローラーの移動距離 (Vector3)
+                if (!zRotate) reg1.z = 0;
                 for (int i = 0; i < 3; i++) relapos[i] = (double)reg1[i]; // double に変換
                 double t = 2 * Math.PI * Vec.norm(relapos); // ノルムを定数倍して回転角とする
                 Vec.normalize(relapos, relapos);
@@ -131,6 +133,7 @@ public class ThreeDDisplay : MonoBehaviour
             } else Vec.unitVector(rotate[1], 3);
 
             relarot = pose.GetLocalRotation(hand) * Quaternion.Inverse(pose.GetLastLocalRotation(hand)); // コントローラーの回転
+            if (!zRotate) { relarot[0] = 0; relarot[1] = 0; }
             reg1.Set(relarot[0], relarot[1], relarot[2]); // 回転軸方向
             reg2.Set(1, 0, 0);
             Vector3.OrthoNormalize(ref reg1, ref reg2); // reg2 を回転軸と垂直に
@@ -171,13 +174,23 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void changeColor(int colorNum) { soft.changeColor(colorNum); }
 
+    public void toggleDrawEdge() { soft.drEdge = !soft.drEdge; }
+
+    public void toggleDrawFace() { soft.drFace = !soft.drFace; }
+
+    public void toggleDrawCell() { soft.drCell = !soft.drCell; }
+
     public void changeFaceAlpha() { soft.changeFaceAlpha(faceSlider.value); }
 
     public void changeCellAlpha() { if (soft != null) soft.changeCellAlpha(cellSlider.value); }
 
     public void toggleWRotate() { wRotate = !wRotate; }
 
+    public void toggleZRotate() { zRotate = !zRotate; }
+
     public void toggleEdit() { edit = !edit; }
+
+    public void toggleSlice() { soft.sliceMode = !soft.sliceMode; }
 
     public void changeRetina() { soft.changeRetina(retinaSlider.value * 3); }
 
