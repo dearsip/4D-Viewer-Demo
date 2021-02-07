@@ -194,6 +194,8 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void changeRetina() { soft.changeRetina(retinaSlider.value * 3); }
 
+    public void changeOrtho() { soft.changeOrtho(); }
+
     public void changeSize() { float s = sizeSlider.value * 2 + 1; ; display.localScale = new Vector3(s, s, s); soft.size = s; }
 
     public void changeBorder() { if (soft != null) soft.changeBorder(borderSlider.value * 2 - 1); }

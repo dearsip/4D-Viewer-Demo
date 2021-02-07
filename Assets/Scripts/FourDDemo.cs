@@ -247,6 +247,12 @@ public class FourDDemo
         renderRelative.setRetina(1 / (r * r + 1) * (6 / (6 + r)));
     }
 
+    public void changeOrtho()
+    {
+        origin[3] = -99999999;
+        renderRelative.setRetina(0);
+    }
+
     public void changeBorder(double r) { border = r; }
 
     public void changeOffset(double r) { offset = r * 0.999; } // 最大値でのZ-Fightingを防ぐ
@@ -487,7 +493,8 @@ public class FourDDemo
         // border 処理のために視点からの距離を測る。
         Vec.sub(reg1, cell.center, origin);
         Vec.toAxisCoordinates(reg1, reg1, axis);
-        Vec.projectRetina(reg4, reg1, renderRelative.getRetina());
+        if (renderRelative.getRetina() > 0) Vec.projectRetina(reg4, reg1, renderRelative.getRetina());
+        else Vec.projectOrtho(reg4, reg1, renderRelative.getOrtho());
         bool beyond = Vec.dot(reg4, eyeVector) < border;
         for (int i = 0; i < cell.ifa.Length; i++) drawFace(shape, cell, shape.face[cell.ifa[i]], selected, beyond);
         //for (int i = 0; i < cell.ie.Length; i++) drawEdge(shape, cell, shape.edge[cell.ie[i]], selected, beyond);
@@ -570,7 +577,8 @@ public class FourDDemo
 
     public double click(double[] vector, bool edit, bool select)
     {
-        Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
+        if (renderRelative.getRetina() > 0) Vec.addScaled(reg3, axis[3], vector, renderRelative.getRetina());
+        else Vec.scale(reg3, axis[3], renderRelative.getOrtho());
         Vec.addScaled(reg2, origin, reg3, 10000); // infinity
         double dMin = 1;
         for (int i = 0; i < shapes.Length; i++)

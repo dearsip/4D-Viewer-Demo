@@ -375,6 +375,15 @@ public class Vec
     public const int PROJ_ORTHO = 2; // value is vector
     public const int PROJ_PERSPEC = 3; // value is point
 
+    public static void projectOrtho(double[] dest, double[] src, double retina)
+    {
+        double scale = 1 / retina;
+        for (int i = 0; i < dest.Length; i++)
+        {
+            dest[i] = scale * src[i];
+        }
+    }
+
     /**
      * Project into a plane without reducing the dimension.
      */

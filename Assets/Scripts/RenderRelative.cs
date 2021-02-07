@@ -35,12 +35,14 @@ public class RenderRelative
 
     // --- options ---
 
+    private double orthoRetina = 2;
     public void setRetina(double retina)
     {
         this.retina = retina;
 
         int next = 0;
         double[] reg;
+        if (retina > 0)
         for (int a = 0; a < dim - 1; a++)
         {
 
@@ -59,9 +61,27 @@ public class RenderRelative
             // no need to zero other components,
             // they never become nonzero
         }
+        else 
+        for (int a = 0; a < dim - 1; a++)
+        {
+
+            reg = new double[dim];
+            reg[a] = 1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            reg = new double[dim];
+            reg[a] = -1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            // no need to zero other components,
+            // they never become nonzero
+        }
     }
 
     public double getRetina() { return retina; }
+    public double getOrtho() { return orthoRetina; }
 
     // --- processing ---
 
@@ -85,7 +105,7 @@ public class RenderRelative
         {
             for (int i = 0; i < clip.Length; i++)
             {
-                if (Vec.clip(reg.vertex[0], reg.vertex[1], clip[i].n)) return false;
+                if (Vec.clip(reg.vertex[0], reg.vertex[1], clip[i].n, clip[i].getThreshold(), 1)) return false;
             }
         }
         else
@@ -97,10 +117,17 @@ public class RenderRelative
         }
 
         dest.vertex = new double[reg.vertex.Length][];
+        if (retina > 0)
         for (int i = 0; i < reg.vertex.Length; i++)
         {
             dest.vertex[i] = new double[3];
             Vec.projectRetina(dest.vertex[i], reg.vertex[i], retina);
+        }
+        else
+        for (int i = 0; i < reg.vertex.Length; i++)
+        {
+            dest.vertex[i] = new double[3];
+            Vec.projectOrtho(dest.vertex[i], reg.vertex[i], orthoRetina);
         }
 
         dest.color = src.color;
