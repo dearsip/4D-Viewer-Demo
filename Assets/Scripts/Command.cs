@@ -71,7 +71,7 @@ public class Command
         public void exec(Context c) //throws Exception
         {
             int i = toInt(c.stack.Pop());
-            c.stack.Push(c.stack.ToArray()[c.stack.Count - 1 - i]);
+            c.stack.Push(c.stack.ToArray()[i]);
         }
     }
 
@@ -81,7 +81,8 @@ public class Command
         {
             string s = (string)c.stack.Pop();
             object o = c.stack.Pop();
-            c.dict.Add(s, o);
+            try { c.dict.Add(s, o); }
+            catch (ArgumentException) { c.dict[s] = o; }
             if (c.isTopLevel())
             {
                 c.topLevelDef.Add(s);
