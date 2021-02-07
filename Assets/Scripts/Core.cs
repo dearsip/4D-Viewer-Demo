@@ -283,7 +283,7 @@ public class Core : MonoBehaviour
             menuCommand = null;
             controll();
             engine.renderAbsolute(eyeVector, opt.oo.sliceMode);
-            doHaptics();
+            //doHaptics();
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
             int now = Environment.TickCount;
