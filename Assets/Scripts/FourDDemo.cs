@@ -12,8 +12,8 @@ using WebSocketSharp;
 
 public class FourDDemo
 {
-    private bool error = true; // 振動装置と接続しているときはfalseにする
-    private string adrr = "ws://172.20.10.6:9999";
+    private bool error = false; // 振動装置と接続しているときはfalseにする
+    private string adrr = "ws://172.20.10.2:9999";
 
     private Geom.Shape[][] shapelist;
 
@@ -60,7 +60,8 @@ public class FourDDemo
     private double[] haptics;
     private bool[] cutting; // 手の形を調べる v手の形
     public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-    public static int[] outputNum = { 273, 513, 451, 453, 508, 659, 662, 520, 417, 415, 489, 420, 336, 262, 326, 329, 173, 181, 164, 166, 111, 264, 345, 435, 294, 204, 114, 366, 276, 186 };
+    //public static int[] outputNum = { 273, 513, 451, 453, 508, 659, 662, 520, 417, 415, 489, 420, 336, 262, 326, 329, 173, 181, 164, 166, 111, 264, 345, 435, 294, 204, 114, 366, 276, 186 };
+    public static int[] outputNum = { 424, 191, 513, 290, 587, 516, 578, 519, 263, 427, 415, 582, 263, 337, 253, 329, 182, 183, 181, 166, 256, 265, 274, 94, 184, 366, 357, 258, 204, 186 };
     private float[] output;
     private static int opFrame = 20; // 出力フレーム
     private int opf;
@@ -309,6 +310,8 @@ public class FourDDemo
         for (int i = 0; i < shapes.Length; i++) shapes[i].reset();
     }
 
+    private int target = 0;
+    private float strength = 0f;
     public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, ref double[] haptics,
         double[][] rotate, double[] eyeVector, double[] cursor, double[][] cursorAxis, bool edit, bool select, bool spin)
     {
@@ -324,7 +327,18 @@ public class FourDDemo
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(this.haptics);
         haptics = this.haptics;
-        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ), 1f);
+        //if (Input.GetKeyDown(KeyCode.UpArrow)) target++;
+        //if (Input.GetKeyDown(KeyCode.DownArrow)) target--;
+        //if (Input.GetKeyDown(KeyCode.RightArrow)) strength += 0.1f;
+        //if (Input.GetKeyDown(KeyCode.LeftArrow)) strength -= 0.1f;
+        //Debug.Log("target: " + target+", strength: "+strength);
+        //for (int i = 0; i < output.Length; i++) output[i] = strength;
+        //for (int i = 0; i < output.Length; i++)
+        //{
+        //    if (i == target) output[i] = strength;
+        //    else output[i] = 0f;
+        //}
         if (!error && (opf = ++opf % opFrame) == 0)
         {
             try {
