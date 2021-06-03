@@ -24,12 +24,16 @@ public class ThreeDDisplay : MonoBehaviour
 
     public Transform hand_;
     public SteamVR_Input_Sources hand;
+    public SteamVR_Input_Sources leftHand;
+    public SteamVR_Action_Boolean hints;
     public SteamVR_Action_Boolean grab;
+    public SteamVR_Action_Boolean move;
     public SteamVR_Action_Boolean menu;
     public SteamVR_Action_Pose pose;
     public GameObject menuPanel;
 
     public Hand laserHand;
+    public Hand _leftHand;
     public GameObject laser;
     public Transform menuParent;
     public Transform head;
@@ -48,6 +52,7 @@ public class ThreeDDisplay : MonoBehaviour
     public Slider faceSlider, cellSlider, retinaSlider, sizeSlider, borderSlider, offsetSlider;
     public Transform display;
     private bool wRotate, zRotate, edit, spin;
+    private bool visibleHints;
 
     // Start is called before the first frame update
     void Start()
@@ -69,6 +74,9 @@ public class ThreeDDisplay : MonoBehaviour
         zRotate = true;
 
         menu.AddOnStateUpListener(ToggleMenu, hand);
+        visibleHints = true;
+        StartCoroutine(InitHints());
+        hints.AddOnStateUpListener(ToggleHints, leftHand);
     }
 
     private void ToggleMenu(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -90,6 +98,33 @@ public class ThreeDDisplay : MonoBehaviour
         GetComponent<BoxCollider>().enabled = !menuPanel.activeSelf;
     }
 
+    private IEnumerator InitHints() {
+        yield return new WaitForSeconds(1.0f);
+        if (visibleHints) showHints();
+        yield break;
+    }
+    private void showHints()
+    {
+        ControllerButtonHints.ShowTextHint(laserHand, grab, "select");
+        ControllerButtonHints.ShowTextHint(laserHand, move, "control");
+        ControllerButtonHints.ShowTextHint(laserHand, menu, "menu");
+        ControllerButtonHints.ShowTextHint(laserHand, hints, "move display");
+        ControllerButtonHints.ShowTextHint(_leftHand, hints, "show/hide hints");
+    }
+    private void ToggleHints(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (visibleHints)
+        {
+            ControllerButtonHints.HideAllTextHints(laserHand);
+            ControllerButtonHints.HideAllTextHints(_leftHand);
+        }
+        else
+        {
+            showHints();
+        }
+        visibleHints = !visibleHints;
+    }
+
     void OnDestroy()
     {
         menu.RemoveOnStateUpListener(ToggleMenu, hand);
@@ -99,7 +134,7 @@ public class ThreeDDisplay : MonoBehaviour
     {
         calcInput();
         soft.Run(ref vertices, ref triangles, ref colors, ref haptics, rotate, 
-            eyeVector, cursor, cursorAxis, grab.GetStateDown(hand) && edit, edit, spin); // ソフトの出力が vertices, triangles に収められる
+            eyeVector, cursor, cursorAxis, move.GetStateDown(hand) && edit, edit, spin); // ソフトの出力が vertices, triangles に収められる
         hapticsTester.draw(haptics);
         if (vertices.Length < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
@@ -119,7 +154,7 @@ public class ThreeDDisplay : MonoBehaviour
     // コントローラーの情報を回転に変換する。
     private void calcInput()
     {
-        if (grab.GetState(hand) && !menuPanel.activeSelf)
+        if (move.GetState(hand) && !menuPanel.activeSelf)
         {
             if (wRotate)
             {
