@@ -12,7 +12,7 @@ using WebSocketSharp;
 
 public class FourDDemo
 {
-    private bool error = true; // 振動装置と接続しているときはfalseにする
+    public bool error = true;
     private string adrr = "ws://172.20.10.2:9999";
 
     private Geom.Shape[][] shapelist;
@@ -42,8 +42,10 @@ public class FourDDemo
 
     public bool sliceMode;
     public bool drEdge;
+    public bool drHdnEdge;
     public bool drFace;
     public bool drCell;
+    public bool invertNormals;
     private float cellAlpha = 0.4f;
     private Color faceColor = Color.white;
     private Color edgeColor = Color.white;
@@ -104,8 +106,10 @@ public class FourDDemo
         for (int i = 0; i < 4; i++) axis[i] = new double[4];
         Vec.unitMatrix(axis);
         drEdge = true;
+        drHdnEdge = false;
         drFace = true;
         drCell = true;
+        invertNormals = false;
         sliceMode = false;
 
         initShape();
@@ -127,16 +131,17 @@ public class FourDDemo
         for (int i = 0; i < spinv.Length; i++) Vec.normalize(spinv[i], spinv[i]);
 
         output = new float[outputNum.Length];
+    }
 
-        if (!error)
+    public void connect()
+    {
+        this.ws = new WebSocket(adrr);
+        this.ws.OnMessage += (object sender, MessageEventArgs e) =>
         {
-            this.ws = new WebSocket(adrr);
-            this.ws.OnMessage += (object sender, MessageEventArgs e) =>
-            {
-                Debug.Log(e.Data);
-            };
-            this.ws.Connect();
-        }
+            Debug.Log(e.Data);
+        };
+        this.ws.Connect();
+        error = false;
     }
 
     private void initShape()
@@ -332,19 +337,19 @@ public class FourDDemo
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(this.haptics);
         haptics = this.haptics;
-        //for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ), 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ), 1f);
         //Debug ---
-        if (Input.GetKeyDown(KeyCode.UpArrow)) target++;
-        if (Input.GetKeyDown(KeyCode.DownArrow)) target--;
-        if (Input.GetKeyDown(KeyCode.RightArrow)) strength += 0.1f;
-        if (Input.GetKeyDown(KeyCode.LeftArrow)) strength -= 0.1f;
-        Debug.Log("target: " + target + ", strength: " + strength);
+        //if (Input.GetKeyDown(KeyCode.UpArrow)) target++;
+        //if (Input.GetKeyDown(KeyCode.DownArrow)) target--;
+        //if (Input.GetKeyDown(KeyCode.RightArrow)) strength += 0.1f;
+        //if (Input.GetKeyDown(KeyCode.LeftArrow)) strength -= 0.1f;
+        //Debug.Log("target: " + target + ", strength: " + strength);
         //for (int i = 0; i < output.Length; i++) output[i] = strength;
-        for (int i = 0; i < output.Length; i++)
-        {
-            if (i == target) output[i] = strength;
-            else output[i] = 0f;
-        }
+        //for (int i = 0; i < output.Length; i++)
+        //{
+        //    if (i == target) output[i] = strength;
+        //    else output[i] = 0f;
+        //}
         // ---
         if (!error && (opf = ++opf % opFrame) == 0)
         {
@@ -476,7 +481,7 @@ public class FourDDemo
             const double epsilon = -1e-9;
 
             Vec.sub(reg1, cell.center, origin); // vector from origin to face center
-            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon);
+            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon) ^ invertNormals;
         }
         else
         {
@@ -488,7 +493,7 @@ public class FourDDemo
     private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
         if (drFace) for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
-        if (drEdge) for (int i = 0; i < shape.edge.Length; i++) if (shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
+        if (drEdge) for (int i = 0; i < shape.edge.Length; i++) if (drHdnEdge || shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
         if (drCell) for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }
 

@@ -119,7 +119,7 @@ public class ThreeDDisplay : MonoBehaviour
     // コントローラーの情報を回転に変換する。
     private void calcInput()
     {
-        if (grab.GetState(hand) && GetComponent<Interactable>().isHovering)
+        if (grab.GetState(hand) && !menuPanel.activeSelf)
         {
             if (wRotate)
             {
@@ -176,9 +176,13 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void toggleDrawEdge() { soft.drEdge = !soft.drEdge; }
 
+    public void toggleDrawHiddenEdge() { soft.drHdnEdge = !soft.drHdnEdge; }
+
     public void toggleDrawFace() { soft.drFace = !soft.drFace; }
 
     public void toggleDrawCell() { soft.drCell = !soft.drCell; }
+
+    public void toggleInvertNormals() { soft.invertNormals = !soft.invertNormals; }
 
     public void changeFaceAlpha() { soft.changeFaceAlpha(faceSlider.value); }
 
@@ -206,7 +210,8 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void toggleSpin() { spin = !spin; }
 
-    public void toggleHaptics() { soft.hapActive = !soft.hapActive; hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive; }
+    public void toggleHaptics() { soft.hapActive = !soft.hapActive; if (soft.error && soft.hapActive) soft.connect();
+        hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive; }
 
     public void reset() { soft.reset(); }
 }
