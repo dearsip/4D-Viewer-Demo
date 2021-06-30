@@ -35,7 +35,7 @@ namespace Valve.VR.InteractionSystem
 		{
 			currentHand = hand;
 			InputModule.instance.HoverBegin( gameObject );
-			ControllerButtonHints.ShowButtonHint( hand, hand.uiInteractAction);
+			//ControllerButtonHints.ShowButtonHint( hand, hand.uiInteractAction);
 		}
 
 
