@@ -60,15 +60,8 @@ public class FourDDemo
     public bool hapActive = false;
     public double size = 1.4;
     private double[] haptics;
-    private bool[] cutting; // 手の形を調べる v手の形
-    // old
-    public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, true, true, true, true, false, false, false, false, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, false, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, false, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-    // new
-    //public static bool[] cut = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-    // old
-    public static int[] outputNum = { 273, 513, 451, 453, 508, 659, 662, 520, 417, 415, 489, 420, 336, 262, 326, 329, 173, 181, 164, 166, 111, 264, 345, 435, 294, 204, 114, 366, 276, 186 };
-    // new
-    //public static int[] outputNum = { 424, 191, 513, 290, 587, 516, 578, 519, 263, 427, 415, 582, 263, 337, 253, 329, 182, 183, 181, 166, 256, 265, 274, 94, 184, 366, 357, 258, 204, 186 };
+    public static bool[] cut;
+    public static int[] outputNum = { 587, 517, 578, 582, 344, 427, 415, 500, 263, 337, 253, 329, 182, 174, 181, 166, 516, 606, 255, 355, 102, 272, 39, 210, 366, 186, 222, 114, 141, 51, };
     private float[] output;
     private static int opFrame = 20; // 出力フレーム
     private int opf;
@@ -127,6 +120,7 @@ public class FourDDemo
         cols = new List<Color>();
 
         initHaptics();
+        //connect(); //Debug
 
         for (int i = 0; i < spinv.Length; i++) Vec.normalize(spinv[i], spinv[i]);
 
@@ -229,10 +223,11 @@ public class FourDDemo
 
     private void initHaptics()
     {
-        haptics = new double[hNum3];
-        for (int i = 0; i < hNum3; i++) if (!cut[i]) haptics[i] = 0;
-        cutting = new bool[hNum3];
-        for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
+        haptics = new double[outputNum.Length];
+        for (int i = 0; i < outputNum.Length; i++) haptics[i] = 0;
+        //cutting = new bool[hNum3];
+        //for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
+        cut = new bool[outputNum.Length];
     }
 
     public void changeShape(int shapeNum)
@@ -321,7 +316,9 @@ public class FourDDemo
     }
 
     private int target = 0;
-    private float strength = 0f;
+    private float[] strength = new float[outputNum.Length];
+    public static float[] cor = { 0.4f, 0.55f, 0.6f, 0.7f, 0.6f, 1.25f, 1.3f, 1.2f, 1.42f, 1.15f, 1.05f, 0.8f, 0.5f, 0.7f, 0.7f, 0.8f, 0.5f, 0.9f, 0.85f, 0.55f, 1.42f, 1.05f, 1.1f, 0.8f, 1.15f, 0.7f, 0.85f, 0.9f, 0.7f, 0.7f }; 
+
     public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, ref double[] haptics,
         double[][] rotate, double[] eyeVector, double[] cursor, double[][] cursorAxis, bool edit, bool select, bool spin)
     {
@@ -337,20 +334,23 @@ public class FourDDemo
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(this.haptics);
         haptics = this.haptics;
-        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + this.haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ), 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[i] == 0) ? 0 : Mathf.Min((float)(this.haptics[i] / 1.7 /*実測したおよその最大値*/), 1f);
         //Debug ---
         //if (Input.GetKeyDown(KeyCode.UpArrow)) target++;
         //if (Input.GetKeyDown(KeyCode.DownArrow)) target--;
-        //if (Input.GetKeyDown(KeyCode.RightArrow)) strength += 0.1f;
-        //if (Input.GetKeyDown(KeyCode.LeftArrow)) strength -= 0.1f;
-        //Debug.Log("target: " + target + ", strength: " + strength);
-        //for (int i = 0; i < output.Length; i++) output[i] = strength;
+        //if (Input.GetKeyDown(KeyCode.RightArrow)) strength[0] += 0.1f;
+        //if (Input.GetKeyDown(KeyCode.LeftArrow)) strength[0] -= 0.1f;
+        ////if (Input.GetKeyDown(KeyCode.RightArrow)) strength[target] += 0.1f;
+        ////if (Input.GetKeyDown(KeyCode.LeftArrow)) strength[target] -= 0.1f;
+        //Debug.Log("target: " + target + ", strength: " + strength[0]);
+        ////Debug.Log("target: " + target + ", strength: " + strength[target]);
+        ////for (int i = 0; i < output.Length; i++) output[i] = strength[i];
         //for (int i = 0; i < output.Length; i++)
         //{
-        //    if (i == target) output[i] = strength;
+        //    if (i == target) output[i] = strength[0] * cor[i] * 0.7f;
         //    else output[i] = 0f;
         //}
-        // ---
+        //---
         if (!error && (opf = ++opf % opFrame) == 0)
         {
             try {
@@ -568,7 +568,8 @@ public class FourDDemo
 
     private void calcHaptics(double[] cursor, double[][] cursorAxis)
     {
-        for (int i = 0; i < haptics.Length; i++) if (cut[i])
+        int count = 0;
+        foreach (int i in outputNum) //(int i = 0; i < haptics.Length; i++) if (cut[i])
         {
             reg4[0] = i % hNum - hNumh; // 立方体形に配置
             reg4[1] = i / hNum % hNum - hNumh;
@@ -580,23 +581,27 @@ public class FourDDemo
             Vec.fromAxisCoordinates(reg5, reg4, cursorAxis); // 向きを変更
             for (int j = 0; j < 3; j++) reg0[j] = reg5[j]; // reg0[3] (= 0) は編集されない
             Vec.add(reg0, cursor, reg0);
-            haptics[i] = click(reg0, false, false);
-            haptics[i] = 1 - haptics[i]; // 近いほど大きく
+            haptics[count] = click(reg0, false, false);
+            haptics[count] = 1 - haptics[count]; // 近いほど大きく
+            count++;
         }
         double max = Vec.max(haptics); // 最も近い点
-        if (max > 0) for (int i = 0; i < hNum3; i++) if (cut[i]) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
+        //if (max > 0) for (int i = 0; i < hNum3; i++) if (cut[i]) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
+        if (max > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] = Math.Max((haptics[i] - max + 0.00005) / 0.00005, 0); // 上限を設定
         max = 0; // 総和が小さい->一部しか触れていない->高圧力と考える
         int touch = 0;
-        for (int i = 0; i < hNum3; i++)
+        //for (int i = 0; i < hNum3; i++)
+        for (int i = 0; i < haptics.Length; i++)
         {
             if (haptics[i] != 0)
             {
                 max += haptics[i];
                 touch++;
-                cutting[i] = true;
+                //cutting[i] = true;
             }
         }
-        if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
+        //if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
+        if (touch > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] *= ( 2 * touch - max) / touch;
         //max_ = Math.Max(Vec.max(haptics), max_);
         //Debug.Log(max_);
     }
@@ -641,10 +646,6 @@ public class FourDDemo
     {
         StreamWriter sw = new StreamWriter("./LogData.txt", true);
         foreach (int[] c in colors) sw.WriteLine(Vec.ToString(c));
-        sw.Flush();
-        sw.Close();
-        sw = new StreamWriter("./Cutting.txt", true);
-        foreach (int[] c in colors) sw.WriteLine(Vec.ToString(cutting));
         sw.Flush();
         sw.Close();
     }

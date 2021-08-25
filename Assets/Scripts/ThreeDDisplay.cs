@@ -245,8 +245,10 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void toggleSpin() { spin = !spin; }
 
-    public void toggleHaptics() { soft.hapActive = !soft.hapActive; if (soft.error && soft.hapActive) soft.connect();
+    public void toggleHaptics() { soft.hapActive = !soft.hapActive; //if (soft.error && soft.hapActive) soft.connect();
         hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive; }
+
+    public void connect() { soft.connect(); }
 
     public void reset() { soft.reset(); }
 }
