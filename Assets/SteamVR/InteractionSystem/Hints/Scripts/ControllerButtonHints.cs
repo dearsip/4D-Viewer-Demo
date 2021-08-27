@@ -586,7 +586,7 @@ namespace Valve.VR.InteractionSystem
 				if ( ticks - tickCount > 1.0f )
 				{
 					tickCount += 1.0f;
-                    hapticFlash.Execute(0, 0.005f, 0.005f, 1, inputSource);
+                    //hapticFlash.Execute(0, 0.005f, 0.005f, 1, inputSource);
 				}
 
 				for ( int i = 0; i < flashingRenderers.Count; i++ )

@@ -207,6 +207,10 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void changeShape(int shapeNum) { soft.changeShape(shapeNum); }
 
+    public void toggleRandom(int shapeNum) { soft.toggleRandom(shapeNum); }
+
+    public void changeRandom() { soft.changeRandom(); }
+
     public void changeColor(int colorNum) { soft.changeColor(colorNum); }
 
     public void toggleDrawEdge() { soft.drEdge = !soft.drEdge; }

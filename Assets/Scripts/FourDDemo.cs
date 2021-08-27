@@ -16,6 +16,8 @@ public class FourDDemo
     private string adrr = "ws://172.20.10.2:9999";
 
     private Geom.Shape[][] shapelist;
+    private List<int> randomShape;
+    private System.Random random;
 
     private Geom.Shape[] shapes;
     private bool[][] inFromt;
@@ -219,6 +221,10 @@ public class FourDDemo
         shapelist[7][4] = Shapes.flat4(sb);
         shapelist[7][5] = Shapes.flat5(sb);
         shapelist[7][6] = Shapes.cone(sb);
+
+        randomShape = new List<int>();
+        for (int i = 0; i < shapelist.Length; i++) randomShape.Add(i);
+        random = new System.Random();
     }
 
     private void initHaptics()
@@ -236,6 +242,16 @@ public class FourDDemo
         colorNum = 1;
         setShape();
     }
+
+    public void toggleRandom(int shapeNum)
+    {
+        if (randomShape.Contains(shapeNum))
+            randomShape.Remove(shapeNum);
+        else
+            randomShape.Add(shapeNum);
+    }
+
+    public void changeRandom() { if (randomShape.Count > 0) changeShape(randomShape[random.Next(randomShape.Count)]); }
 
     public void changeColor(int colorNum)
     {
@@ -334,7 +350,7 @@ public class FourDDemo
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(this.haptics);
         haptics = this.haptics;
-        for (int i = 0; i < output.Length; i++) output[i] = (this.haptics[i] == 0) ? 0 : Mathf.Min((float)(this.haptics[i] / 1.7 /*実測したおよその最大値*/), 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (float)this.haptics[i];
         //Debug ---
         //if (Input.GetKeyDown(KeyCode.UpArrow)) target++;
         //if (Input.GetKeyDown(KeyCode.DownArrow)) target--;
@@ -566,6 +582,7 @@ public class FourDDemo
         for (int i = target; i < size; i++) bufRelative.get(i).color.a *= 0.1f;
     }
 
+    private double f = 3.0;
     private void calcHaptics(double[] cursor, double[][] cursorAxis)
     {
         int count = 0;
@@ -601,9 +618,9 @@ public class FourDDemo
             }
         }
         //if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
-        if (touch > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] *= ( 2 * touch - max) / touch;
-        //max_ = Math.Max(Vec.max(haptics), max_);
-        //Debug.Log(max_);
+        if (touch > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] *= 1 - 0.75 * Math.Sqrt(Math.Max(max / touch - 0.25,0)/0.75);
+        max_ = Math.Max(Vec.max(haptics), max_);
+        Debug.Log(max_);
     }
 
     public double click(double[] vector, bool edit, bool select)

@@ -5,7 +5,7 @@
       "app_key": "application.generated.unity.4dviewerdemo.exe",
       "launch_type": "url",
       "url": "steam://launch/",
-      "action_manifest_path": "C:\\Users\\pdaei\\Documents\\4D Viewer Demo\\actions.json",
+      "action_manifest_path": "C:\\Users\\pdaei\\Documents\\GitHub\\4D-Viewer-Demo\\actions.json",
       "strings": {
         "en_us": {
           "name": "4D Viewer Demo [Testing]"
