@@ -508,7 +508,7 @@ public class FourDDemo
 
     private void drawShape(Geom.Shape shape, double[] eyeVector)
     {
-        if (drFace) for (int i = 0; i < shape.face.Length; i++) if (shape.face[i].visible) drawFace(shape, shape.face[i]);
+        if (drFace) for (int i = 0; i < shape.face.Length; i++) if (drHdnEdge || shape.face[i].visible) drawFace(shape, shape.face[i]);
         if (drEdge) for (int i = 0; i < shape.edge.Length; i++) if (drHdnEdge || shape.edge[i].visible) drawEdge(shape, shape.edge[i]);
         if (drCell) for (int i = 0; i < shape.cell.Length; i++) if (shape.cell[i].visible) drawCell(shape, shape.cell[i], i == selectedCell, eyeVector);
     }

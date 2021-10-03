@@ -158,7 +158,7 @@ public class Core : MonoBehaviour
         mesh = new Mesh();
         engine = new Engine(mesh);
 
-        initHaptics();
+        //initHaptics();
 
         newGame(dim);
         active = true;
@@ -434,14 +434,14 @@ public class Core : MonoBehaviour
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
-        reg1 = (pose.GetLocalPosition(right) - transform.position) / 0.3f * 1.2f / (float)opt.ov4.scale;
-        for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
-        reg1 = pose.GetLocalRotation(right)*Vector3.right;
-        for (int i = 0; i < 3; i++) cursorAxis[0][i] = reg1[i];
-        reg1 = pose.GetLocalRotation(right)*Vector3.up;
-        for (int i = 0; i < 3; i++) cursorAxis[1][i] = reg1[i];
-        reg1 = pose.GetLocalRotation(right)*Vector3.forward;
-        for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
+        //reg1 = (pose.GetLocalPosition(right) - transform.position) / 0.3f * 1.2f / (float)opt.ov4.scale;
+        //for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
+        //reg1 = pose.GetLocalRotation(right)*Vector3.right;
+        //for (int i = 0; i < 3; i++) cursorAxis[0][i] = reg1[i];
+        //reg1 = pose.GetLocalRotation(right)*Vector3.up;
+        //for (int i = 0; i < 3; i++) cursorAxis[1][i] = reg1[i];
+        //reg1 = pose.GetLocalRotation(right)*Vector3.forward;
+        //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
     private double limitAng = 30;
 
