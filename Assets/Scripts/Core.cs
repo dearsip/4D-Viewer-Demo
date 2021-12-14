@@ -226,7 +226,7 @@ public class Core : MonoBehaviour
         for (int i = 0; i < hNum3; i++) if (!cut[i]) haptics[i] = 0;
         cutting = new bool[hNum3];
         for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
-        output = new float[outputNum.Length];
+        output = new float[outputPlc.Length];
         if (!error)
         {
             ws = new WebSocket(adrr);
@@ -342,7 +342,7 @@ public class Core : MonoBehaviour
     {
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(haptics);
-        for (int i = 0; i < output.Length; i++) output[i] = (haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (haptics[i] == 0) ? 0 : Mathf.Min((float)(0.4 + haptics[i] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
         if (!error && (opf = ++opf % opFrame) == 0)
         {
             try {

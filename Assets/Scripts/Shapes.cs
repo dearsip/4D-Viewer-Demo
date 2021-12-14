@@ -680,6 +680,42 @@ public class Shapes
             },
             new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
             },
-        }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 0, 0, 0, 1, 1, 1, 1 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 0, 0, 0, 1, 1, 1, 1 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 0, 0, 0, 1, 1, 1, 1 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 1, 1, 1, 1, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 1, 1, 1, 1, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
+        new int[][][]
+        {
+            new int[][] { new int[] { 0, 0, 0, 0, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 1, 1, 1, 1, 0, 0, 0, 0 } },
+            new int[][] { new int[] { 0, 4, 1, 5, 2, 6, 3, 7 } }
+        },
     };
 }

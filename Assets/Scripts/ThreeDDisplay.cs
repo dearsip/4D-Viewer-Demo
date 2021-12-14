@@ -149,6 +149,7 @@ public class ThreeDDisplay : MonoBehaviour
         mesh.colors = colors;
         mesh.RecalculateNormals();
         GetComponent<MeshFilter>().sharedMesh = mesh;
+        hapticsTester.transform.rotation = hand_.rotation;
     }
 
     // コントローラーの情報を回転に変換する。
