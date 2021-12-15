@@ -64,42 +64,42 @@ public class FourDDemo
     private double[] haptics;
     public static bool[] cut;
     public static float[][] outputPlc = new float[30][] {
-        new float[3] {2.2f, 1.8f, 6.8f,},
-        new float[3] {4.5f, 2, 6.5f,},
-        new float[3] {2, 1.1f, 7.2f,},
-        new float[3] {5.5f, 1.2f, 6.5f,},
+        new float[3] {2.6f, 1.3f, 6.5f,},
+        new float[3] {3.8f, 1.8f, 6.3f,},
+        new float[3] {2.5f, 0.2f, 7.0f,},
+        new float[3] {5.5f, 1.6f, 6.5f,},
 
-        new float[3] {1.9f, 1.9f, 4.7f,},
-        new float[3] {4, 1.2f, 4.7f,},
-        new float[3] {1.2f, 1.5f, 5.5f,},
-        new float[3] {4.4f, 0.5f, 5.3f,},
+        new float[3] {1.5f, 2.0f, 4.0f,},
+        new float[3] {3.5f, 1.5f, 4.7f,},
+        new float[3] {1.2f, 1.0f, 4.2f,},
+        new float[3] {4.6f, 0.5f, 5.1f,},
 
-        new float[3] {2, 2, 3,},
-        new float[3] {4, 1, 3.3f,},
-        new float[3] {1, 1, 3.6f,},
-        new float[3] {5, 0, 4,},
+        new float[3] {2.5f, 2.0f, 3.0f,},
+        new float[3] {3.7f, 1.3f, 3.6f,},
+        new float[3] {1.3f, 1.3f, 3.1f,},
+        new float[3] {4.0f, 0.0f, 4.0f,},
         
-        new float[3] {2, 2, 2,},
-        new float[3] {3, 1, 2,},
-        new float[3] {1, 1.6f, 2,},
-        new float[3] {4, 0, 2,},
+        new float[3] {2.4f, 2.2f, 2.0f,},
+        new float[3] {3.3f, 1.2f, 2.4f,},
+        new float[3] {1.9f, 1.6f, 2.0f,},
+        new float[3] {3.5f, 0.0f, 2.4f,},
 
-        new float[3] {2, 2.9f, 4.2f,},
-        new float[3] {1.3f, 3.5f, 5.2f,},
+        new float[3] {1.7f, 2.7f, 4.9f,},
+        new float[3] {1.0f, 2.7f, 5.7f,},
 
-        new float[3] {3.7f, 1.7f, 3,},
-        new float[3] {4, 3, 4,},
-        new float[3] {4, 2, 2,},
-        new float[3] {3, 3, 3,},
-        new float[3] {3.8f, 3.8f, 0.5f,},
-        new float[3] {3.8f, 4.8f, 1.5f,},
-        new float[3] {6f, 4f, 4f,},
+        new float[3] {3.5f, 1.8f, 2.8f,},
+        new float[3] {3.1f, 2.8f, 4.6f,},
+        new float[3] {3.1f, 2.9f, 2.2f,},
+        new float[3] {2.7f, 3.3f, 3.6f,},
+        new float[3] {3.7f, 3.3f, 1.3f,},
+        new float[3] {3.4f, 4.2f, 2.4f,},
 
-        new float[3] {6, 2, 2,},
-        new float[3] {4.4f, 5.8f, 3,},
-        new float[3] {6, 3, 1,},
-        new float[3] {5.8f, 5.8f, 1.2f,},
-        new float[3] {5.8f, 4.8f, 0.2f,},
+        new float[3] {5.2f, 2.8f, 5.1f,},
+        new float[3] {5.4f, 1.6f, 3.3f,},
+        new float[3] {3.4f, 4.6f, 4.6f,},
+        new float[3] {5.2f, 3.4f, 3.7f,},
+        new float[3] {4.9f, 4.8f, 3.2f,},
+        new float[3] {5.4f, 3.8f, 2.2f,},
     };
     public static bool[] isInn = { true, true, false, false, true, true, false, false, true, true, false, false, true, true, false, false, true, false, true, true, true, true, true, true, false, false, false, false, false, false, };
     private float[] output;
@@ -675,7 +675,7 @@ public class FourDDemo
         //if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
         if (touch > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] *= 1 - 0.75 * Math.Sqrt(Math.Max(max / touch - 0.25,0)/0.75);
         max_ = Math.Max(Vec.max(haptics), max_);
-        Debug.Log(max_);
+        //Debug.Log(max_);
     }
 
     public double click(double[] vector, bool edit, bool select)
@@ -721,13 +721,13 @@ public class FourDDemo
         switch (n)
         {
             case 0:
-                d = Math.Abs(Vec.dot(cursor, shapes[0].axis[1]) * .0002);
+                d = Math.Abs(Vec.dot(cursor, shapes[0].axis[1]) * .00025);
                 break;
             case 1:
-                d = Math.Sqrt(Math.Pow(Vec.dot(cursor, shapes[0].axis[0]),2) + Math.Pow(Vec.dot(cursor, shapes[0].axis[2]),2)) * .0002;
+                d = Math.Sqrt(Math.Pow(Vec.dot(cursor, shapes[0].axis[0]),2) + Math.Pow(Vec.dot(cursor, shapes[0].axis[2]),2)) * .00025;
                 break;
             case 2:
-                d = Vec.norm(cursor) * .0002;
+                d = Vec.norm(cursor) * .00025;
                 break;
             default:
                 break;

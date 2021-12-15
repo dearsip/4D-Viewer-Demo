@@ -21,6 +21,7 @@ public class ThreeDDisplay : MonoBehaviour
     private Color[] colors;
     private double[] haptics;
     public HapticsTester hapticsTester;
+    public SkinnedMeshRenderer hapticsModel;
 
     public Transform hand_;
     public SteamVR_Input_Sources hand;
@@ -250,8 +251,19 @@ public class ThreeDDisplay : MonoBehaviour
 
     public void toggleSpin() { spin = !spin; }
 
-    public void toggleHaptics() { soft.hapActive = !soft.hapActive; //if (soft.error && soft.hapActive) soft.connect();
-        hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive; }
+    public GameObject fixedCamera;
+    private static Vector3 pHap = new Vector3(-1.62f, 0.48f, -0.48f);
+    private static Vector3 pNonHap = new Vector3(-1.6f, 0.48f, -0.48f);
+    private static Quaternion rHap = Quaternion.Euler(new Vector3(24.01f, 37.19f, 0f));
+    private static Quaternion rNonHap = Quaternion.Euler(new Vector3(24.01f, 49.61f, 0f));
+    public void toggleHaptics()
+    {
+        soft.hapActive = !soft.hapActive; //if (soft.error && soft.hapActive) soft.connect();
+        hapticsTester.GetComponent<MeshRenderer>().enabled = soft.hapActive;
+        hapticsModel.enabled = soft.hapActive;
+        fixedCamera.transform.localPosition = (soft.hapActive) ? pHap : pNonHap;
+        fixedCamera.transform.rotation = (soft.hapActive) ? rHap : rNonHap;
+    }
 
     public void connect() { soft.connect(); }
 
