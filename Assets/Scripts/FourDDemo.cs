@@ -185,6 +185,7 @@ public class FourDDemo
         {
             new Geom.Shape[] { Shapes.cell_5() },
             new Geom.Shape[] { Shapes.cell_8() },
+            //new Geom.Shape[2],
             new Geom.Shape[] { Shapes.cell_16() },
             new Geom.Shape[] { Shapes.cell_24(sb) },
             new Geom.Shape[] { Shapes.cell_120(sb) },
@@ -199,6 +200,14 @@ public class FourDDemo
             new Geom.Shape[] { Shapes.cell_8() },
             new Geom.Shape[] { Shapes.cell_8() },
         };
+        //shapelist[1][0] = Shapes.cell_8();
+        //shapelist[1][1] = Shapes.cell_5();
+        //shapelist[1][0].scale(new double[] { .6,.6,.6,.6 });
+        //shapelist[1][1].scale(new double[] { .6,.6,.6,.6 });
+        //shapelist[1][0].translate(new double[] { .8, 0, 0, 0 });
+        //shapelist[1][1].translate(new double[] { -.8, 0, 0, 0 });
+        //shapelist[1][0].calculate();
+        //shapelist[1][1].calculate();
 
         shapelist[6][0] = Shapes.cone(sb);
         for (int i = 1; i < 7; i++) shapelist[6][i] = shapelist[6][0].copy();
