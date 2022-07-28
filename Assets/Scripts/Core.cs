@@ -730,7 +730,21 @@ public class Core : MonoBehaviour
 
         Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
 
-        if (FileBrowser.Success) menuCommand = doLoadGeom;
+        if (FileBrowser.Success) {
+            if (PropertyFile.test(FileBrowser.Result)) menuCommand = doLoadMaze;
+            else menuCommand = doLoadGeom;
+        }
+    }
+
+    private void doLoadMaze()
+    {
+        Dictionary<string, string> p = PropertyFile.load(FileBrowser.Result);
+        try {
+            PropertyStore store = new PropertyStore(p);
+            //storable.load(store);
+        } catch (ValidationException e) {
+            //throw App.getException("PropertyFile.e2",new Object[] { file.getName(), e.getMessage() });
+      }
     }
 
     private void doLoadGeom()

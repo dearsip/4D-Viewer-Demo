@@ -176,6 +176,10 @@ public class Menu : MonoBehaviour
             oa.opt.od.map = getBool(map);
             oa.opt.od.trainSpeed = getInt(trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
 
+            oa.opt.oo.moveInputType = getInt(moveType);
+            oa.opt.oo.rotateInputType = getInt(rotateType);
+            oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
+            oa.opt.oo.invertForward = getBool(invertForward);
             oa.opt.oo.sliceMode = getBool(sliceMode);
             oa.opt.oo.limit3D = getBool(limit3D);
 
