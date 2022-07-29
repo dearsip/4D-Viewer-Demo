@@ -42,7 +42,7 @@ public class PropertyStore : IStore {
         return value;
     }
 
-    private string? getNullableProperty(string key) {
+    private string getNullableProperty(string key) {
         return p[key];
     }
 
@@ -156,10 +156,11 @@ public class PropertyStore : IStore {
             if ( field[i].IsInitOnly 
               || field[i].IsLiteral ) continue; // ignore globals and constants
 
-            Type fieldType = field[i].GetType();
+            Type fieldType = field[i].FieldType;
             string fieldKey = FieldKey(key,field[i]);
 
             try {
+                Debug.Log("isPrimitive: "+fieldType);
 
                 if (fieldType.IsPrimitive) field[i].SetValue(o,getPrimitive(fieldKey,fieldType));
                 else getObject(fieldKey,field[i].GetValue(o));
@@ -181,7 +182,7 @@ public class PropertyStore : IStore {
         else if (c == typeof(int)   ) return getInteger(key);
         else if (c == typeof(long)  ) return getLong   (key);
         else if (c == typeof(double)) return getDouble (key);
-        else throw new Exception("not primitive");//App.getException("PropertyStore.e6",new Object[] { key, c.getName() });
+        else throw new Exception("not primitive "+key+", "+c);//App.getException("PropertyStore.e6",new Object[] { key, c.getName() });
     }
 
     /**
@@ -192,9 +193,10 @@ public class PropertyStore : IStore {
         * we can't handle primitive types here.  Use getPrimitive instead.
         */
     public void getObject(string key, object o) {
+        Debug.Log("getObject key: "+key+", object: "+o);
         Type c = o.GetType();
 
-             if (c.IsPrimitive) throw new Exception("not primitive");//App.getException("PropertyStore.e7",new object[] { key, c.getName() });
+             if (c.IsPrimitive) throw new Exception("not object "+key+", "+o+", "+c);//App.getException("PropertyStore.e7",new object[] { key, c.getName() });
         else if (c.IsArray    ) getArray (key,o);
         else                    getStruct(key,o);
     }

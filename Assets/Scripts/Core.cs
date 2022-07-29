@@ -741,10 +741,11 @@ public class Core : MonoBehaviour
         Dictionary<string, string> p = PropertyFile.load(FileBrowser.Result);
         try {
             PropertyStore store = new PropertyStore(p);
-            //storable.load(store);
-        } catch (ValidationException e) {
+            loadMaze(store);
+        } catch (Exception e) {
+            Debug.Log(e);
             //throw App.getException("PropertyFile.e2",new Object[] { file.getName(), e.getMessage() });
-      }
+        }
     }
 
     private void doLoadGeom()
@@ -767,6 +768,61 @@ public class Core : MonoBehaviour
             //t.printStackTrace();
             //JOptionPane.showMessageDialog(this, s + t.getClass().getName() + "\n" + t.getMessage(), App.getString("Maze.s25"), JOptionPane.ERROR_MESSAGE);
         }
+    }
+   private static readonly string VALUE_CHECK       = "Maze";
+
+   private static readonly string KEY_CHECK         = "game";
+   private static readonly string KEY_DIM           = "dim";
+   private static readonly string KEY_OPTIONS_MAP   = "om";
+   private static readonly string KEY_OPTIONS_COLOR = "oc";
+   private static readonly string KEY_OPTIONS_VIEW  = "ov";
+   private static readonly string KEY_OPTIONS_SEED  = "oe";
+   private static readonly string KEY_ALIGN_MODE    = "align";
+
+    public void loadMaze(PropertyStore store){
+        try {
+            if ( ! store.getString(KEY_CHECK).Equals(VALUE_CHECK) ) throw new Exception("getEmpty");//App.getEmptyException();
+        } catch (Exception e) {
+            throw e;//App.getException("Core.e1");
+        }
+
+    // read file, but don't modify existing objects until we're sure of success
+
+        int dimLoad = store.getInteger(KEY_DIM);
+        if ( ! (dimLoad == 3 || dimLoad == 4) ) throw new Exception("dimError");//App.getException("Core.e2");
+
+        OptionsMap omLoad = new OptionsMap(dimLoad);
+        OptionsColor ocLoad = new OptionsColor();
+        OptionsView ovLoad = new OptionsView();
+        OptionsSeed oeLoad = new OptionsSeed();
+
+        store.getObject(KEY_OPTIONS_MAP,omLoad);
+        store.getObject(KEY_OPTIONS_COLOR,ocLoad);
+        store.getObject(KEY_OPTIONS_VIEW,ovLoad);
+        store.getObject(KEY_OPTIONS_SEED,oeLoad);
+        if ( ! oeLoad.isSpecified() ) throw new Exception("seedError");//App.getException("Core.e3");
+        bool alignModeLoad = store.getBool(KEY_ALIGN_MODE);
+
+    // ok, we know enough ... even if the engine parameters turn out to be invalid,
+    // we can still start a new game
+
+        // and, we need to initialize the engine before it can validate its parameters
+
+        dim = dimLoad;
+
+        oa.omCurrent = omLoad; // may as well transfer as copy
+        oa.ocCurrent = ocLoad;
+        oa.ovCurrent = ovLoad;
+        oa.oeCurrent = oeLoad;
+        // oeNext is not modified by loading a game
+
+        IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov());
+        engine.newGame(dim,model,ov(),/*oa.opt.os,*/ot(),false);
+
+        updateOptions();
+        setOptions();
+
+        engine.load(store,alignModeLoad);
     }
 
     public void loadGeom(string file) //throws Exception

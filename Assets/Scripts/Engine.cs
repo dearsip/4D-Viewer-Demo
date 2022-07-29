@@ -212,49 +212,49 @@ public class Engine : IMove
     private const string KEY_AXIS = "axis";
     private const string KEY_WIN = "win";
 
-    //public void load(IStore store, bool alignMode)
-    //{
-    //    try
-    //    {
+    public void load(IStore store, bool alignMode)
+    {
+        try
+        {
 
-    //        store.getObject(KEY_ORIGIN, origin);
-    //        store.getObject(KEY_AXIS, axis);
-    //        win = store.getBoolean(KEY_WIN);
+            store.getObject(KEY_ORIGIN, origin);
+            store.getObject(KEY_AXIS, axis);
+            win = store.getBool(KEY_WIN);
 
-    //        model.testOrigin(origin, reg1, reg2);
+            model.testOrigin(origin, reg1, reg2);
 
-    //        // check that axes are orthonormal, more or less
-    //        const double EPSILON = 0.001;
-    //        for (int i = 0; i < axis.Length; i++)
-    //        {
-    //            for (int j = 0; j < axis.Length; j++)
-    //            {
-    //                double dotExpected = (i == j) ? 1 : 0; // delta_ij
-    //                double dot = Vec.dot(axis[i], axis[j]);
-    //                if (Math.Abs(dot - dotExpected) > EPSILON) throw App.getEmptyException();
-    //            }
-    //        }
+            // check that axes are orthonormal, more or less
+            const double EPSILON = 0.001;
+            for (int i = 0; i < axis.Length; i++)
+            {
+                for (int j = 0; j < axis.Length; j++)
+                {
+                    double dotExpected = (i == j) ? 1 : 0; // delta_ij
+                    double dot = Vec.dot(axis[i], axis[j]);
+                    if (Math.Abs(dot - dotExpected) > EPSILON) throw new Exception("axis vector is zero.");//App.getEmptyException();
+                }
+            }
 
-    //        if (alignMode) align().snap();
-    //        //
-    //        // pseudo-validation to prevent being in align mode without being aligned.
-    //        // this can only happen if someone modifies a file by hand
-    //        //
-    //        // a real validation would compare the current position to the align goal,
-    //        // and if they were different, would snap to the goal and throw an exception
-    //        // carrying a message similar to Engine.e1
+            if (alignMode) align().snap();
+            //
+            // pseudo-validation to prevent being in align mode without being aligned.
+            // this can only happen if someone modifies a file by hand
+            //
+            // a real validation would compare the current position to the align goal,
+            // and if they were different, would snap to the goal and throw an exception
+            // carrying a message similar to Engine.e1
 
-    //    }
-    //    catch (ValidationException e)
-    //    {
-    //        initPlayer();
-    //        throw App.getException("Engine.e1"); // slight misuse of protocol to report information
-    //    }
-    //    finally
-    //    {
-    //        renderAbsolute();
-    //    }
-    //}
+        }
+        catch (Exception e)
+        {
+            initPlayer();
+            throw new Exception("Unable to set position, restarting saved game.");
+        }
+        finally
+        {
+            //renderAbsolute();
+        }
+    }
 
     public int getSaveType()
     {
