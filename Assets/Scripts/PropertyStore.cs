@@ -85,6 +85,9 @@ public class PropertyStore : IStore {
         string value = getProperty(key);
         try {
             return Int32.Parse(value);
+        } catch (OverflowException o) {
+            Debug.Log(o);
+            return (int)Int64.Parse(value);
         } catch (/*NumberFormat*/Exception e) {
             throw e;//App.getException("PropertyStore.e3",new Object[] { key, value });
         }

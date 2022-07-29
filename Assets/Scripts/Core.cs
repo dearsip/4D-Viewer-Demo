@@ -261,7 +261,7 @@ public class Core : MonoBehaviour
         oa.oeCurrent.forceSpecified();
         oa.oeNext = new OptionsSeed();
 
-        IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov());
+        IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov(), null);
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
 
         updateOptions();
@@ -816,11 +816,16 @@ public class Core : MonoBehaviour
         oa.oeCurrent = oeLoad;
         // oeNext is not modified by loading a game
 
-        IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov());
+        IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov(),store);
         engine.newGame(dim,model,ov(),/*oa.opt.os,*/ot(),false);
 
         updateOptions();
         setOptions();
+
+        target = engine;
+        saveOrigin = new double[this.dim];
+        saveAxis = new double[this.dim][];
+        for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
 
         engine.load(store,alignModeLoad);
     }

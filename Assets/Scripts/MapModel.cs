@@ -32,9 +32,10 @@ public class MapModel : IModel
 
     // --- construction ---
 
-    public MapModel(int dimSpace, OptionsMap om, OptionsColor oc, OptionsSeed oe, OptionsView ov)
+    public MapModel(int dimSpace, OptionsMap om, OptionsColor oc, OptionsSeed oe, OptionsView ov, IStore store)
     {
-        map = new Map(dimSpace, om, oe.mapSeed);
+        if (store != null) map = new Map(dimSpace, om, store);
+        else map = new Map(dimSpace, om, oe.mapSeed);
         colorizer = new Colorizer(dimSpace, om.dimMap, om.size, oc, oe.colorSeed);
         renderAbsolute = new RenderAbsolute(dimSpace, map, colorizer, ov, this);
         bufAbsolute = new PolygonBuffer(dimSpace);
