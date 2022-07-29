@@ -672,7 +672,11 @@ public class Engine : IMove
             renderPolygon(bufRelative, objCrossPoly, 4, trans);
         }
 
-        if (win) renderObject(bufRelative, objWin);
+        if (win)
+        {
+            renderPolygon(bufRelative, objWinSlice, 4, trans);
+            renderObject(bufRelative, objWin);
+        }
         //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
 
         if (getSaveType() == IModel.SAVE_MAZE  && ((MapModel)model).showMap)
@@ -1050,6 +1054,21 @@ public class Engine : IMove
          new double[] { 0.4,-0.4,-1}, new double[] { 0.4, 0.4,-1},
          new double[] { 0.4, 0.4,-1}, new double[] { 0.8,-0.4,-1},
          new double[] { 0.8,-0.4,-1}, new double[] { 0.8, 0.4,-1},
+   };
+
+    private static readonly double[][] objWinSlice = new double[][] {
+         new double[] {-0.8, 0.4,-0.1}, new double[] {-0.8,-0.4,-0.1}, new double[] {-0.8,-0.4,0.1}, new double[] {-0.8, 0.4,0.1},
+         new double[] {-0.8,-0.4,-0.1}, new double[] {-0.6, 0,  -0.1}, new double[] {-0.6, 0,  0.1}, new double[] {-0.8,-0.4,0.1},
+         new double[] {-0.6, 0,  -0.1}, new double[] {-0.4,-0.4,-0.1}, new double[] {-0.4,-0.4,0.1}, new double[] {-0.6, 0,  0.1},
+         new double[] {-0.4,-0.4,-0.1}, new double[] {-0.4, 0.4,-0.1}, new double[] {-0.4, 0.4,0.1}, new double[] {-0.4,-0.4,0.1},
+ 
+         new double[] {-0.1, 0.4,-0.1}, new double[] { 0.1, 0.4,-0.1}, new double[] { 0.1, 0.4,0.1},new double[] {-0.1, 0.4,0.1},
+         new double[] { 0,   0.4,-0.1}, new double[] { 0,  -0.4,-0.1}, new double[] { 0,  -0.4,0.1},new double[] { 0,   0.4,0.1},
+         new double[] {-0.1,-0.4,-0.1}, new double[] { 0.1,-0.4,-0.1}, new double[] { 0.1,-0.4,0.1},new double[] {-0.1,-0.4,0.1},
+                                                                      
+         new double[] { 0.4,-0.4,-0.1}, new double[] { 0.4, 0.4,-0.1}, new double[] { 0.4, 0.4,0.1},new double[] { 0.4,-0.4,0.1},
+         new double[] { 0.4, 0.4,-0.1}, new double[] { 0.8,-0.4,-0.1}, new double[] { 0.8,-0.4,0.1},new double[] { 0.4, 0.4,0.1},
+         new double[] { 0.8,-0.4,-0.1}, new double[] { 0.8, 0.4,-0.1}, new double[] { 0.8, 0.4,0.1},new double[] { 0.8,-0.4,0.1},
    };
 
     // private static readonly double[][] objDead2 = new double[][] {

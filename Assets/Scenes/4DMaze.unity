@@ -35075,7 +35075,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1000011817404238, guid: a4e357c9bf84fa7438984def3c9d2d94, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 224000013577827562, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -35200,7 +35200,7 @@ PrefabInstance:
     - target: {fileID: 224000010383356806, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000022888184
+      value: 0.000038146973
       objectReference: {fileID: 0}
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -35210,32 +35210,32 @@ PrefabInstance:
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: -20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000012294561952, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: -20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4074129722683132244, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -35270,7 +35270,7 @@ PrefabInstance:
     - target: {fileID: 224000013440901968, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000013440901968, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -35285,17 +35285,17 @@ PrefabInstance:
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 224000011063755118, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.000000059604645
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4e357c9bf84fa7438984def3c9d2d94, type: 3}
@@ -35405,7 +35405,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 100, y: 30, z: 5}
+  m_Size: {x: 60, y: 30, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1224551455
 MonoBehaviour:
@@ -35487,7 +35487,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d249a08ba2c4dd8438d077bea58b5f4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 2122453883}
+  slider: {fileID: 2018975719}
 --- !u!114 &1224551458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41054,7 +41054,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  step: 0.1
+  step: 0.05
 --- !u!1 &1460036615
 GameObject:
   m_ObjectHideFlags: 0
@@ -49865,7 +49865,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 100, y: 30, z: 5}
+  m_Size: {x: 60, y: 30, z: 5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1791385216
 MonoBehaviour:
@@ -49947,7 +49947,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d249a08ba2c4dd8438d077bea58b5f4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 2122453883}
+  slider: {fileID: 1458025801}
 --- !u!114 &1791385219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56341,7 +56341,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
-  step: 0.1
+  step: 0.05
 --- !u!1 &2030911427
 GameObject:
   m_ObjectHideFlags: 0
