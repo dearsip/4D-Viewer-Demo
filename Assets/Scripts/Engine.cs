@@ -603,11 +603,11 @@ public class Engine : IMove
 
     // --- rendering ---
 
-    public void renderAbsolute(double[] eyeVector, bool sliceMode)
+    public void renderAbsolute(double[] eyeVector, OptionsControll oo)
     {
         model.animate();
         model.render(origin);
-        RenderRelative(eyeVector, sliceMode);
+        RenderRelative(eyeVector, oo);
     }
 
     private readonly Color white = new Color(0, 0, 0);
@@ -649,7 +649,7 @@ public class Engine : IMove
     }
 
     private readonly Color trans = new Color(0, 0, 0, 0);
-    private void RenderRelative(double[] eyeVector, bool sliceMode)
+    private void RenderRelative(double[] eyeVector, OptionsControll oo)
     {
         if (OptionsFisheye.of.fisheye)
         {
@@ -684,7 +684,7 @@ public class Engine : IMove
 
         //renderDisplay();
         bufRelative.sort(eyeVector);
-        convert(eyeVector, sliceMode);
+        convert(eyeVector, oo);
     }
 
     private void renderPrepare()
@@ -778,9 +778,8 @@ public class Engine : IMove
     //}
 
     private double width = 0.005;
-    private float t3 = 0.2f;
     private float t2 = 1f;
-    private void convert(double[] eyeVector, bool sliceMode)
+    private void convert(double[] eyeVector, OptionsControll oo)
     {
         int count = 0;
         Polygon p;
@@ -791,7 +790,7 @@ public class Engine : IMove
         {
             p = bufRelative.get(i);
             int v = p.vertex.Length;
-            if (sliceMode) p.color.a *= t3;
+            if (oo.sliceMode) p.color.a *= oo.baseTransparency;
             if (v == 2)
             {
                 v = 4;
@@ -837,7 +836,7 @@ public class Engine : IMove
                     tris.Add(count + j + 1);
                     tris.Add(count + j + 2);
                 }
-                if (sliceMode)
+                if (oo.sliceMode)
                 {
                     int k = 0;
                     for (int j = 0; j < v - 1; j++)
@@ -868,7 +867,7 @@ public class Engine : IMove
                     if (k > 0)
                     {
                         count += v;
-                        p.color.a = t2;
+                        p.color.a = oo.sliceTransparency;
                         v = 4;
                         Vec.sub(reg5, reg8, reg7);
                         Vec.cross(reg6, reg5, eyeVector);

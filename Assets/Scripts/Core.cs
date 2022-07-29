@@ -282,7 +282,7 @@ public class Core : MonoBehaviour
             menuCommand?.Invoke();
             menuCommand = null;
             controll();
-            engine.renderAbsolute(eyeVector, opt.oo.sliceMode);
+            engine.renderAbsolute(eyeVector, opt.oo);
             //doHaptics();
             GetComponent<MeshFilter>().sharedMesh = mesh;
 
@@ -1319,6 +1319,8 @@ public class Core : MonoBehaviour
         opt.oo.rotateInputType = 1;
         opt.oo.invertLeftAndRight = false;
         opt.oo.invertForward = false;
+        opt.oo.baseTransparency = 0.2f;
+        opt.oo.sliceTransparency = 1f;
 
         dim = 4;
         gameDirectory = null;

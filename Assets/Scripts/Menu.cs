@@ -22,12 +22,13 @@ public class Menu : MonoBehaviour
 
     public Slider dimSlider, sizeSlider, densitySlider, twistProbabilitySlider, branchProbabilitySlider, loopCrossProbabilitySlider,
         dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider,
-        transparencySlider, borderSlider, frameRateSlider, timeMoveSlider, timeRotateSlider, timeAlignMoveSlider, timeAlignRotateSlider;
+        transparencySlider, borderSlider, baseTransparencySlider, sliceTransparencySlider, frameRateSlider, timeMoveSlider, timeRotateSlider,
+        timeAlignMoveSlider, timeAlignRotateSlider;
     public InputField dimCurrent, dimNext, sizeCurrent, sizeNext, densityCurrent, densityNext, twistPobabilityCurrent, twistProbabilityNext,
         branchProbabilityCurrent, branchProbabilityNext, loopCrossProbabilityCurrent, loopCrossProbabilityNext, dimSameParallelField,
         dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField,
-        transparencyField, borderField, frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField,
-        width, flare, rainbowGap;
+        transparencyField, borderField, baseTransparencyField, sliceTransparencyField, frameRateField, timeMoveField, timeRotateField, 
+        timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
@@ -136,6 +137,8 @@ public class Menu : MonoBehaviour
         put(invertForward, oa.opt.oo.invertForward);
         put(alignMode, core.alignMode);
         put(sliceMode, oa.opt.oo.sliceMode);
+        put(baseTransparencyField, baseTransparencySlider, oa.opt.oo.baseTransparency);
+        put(sliceTransparencyField, sliceTransparencySlider, oa.opt.oo.sliceTransparency);
         put(limit3D, oa.opt.oo.limit3D);
 
         put(frameRateField, frameRateSlider, oa.opt.ot4.frameRate);
@@ -181,6 +184,8 @@ public class Menu : MonoBehaviour
             oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
             oa.opt.oo.invertForward = getBool(invertForward);
             oa.opt.oo.sliceMode = getBool(sliceMode);
+            oa.opt.oo.baseTransparency = getFloat(baseTransparencyField, true);
+            oa.opt.oo.sliceTransparency = getFloat(sliceTransparencyField, true);
             oa.opt.oo.limit3D = getBool(limit3D);
 
             OptionsFisheye ofTemp = new OptionsFisheye();
@@ -279,6 +284,12 @@ public class Menu : MonoBehaviour
         core.menuCommand = core.newGame;
     }
 
+    private void put(InputField inputField, Slider slider, float value)
+    {
+        slider.value = value;
+        inputField.text = value.ToString();
+    }
+
     private void put(InputField inputField, Slider slider, double value)
     {
         slider.value = (float)value;
@@ -290,9 +301,20 @@ public class Menu : MonoBehaviour
         slider.value = value[0];
         inputField.text = Vec.ToString(value);
     }
+
+    private void put(InputField inputField, float value)
+    {
+        inputField.text = value.ToString();
+    }
+
     private void put(InputField inputField, double value)
     {
         inputField.text = value.ToString();
+    }
+
+    private void put(Slider slider, double value)
+    {
+        slider.value = (float)value;
     }
 
     private void put(InputField inputField, Slider slider, int value)
@@ -334,6 +356,20 @@ public class Menu : MonoBehaviour
         int i = int.Parse(inputField.text);
         if (i < min || i > max) throw new Exception();
         return i;
+    }
+
+    private float getFloat(InputField inputField, bool allowZero)
+    {
+        float f = float.Parse(inputField.text);
+        if (f < 0 || (!allowZero && f == 0)) throw new Exception();
+        return f;
+    }
+
+    private float getFloat(InputField inputField, float min, float max, bool allowMin)
+    {
+        float f = float.Parse(inputField.text);
+        if (f > max || f < min || (!allowMin && f == min)) throw new Exception();
+        return f;
     }
 
     private double getDouble(InputField inputField, bool allowZero)

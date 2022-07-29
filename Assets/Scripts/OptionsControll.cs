@@ -8,6 +8,8 @@ public class OptionsControll// : IValidate
     public int moveInputType, rotateInputType;
     public bool invertLeftAndRight, invertForward, sliceMode, limit3D;
 
+    public float baseTransparency, sliceTransparency;
+
     // --- constants ---
 
     public const int INPUTTYPE_JOYSTICK = 0;
@@ -28,6 +30,8 @@ public class OptionsControll// : IValidate
         dest.invertLeftAndRight = src.invertLeftAndRight;
         dest.invertForward = src.invertForward;
         dest.sliceMode = src.sliceMode;
+        dest.baseTransparency = src.baseTransparency;
+        dest.sliceTransparency = src.sliceTransparency;
         dest.limit3D = src.limit3D;
     }
 
