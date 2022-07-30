@@ -11,6 +11,7 @@ public class Hints : MonoBehaviour
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean trigger, move, menu, grab;
     private bool visibleHints;
+    private float time;
 
     // Start is called before the first frame update
     void Start()
@@ -18,12 +19,17 @@ public class Hints : MonoBehaviour
         visibleHints = true;
         StartCoroutine(InitHints());
         grab.AddOnStateUpListener(ToggleHints, hand);
+        time = Time.time;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (visibleHints && Time.time - time > 5f) {
+            ControllerButtonHints.HideAllTextHints(rightHand);
+            ControllerButtonHints.HideAllTextHints(leftHand);
+            visibleHints = false;
+        }
     }
 
     private IEnumerator InitHints() {
@@ -42,6 +48,7 @@ public class Hints : MonoBehaviour
         ControllerButtonHints.ShowTextHint(leftHand, trigger, "select");
         ControllerButtonHints.ShowTextHint(rightHand, grab, "move display");
         ControllerButtonHints.ShowTextHint(leftHand, grab, "show/hide hints");
+        time = Time.time;
     }
 
     private void ToggleHints(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
