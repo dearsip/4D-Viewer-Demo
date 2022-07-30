@@ -464,6 +464,8 @@ public class Core : MonoBehaviour
                 relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
                 reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
                 reg3[3] /= Math.Max(limitAng * Math.PI / 180, reg3[3]);
+                if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
+                if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
                 if (alignMode)
                 {
                     for (int i = 0; i < reg3.Length; i++)
@@ -489,6 +491,7 @@ public class Core : MonoBehaviour
                     for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
                     if (opt.oo.limit3D) reg2[2] = 0;
                     Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                    if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                     for (int i = 0; i < reg2.Length; i++)
                     {
                         if (Math.Abs(reg2[i]) > 0.8)
@@ -504,6 +507,7 @@ public class Core : MonoBehaviour
                     {
                         relarot = rotRight * Quaternion.Inverse(fromRotRight);
                         if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
+                        if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                         for (int i = 0; i < 3; i++)
                         {
                             float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
@@ -523,6 +527,7 @@ public class Core : MonoBehaviour
                     Vec.unitVector(reg3, 3);
                     for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
                     if (opt.oo.limit3D) reg2[2] = 0;
+                    if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                     double t = Vec.norm(reg2);
                     if (t != 0)
                     {
@@ -535,6 +540,7 @@ public class Core : MonoBehaviour
 
                     relarot = rotRight * Quaternion.Inverse(lastRotRight);
                     if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
+                    if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                     float f;
                     relarot.ToAngleAxis(out f, out reg0);
                     //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);

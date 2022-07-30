@@ -30,7 +30,7 @@ public class Menu : MonoBehaviour
         transparencyField, borderField, baseTransparencyField, sliceTransparencyField, frameRateField, timeMoveField, timeRotateField, 
         timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
-        alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
+        invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, moveType, rotateType;
 
@@ -135,6 +135,8 @@ public class Menu : MonoBehaviour
         put(rotateType, oa.opt.oo.rotateInputType);
         put(invertLeftAndRight, oa.opt.oo.invertLeftAndRight);
         put(invertForward, oa.opt.oo.invertForward);
+        put(invertYawAndPitch, oa.opt.oo.invertYawAndPitch);
+        put(invertRoll, oa.opt.oo.invertRoll);
         put(alignMode, core.alignMode);
         put(sliceMode, oa.opt.oo.sliceMode);
         put(baseTransparencyField, baseTransparencySlider, oa.opt.oo.baseTransparency);
@@ -183,6 +185,8 @@ public class Menu : MonoBehaviour
             oa.opt.oo.rotateInputType = getInt(rotateType);
             oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
             oa.opt.oo.invertForward = getBool(invertForward);
+            oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
+            oa.opt.oo.invertRoll = getBool(invertRoll);
             oa.opt.oo.sliceMode = getBool(sliceMode);
             oa.opt.oo.baseTransparency = getFloat(baseTransparencyField, true);
             oa.opt.oo.sliceTransparency = getFloat(sliceTransparencyField, true);
@@ -237,6 +241,8 @@ public class Menu : MonoBehaviour
             oa.opt.oo.rotateInputType = getInt(rotateType);
             oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
             oa.opt.oo.invertForward = getBool(invertForward);
+            oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
+            oa.opt.oo.invertRoll = getBool(invertRoll);
 
             oa.opt.ot4.frameRate = getInt(frameRateField, false);
             oa.opt.ot4.timeMove = getDouble(timeMoveField, false);
