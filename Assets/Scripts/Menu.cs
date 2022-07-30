@@ -32,7 +32,7 @@ public class Menu : MonoBehaviour
     public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
-    public Dropdown colorMode, moveType, rotateType;
+    public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
 
     private void Start()
     {
@@ -131,8 +131,10 @@ public class Menu : MonoBehaviour
         put(map, oa.opt.od.map);
         put(trainSpeedField, trainSpeedSlider, oa.opt.od.trainSpeed);
 
-        put(moveType, oa.opt.oo.moveInputType);
-        put(rotateType, oa.opt.oo.rotateInputType);
+        put(inputTypeLeftAndRight, oa.opt.oo.inputTypeLeftAndRight);
+        put(inputTypeForward, oa.opt.oo.inputTypeForward);
+        put(inputTypeYawAndPitch, oa.opt.oo.inputTypeYawAndPitch);
+        put(inputTypeRoll, oa.opt.oo.inputTypeRoll);
         put(invertLeftAndRight, oa.opt.oo.invertLeftAndRight);
         put(invertForward, oa.opt.oo.invertForward);
         put(invertYawAndPitch, oa.opt.oo.invertYawAndPitch);
@@ -181,8 +183,10 @@ public class Menu : MonoBehaviour
             oa.opt.od.map = getBool(map);
             oa.opt.od.trainSpeed = getInt(trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
 
-            oa.opt.oo.moveInputType = getInt(moveType);
-            oa.opt.oo.rotateInputType = getInt(rotateType);
+            oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
+            oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
+            oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
+            oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
             oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
             oa.opt.oo.invertForward = getBool(invertForward);
             oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
@@ -237,8 +241,10 @@ public class Menu : MonoBehaviour
             }
             else oa.oeNext.colorSeedSpecified = false;
 
-            oa.opt.oo.moveInputType = getInt(moveType);
-            oa.opt.oo.rotateInputType = getInt(rotateType);
+            oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
+            oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
+            oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
+            oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
             oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
             oa.opt.oo.invertForward = getBool(invertForward);
             oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);

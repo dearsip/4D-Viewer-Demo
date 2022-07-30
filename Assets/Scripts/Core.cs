@@ -444,8 +444,12 @@ public class Core : MonoBehaviour
         //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
     private double limitAng = 30;
-
-    private double limit = 0.1;
+    private double limitAngRoll = 30;
+    private double limitAngForward = 30;
+    private double maxAng = 60;
+    private double limit = 0.1; // Controller Transform Unit
+    private double limitLR = 0.3; // LR Drag Unit
+    private double max = 0.2; // YP Drag Unit
     private void controll()
     {
         // save state
@@ -457,13 +461,26 @@ public class Core : MonoBehaviour
         {
             if (leftMove)
             {
-                for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
+                if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControll.INPUTTYPE_DRAG) {
+                    for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - lastPosLeft[i];
+                    Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
+                }
+                else {
+                    for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
+                    Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                }
                 if (opt.oo.limit3D) reg2[2] = 0;
-                Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                 Array.Copy(reg2, reg3, 3);
-                relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
-                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
-                reg3[3] /= Math.Max(limitAng * Math.PI / 180, reg3[3]);
+                if (!alignMode && opt.oo.inputTypeForward == OptionsControll.INPUTTYPE_DRAG) {
+                    relarot = rotLeft * Quaternion.Inverse(lastRotLeft);
+                    reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                    reg3[3] /= maxAng * Math.PI / 180 * dMove;
+                }
+                else {
+                    relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
+                    reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                    reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
+                }
                 if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
                 if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
                 if (alignMode)
@@ -525,37 +542,57 @@ public class Core : MonoBehaviour
                 else
                 {
                     Vec.unitVector(reg3, 3);
-                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
+                        for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - lastPosRight[i];
+                    }
+                    else {
+                        for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    }
                     if (opt.oo.limit3D) reg2[2] = 0;
                     if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                     double t = Vec.norm(reg2);
                     if (t != 0)
                     {
-                        t = dRotate * Math.PI / 180 * Math.Min(limit, t) / limit;
+                        if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
+                            t = Math.PI / 2 * Math.Min(max, t) / max;
+                        }
+                        else {
+                            t = dRotate * Math.PI / 180 * Math.Min(limit, t) / limit;
+                        }
                         Vec.normalize(reg2, reg2);
                         for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
                         reg4[3] = Math.Cos(t);
                         target.rotateAngle(reg3, reg4);
                     }
 
-                    relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                    float f;
+                    if (opt.oo.inputTypeRoll == OptionsControll.INPUTTYPE_DRAG) {
+                        relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                    }
+                    else {
+                        relarot = rotRight * Quaternion.Inverse(fromRotRight);
+                        f = Mathf.Acos(relarot.w);
+                        if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
+                        relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
+                    }
                     if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                     if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
-                    float f;
-                    relarot.ToAngleAxis(out f, out reg0);
-                    //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
-                    reg1.Set(1, 0, 0);
-                    Vector3.OrthoNormalize(ref reg0, ref reg1);
-                    //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
-                    //relarot[3] = Mathf.Cos(f);
-                    reg0 = relarot * reg1;
-                    for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
-                    reg3[3] = 0;
-                    for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
-                    reg4[3] = 0;
-                    Vec.normalize(reg3, reg3);
-                    Vec.normalize(reg4, reg4);
-                    target.rotateAngle(reg4, reg3);
+                    if (relarot.w < 1f) {
+                        relarot.ToAngleAxis(out f, out reg0);
+                        //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
+                        reg1.Set(1, 0, 0);
+                        Vector3.OrthoNormalize(ref reg0, ref reg1);
+                        //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
+                        //relarot[3] = Mathf.Cos(f);
+                        reg0 = relarot * reg1;
+                        for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
+                        reg3[3] = 0;
+                        for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
+                        reg4[3] = 0;
+                        Vec.normalize(reg3, reg3);
+                        Vec.normalize(reg4, reg4);
+                        target.rotateAngle(reg4, reg3);
+                    }
                 }
             }
             if (leftTrigger)
@@ -1349,8 +1386,10 @@ public class Core : MonoBehaviour
         opt.od.invertNormals = false;
         opt.od.separate = true;
 
-        opt.oo.moveInputType = 0;
-        opt.oo.rotateInputType = 1;
+        opt.oo.inputTypeLeftAndRight = 0;
+        opt.oo.inputTypeForward = 0;
+        opt.oo.inputTypeYawAndPitch = 0;
+        opt.oo.inputTypeRoll = 1;
         opt.oo.invertLeftAndRight = false;
         opt.oo.invertForward = false;
         opt.oo.baseTransparency = 0.2f;

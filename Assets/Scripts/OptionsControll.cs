@@ -5,7 +5,7 @@ public class OptionsControll// : IValidate
 
     // --- fields ---
 
-    public int moveInputType, rotateInputType;
+    public int inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
     public bool invertLeftAndRight, invertForward, invertYawAndPitch, invertRoll, sliceMode, limit3D;
 
     public float baseTransparency, sliceTransparency;
@@ -13,7 +13,7 @@ public class OptionsControll// : IValidate
     // --- constants ---
 
     public const int INPUTTYPE_JOYSTICK = 0;
-    public const int COLOR_GREEN = 1;
+    public const int INPUTTYPE_DRAG = 1;
 
     // --- construction ---
 
@@ -25,8 +25,10 @@ public class OptionsControll// : IValidate
 
     public static void copy(OptionsControll dest, OptionsControll src)
     {
-        dest.moveInputType = src.moveInputType;
-        dest.rotateInputType = src.rotateInputType;
+        dest.inputTypeLeftAndRight = src.inputTypeLeftAndRight;
+        dest.inputTypeForward = src.inputTypeForward;
+        dest.inputTypeYawAndPitch = src.inputTypeYawAndPitch;
+        dest.inputTypeRoll = src.inputTypeRoll;
         dest.invertLeftAndRight = src.invertLeftAndRight;
         dest.invertForward = src.invertForward;
         dest.invertYawAndPitch = src.invertYawAndPitch;
