@@ -16,6 +16,7 @@ public class Menu : MonoBehaviour
     public GameObject leftLaser, rightLaser;
     private Options optDefault;
     private OptionsAll oaResult;
+    private bool isActivating;
 
     public Transform parent;
     public Transform head;
@@ -85,6 +86,7 @@ public class Menu : MonoBehaviour
 
     public void Activate(OptionsAll oa)
     {
+        isActivating = true;
         SteamVR_Actions._default.Activate(left);
         SteamVR_Actions._default.Activate(right);
         gameObject.SetActive(true);
@@ -157,10 +159,13 @@ public class Menu : MonoBehaviour
         put(width, OptionsFisheye.of.width);
         put(flare, OptionsFisheye.of.flare);
         put(rainbowGap, OptionsFisheye.of.rainbowGap);
+
+        isActivating = false;
     }
 
     public void doUpdate()
     {
+        if (isActivating) return;
         OptionsAll oa = core.getOptionsAll();
         try
         {

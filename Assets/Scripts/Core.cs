@@ -132,7 +132,21 @@ public class Core : MonoBehaviour
         return engine.getSaveType();
     }
 
-    // Start is called before the first frame update
+    public void saveMaze(IStore store) {
+
+      store.putString(KEY_CHECK,VALUE_CHECK);
+
+      store.putInteger(KEY_DIM,dim);
+      store.putObject(KEY_OPTIONS_MAP,oa.omCurrent);
+      store.putObject(KEY_OPTIONS_COLOR,oc()); // ocCurrent may be null
+      store.putObject(KEY_OPTIONS_VIEW,ov());  // ditto
+      store.putObject(KEY_OPTIONS_SEED,oa.oeCurrent);
+      store.putBool(KEY_ALIGN_MODE,alignMode);
+
+      engine.save(store,om());
+   }
+
+   // Start is called before the first frame update
     void Start() // ルーチン開始
     {
         SteamVR_Actions.controll.Activate(left);
@@ -146,7 +160,7 @@ public class Core : MonoBehaviour
         optDefault = ScriptableObject.CreateInstance<Options>();
         opt = ScriptableObject.CreateInstance<Options>();
         // ロード
-        load();
+        doInit();
         // dim and rest of oa are initialized when new game started
 
         oa = new OptionsAll();
@@ -214,6 +228,11 @@ public class Core : MonoBehaviour
         menu.RemoveOnStateUpListener(OpenMenu_, left);
         menu.RemoveOnStateUpListener(OpenMenu_, right);
         trigger.RemoveOnStateDownListener(RightClick, right);
+        try {
+            PropertyFile.save(fileCurrent,save);
+        } catch (Exception e) {
+            Debug.Log(e);
+        }
     }
 
     private void initHaptics()
@@ -789,14 +808,7 @@ public class Core : MonoBehaviour
 
     private void doLoadMaze()
     {
-        Dictionary<string, string> p = PropertyFile.load(reloadFile);
-        try {
-            PropertyStore store = new PropertyStore(p);
-            loadMaze(store);
-        } catch (Exception e) {
-            Debug.Log(e);
-            //throw App.getException("PropertyFile.e2",new Object[] { file.getName(), e.getMessage() });
-        }
+        PropertyFile.load(reloadFile, loadMaze);
     }
 
     private void doLoadGeom()
@@ -828,9 +840,11 @@ public class Core : MonoBehaviour
    private static readonly string KEY_OPTIONS_COLOR = "oc";
    private static readonly string KEY_OPTIONS_VIEW  = "ov";
    private static readonly string KEY_OPTIONS_SEED  = "oe";
+   private static readonly string KEY_OPTIONS_DISPLAY = "od";
+   private static readonly string KEY_OPTIONS_CONTROLL = "oo";
    private static readonly string KEY_ALIGN_MODE    = "align";
 
-    public void loadMaze(PropertyStore store){
+    public void loadMaze(IStore store){
         try {
             if ( ! store.getString(KEY_CHECK).Equals(VALUE_CHECK) ) throw new Exception("getEmpty");//App.getEmptyException();
         } catch (Exception e) {
@@ -1128,284 +1142,66 @@ public class Core : MonoBehaviour
         else menuCommand = doLoadGeom;
     }
 
-    private void load()
-    {
-        //opt.oc3.colorMode = 0;
-        //opt.oc3.dimSameParallel = 2;
-        //opt.oc3.dimSamePerpendicular = 0;
-        //opt.oc3.enable[0] = true;
-        //opt.oc3.enable[1] = true;
-        //opt.oc3.enable[2] = true;
-        //opt.oc3.enable[3] = true;
-        //opt.oc3.enable[4] = true;
-        //opt.oc3.enable[5] = true;
-        //opt.oc3.enable[6] = true;
-        //opt.oc3.enable[7] = false;
-        //opt.oc3.enable[8] = false;
-        //opt.oc3.enable[9] = false;
-        //opt.oc3.enable[10] = true;
-        //opt.oc3.enable[11] = false;
-
-        opt.oc4.colorMode = 1;
-        opt.oc4.dimSameParallel = 0;
-        opt.oc4.dimSamePerpendicular = 0;
-        opt.oc4.enable[0] = true;
-        opt.oc4.enable[1] = true;
-        opt.oc4.enable[2] = false;
-        opt.oc4.enable[3] = true;
-        opt.oc4.enable[4] = true;
-        opt.oc4.enable[5] = true;
-        opt.oc4.enable[6] = true;
-        opt.oc4.enable[7] = true;
-        opt.oc4.enable[8] = false;
-        opt.oc4.enable[9] = false;
-        opt.oc4.enable[10] = true;
-        opt.oc4.enable[11] = false;
-
-        //opt.oi.background = 0;
-        //opt.oi.invertColors = false;
-        //opt.oi.convertColors = 0;
-        //opt.oi.lineWidth = 1;
-        //opt.oi.oneInch = 1;
-
-        //opt.ok3.key[0].code = 69;
-        //opt.ok3.key[1].code = 68;
-        //opt.ok3.key[2].code = 74;
-        //opt.ok3.key[3].code = 76;
-        //opt.ok3.key[4].code = 73;
-        //opt.ok3.key[5].code = 75;
-        //opt.ok3.key[6].code = 0;
-        //opt.ok3.key[7].code = 0;
-        //opt.ok3.key[8].code = 74;
-        //opt.ok3.key[9].code = 76;
-        //opt.ok3.key[10].code = 73;
-        //opt.ok3.key[11].code = 75;
-        //opt.ok3.key[12].code = 0;
-        //opt.ok3.key[13].code = 0;
-        //opt.ok3.key[14].code = 85;
-        //opt.ok3.key[15].code = 79;
-        //opt.ok3.key[16].code = 0;
-        //opt.ok3.key[17].code = 0;
-        //opt.ok3.key[18].code = 0;
-        //opt.ok3.key[19].code = 0;
-        //opt.ok3.key[20].code = 10;
-        //opt.ok3.key[21].code = 10;
-        //opt.ok3.key[0].modifiers = 0;
-        //opt.ok3.key[1].modifiers = 0;
-        //opt.ok3.key[2].modifiers = 0;
-        //opt.ok3.key[3].modifiers = 0;
-        //opt.ok3.key[4].modifiers = 0;
-        //opt.ok3.key[5].modifiers = 0;
-        //opt.ok3.key[6].modifiers = 0;
-        //opt.ok3.key[7].modifiers = 0;
-        //opt.ok3.key[8].modifiers = 8;
-        //opt.ok3.key[9].modifiers = 8;
-        //opt.ok3.key[10].modifiers = 8;
-        //opt.ok3.key[11].modifiers = 8;
-        //opt.ok3.key[12].modifiers = 0;
-        //opt.ok3.key[13].modifiers = 0;
-        //opt.ok3.key[14].modifiers = 0;
-        //opt.ok3.key[15].modifiers = 0;
-        //opt.ok3.key[16].modifiers = 0;
-        //opt.ok3.key[17].modifiers = 0;
-        //opt.ok3.key[18].modifiers = 0;
-        //opt.ok3.key[19].modifiers = 0;
-        //opt.ok3.key[20].modifiers = 0;
-        //opt.ok3.key[21].modifiers = 1;
-        //opt.ok3.startAlignMode = true;
-
-        //opt.ok4.key[0].code = 69;
-        //opt.ok4.key[1].code = 68;
-        //opt.ok4.key[2].code = 74;
-        //opt.ok4.key[3].code = 76;
-        //opt.ok4.key[4].code = 73;
-        //opt.ok4.key[5].code = 75;
-        //opt.ok4.key[6].code = 85;
-        //opt.ok4.key[7].code = 79;
-        //opt.ok4.key[8].code = 74;
-        //opt.ok4.key[9].code = 76;
-        //opt.ok4.key[10].code = 73;
-        //opt.ok4.key[11].code = 75;
-        //opt.ok4.key[12].code = 85;
-        //opt.ok4.key[13].code = 79;
-        //opt.ok4.key[14].code = 85;
-        //opt.ok4.key[15].code = 79;
-        //opt.ok4.key[16].code = 74;
-        //opt.ok4.key[17].code = 76;
-        //opt.ok4.key[18].code = 73;
-        //opt.ok4.key[19].code = 75;
-        //opt.ok4.key[20].code = 10;
-        //opt.ok4.key[21].code = 10;
-        //opt.ok4.key[0].modifiers = 0;
-        //opt.ok4.key[1].modifiers = 0;
-        //opt.ok4.key[2].modifiers = 0;
-        //opt.ok4.key[3].modifiers = 0;
-        //opt.ok4.key[4].modifiers = 0;
-        //opt.ok4.key[5].modifiers = 0;
-        //opt.ok4.key[6].modifiers = 0;
-        //opt.ok4.key[7].modifiers = 0;
-        //opt.ok4.key[8].modifiers = 8;
-        //opt.ok4.key[9].modifiers = 8;
-        //opt.ok4.key[10].modifiers = 8;
-        //opt.ok4.key[11].modifiers = 8;
-        //opt.ok4.key[12].modifiers = 8;
-        //opt.ok4.key[13].modifiers = 8;
-        //opt.ok4.key[14].modifiers = 1;
-        //opt.ok4.key[15].modifiers = 1;
-        //opt.ok4.key[16].modifiers = 1;
-        //opt.ok4.key[17].modifiers = 1;
-        //opt.ok4.key[18].modifiers = 1;
-        //opt.ok4.key[19].modifiers = 1;
-        //opt.ok4.key[20].modifiers = 0;
-        //opt.ok4.key[21].modifiers = 1;
-        //opt.ok4.startAlignMode = true;
-
-        //opt.okc.key[0].code = 113;
-        //opt.okc.key[1].code = 48;
-        //opt.okc.key[2].code = 49;
-        //opt.okc.key[3].code = 50;
-        //opt.okc.key[4].code = 51;
-        //opt.okc.key[5].code = 52;
-        //opt.okc.key[6].code = 53;
-        //opt.okc.key[7].code = 54;
-        //opt.okc.key[8].code = 55;
-        //opt.okc.key[9].code = 56;
-        //opt.okc.key[10].code = 57;
-        //opt.okc.key[11].code = 45;
-        //opt.okc.key[12].code = 91;
-        //opt.okc.key[13].code = 44;
-        //opt.okc.key[14].code = 40;
-        //opt.okc.key[15].code = 37;
-        //opt.okc.key[16].code = 0;
-        //opt.okc.key[17].code = 61;
-        //opt.okc.key[18].code = 93;
-        //opt.okc.key[19].code = 46;
-        //opt.okc.key[20].code = 38;
-        //opt.okc.key[21].code = 39;
-        //opt.okc.key[22].code = 0;
-        //opt.okc.key[23].code = 27;
-        //opt.okc.key[24].code = 115;
-        //opt.okc.key[0].modifiers = 0;
-        //opt.okc.key[1].modifiers = 0;
-        //opt.okc.key[2].modifiers = 0;
-        //opt.okc.key[3].modifiers = 0;
-        //opt.okc.key[4].modifiers = 0;
-        //opt.okc.key[5].modifiers = 0;
-        //opt.okc.key[6].modifiers = 0;
-        //opt.okc.key[7].modifiers = 0;
-        //opt.okc.key[8].modifiers = 0;
-        //opt.okc.key[9].modifiers = 0;
-        //opt.okc.key[10].modifiers = 0;
-        //opt.okc.key[11].modifiers = 0;
-        //opt.okc.key[12].modifiers = 0;
-        //opt.okc.key[13].modifiers = 0;
-        //opt.okc.key[14].modifiers = 0;
-        //opt.okc.key[15].modifiers = 0;
-        //opt.okc.key[16].modifiers = 0;
-        //opt.okc.key[17].modifiers = 0;
-        //opt.okc.key[18].modifiers = 0;
-        //opt.okc.key[19].modifiers = 0;
-        //opt.okc.key[20].modifiers = 0;
-        //opt.okc.key[21].modifiers = 0;
-        //opt.okc.key[22].modifiers = 0;
-        //opt.okc.key[23].modifiers = 0;
-        //opt.okc.key[24].modifiers = 8;
-        //opt.okc.param[0] = 2;
-        //opt.okc.param[1] = 1;
-        //opt.okc.param[2] = 4;
-        //opt.okc.param[3] = 8;
-        //opt.okc.param[4] = 9;
-        //opt.okc.param[5] = 0;
-
-        //opt.om3.dimMap = 3;
-        //opt.om3.size[0] = 10;
-        //opt.om3.size[1] = 10;
-        //opt.om3.size[2] = 10;
-        //opt.om3.density = 0.1;
-        //opt.om3.twistProbability = 0.2;
-        //opt.om3.branchProbability = 0.2;
-        //opt.om3.allowLoops = true;
-        //opt.om3.loopCrossProbability = 0.7;
-
-        opt.om4.dimMap = 4;
-        opt.om4.size[0] = 3;
-        opt.om4.size[1] = 3;
-        opt.om4.size[2] = 3;
-        opt.om4.size[3] = 3;
-        opt.om4.density = 1;
-        opt.om4.twistProbability = 0.4;
-        opt.om4.branchProbability = 0.2;
-        opt.om4.allowLoops = false;
-        opt.om4.loopCrossProbability = 0.7;
-
-        //opt.os.enable = true;
-        //opt.os.screenWidth = 12;
-        //opt.os.screenDistance = 30;
-        //opt.os.eyeSpacing = 3;
-        //opt.os.cross = true;
-        //opt.os.tiltVertical = -15;
-        //opt.os.tiltHorizontal = 30;
-
-        //opt.ot3.frameRate = 30;
-        //opt.ot3.timeMove = 0.8;
-        //opt.ot3.timeRotate = 0.8;
-        //opt.ot3.timeAlignMove = 2;
-        //opt.ot3.timeAlignRotate = 2;
-
-        opt.ot4.frameRate = 20;
-        opt.ot4.timeMove = 1;
-        opt.ot4.timeRotate = 0.7;
-        opt.ot4.timeAlignMove = 2;
-        opt.ot4.timeAlignRotate = 2;
-
-        //opt.ov3.depth = 6;
-        //opt.ov3.texture[0] = false;
-        //opt.ov3.texture[1] = true;
-        //opt.ov3.texture[2] = false;
-        //opt.ov3.texture[3] = true;
-        //opt.ov3.texture[4] = false;
-        //opt.ov3.texture[5] = true;
-        //opt.ov3.texture[6] = false;
-        //opt.ov3.texture[7] = true;
-        //opt.ov3.texture[8] = false;
-        //opt.ov3.texture[9] = true;
-        //opt.ov3.retina = 1.45;
-        //opt.ov3.scale = 0.95;
-
-        opt.ov4.depth = 5;
-        opt.ov4.texture[0] = false;
-        opt.ov4.texture[1] = false;
-        opt.ov4.texture[2] = false;
-        opt.ov4.texture[3] = false;
-        opt.ov4.texture[4] = false;
-        opt.ov4.texture[5] = false;
-        opt.ov4.texture[6] = false;
-        opt.ov4.texture[7] = false;
-        opt.ov4.texture[8] = false;
-        opt.ov4.texture[9] = true;
-        opt.ov4.retina = 1.8;
-        opt.ov4.scale = 0.6;
-
-        opt.od.transparency = 0.1;
-        opt.od.border = 1;
-        opt.od.useEdgeColor = false;
-        opt.od.hidesel = false;
-        opt.od.invertNormals = false;
-        opt.od.separate = true;
-
-        opt.oo.inputTypeLeftAndRight = 0;
-        opt.oo.inputTypeForward = 0;
-        opt.oo.inputTypeYawAndPitch = 0;
-        opt.oo.inputTypeRoll = 1;
-        opt.oo.invertLeftAndRight = false;
-        opt.oo.invertForward = false;
-        opt.oo.baseTransparency = 0.2f;
-        opt.oo.sliceTransparency = 1f;
-
-        dim = 4;
-        gameDirectory = null;
-
-        SaveData.SetClass("optDefault", opt);
-        opt = SaveData.GetClass("opt", opt);
+    private bool doInit() {
+        try {
+            PropertyFile.load(nameDefault, delegate(IStore store) { loadDefault(store); });
+            if (File.Exists(fileCurrent)) PropertyFile.load(fileCurrent, load);
+        } catch (ValidationException e) {
+            Debug.Log(e);
+            return false;
+        }
+        return true;
     }
+
+   private static string nameDefault = "default.properties";
+   private static string fileCurrent = "current.properties";
+
+   private static readonly String KEY_OPTIONS = "opt";
+   private static readonly String KEY_BOUNDS  = "bounds";
+   private static readonly String KEY_GAME_DIRECTORY  = "dir.game";
+   private static readonly String KEY_IMAGE_DIRECTORY = "dir.image";
+   private static readonly String KEY_VERSION = "version";
+   private static readonly String KEY_FISHEYE = "opt.of"; // not part of opt (yet)
+
+   // here we don't have to be careful about modifying an existing object,
+   // because if any of the load process fails, the program will exit
+
+    public void loadDefault(IStore store) {
+        store.getObject(KEY_OPTIONS,optDefault);
+
+        if (File.Exists(fileCurrent)) return;
+
+        store.getObject(KEY_OPTIONS,opt);
+        dim = 4;
+        gameDirectory  = null;
+    }
+
+    public void load(IStore store) {
+
+        store.getObject(KEY_OPTIONS,opt);
+        dim = store.getInteger(KEY_DIM);
+        //if ( ! (dim == 3 || dim == 4) ) throw App.getException("Maze.e1");
+        //gameDirectory  = store.getString(KEY_GAME_DIRECTORY );
+
+        //int? temp = store.getNullableInteger(KEY_VERSION);
+        //int version = (temp == null) ? 1 : temp.Value;
+
+        //if (version >= 2) {
+            //store.getObject(KEY_FISHEYE,OptionsFisheye.of);
+            //OptionsFisheye.recalculate();
+        //}
+    }
+
+    public void save(IStore store) {
+
+        store.putObject(KEY_OPTIONS,oa.opt);
+        store.putInteger(KEY_DIM,dim);
+        //store.putString(KEY_GAME_DIRECTORY, gameDirectory);
+
+        //store.putInteger(KEY_VERSION,2);
+
+        //// version 2
+        //store.putObject(KEY_FISHEYE,OptionsFisheye.of);
+    }
+
 }

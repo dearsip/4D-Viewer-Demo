@@ -49,6 +49,7 @@ public class Permute
      */
     public static int[] sequence(int base_, int n)
     {
+        UnityEngine.Debug.Log(n);
         int[] p = new int[n];
         for (int i = 0; i < n; i++) p[i] = base_ + i;
         return p;

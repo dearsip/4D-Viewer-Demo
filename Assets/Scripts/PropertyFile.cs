@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class PropertyFile
 {
+    public delegate void Loader(IStore store);
+    public delegate void Saver(IStore store);
     private static bool testProperties(string file) //throws IOException 
     {
         try {
@@ -36,20 +38,57 @@ public class PropertyFile
         }
     }
 
+    private static void storeProperties(string file, Dictionary<string, string> p) {
+        try {
+            using (StreamWriter sw = new StreamWriter(file))
+            {
+                sw.WriteLine("#"+DateTime.Now.ToString("ddd MMM dd HH:mm:ss K yyyy"));
+                foreach(KeyValuePair<string, string> c in p) sw.WriteLine(c.Key+"="+c.Value);
+            }
+        }
+        catch (Exception t)
+        {
+          Debug.Log(t);
+        }
+    }
+
     public static bool test(string file) {
         return testProperties(file);
     }
 
-    public static Dictionary<string, string> load(string file) {
-        Dictionary<string, string> dict = new Dictionary<string, string>();
+    public static void load(string file, Loader storable) {
+        Dictionary<string, string> p = new Dictionary<string, string>();
         try
         {
-            loadProperties(file, dict);
+            loadProperties(file, p);
         }
         catch (Exception e)
         {
             Debug.Log(e);
         }
-        return dict;
+        try {
+            PropertyStore store = new PropertyStore(p);
+            storable(store);
+        } catch (Exception e) {
+            Debug.Log(e);
+            //throw App.getException("PropertyFile.e2",new Object[] { file.getName(), e.getMessage() });
+        }
+    }
+
+    public static void save(string file, Saver storable) {
+        Dictionary<string, string> p = new Dictionary<string, string>();
+
+        try {
+            PropertyStore store = new PropertyStore(p);
+            storable(store);
+        } catch (ValidationException e) {
+            Debug.Log(e);
+        }
+
+        try {
+            storeProperties(file,p);
+        } catch (IOException e) {
+            Debug.Log(e);
+        }
     }
 }

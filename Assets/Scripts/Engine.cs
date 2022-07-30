@@ -261,6 +261,14 @@ public class Engine : IMove
         return model.getSaveType();
     }
 
+   public void save(IStore store, OptionsMap om) {
+
+      store.putObject(KEY_ORIGIN,origin);
+      store.putObject(KEY_AXIS,axis);
+      store.putBool(KEY_WIN,win);
+      //if (getSaveType() == IModel.SAVE_MAZE) ((MapModel)model).save(store, om);
+   }
+
     //public void save(IStore store)
     //{
 

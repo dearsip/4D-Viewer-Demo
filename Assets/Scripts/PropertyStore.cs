@@ -25,8 +25,8 @@ public class PropertyStore : IStore {
         * and (b) it uses strict parsing, unlike the related functions in Boolean.
         */
     private bool parseBool(string s) {
-        if (s == "true") return true;
-        else if (s == "false") return false;
+        if (s == "true" || s == "True") return true;
+        else if (s == "false" || s == "False") return false;
         else throw new /*NumberFormat*/Exception("not bool"); // not really a number, but close enough
     }
 
@@ -99,6 +99,15 @@ public class PropertyStore : IStore {
             return Int64.Parse(value);
         } catch (/*NumberFormat*/Exception e) {
             throw e;//App.getException("PropertyStore.e4",new Object[] { key, value });
+        }
+    }
+
+    public float getSingle(string key) {
+        string value = getProperty(key);
+        try {
+            return Single.Parse(value);
+        } catch (/*NumberFormat*/Exception e) {
+            throw e;//App.getException("PropertyStore.e5",new Object[] { key, value });
         }
     }
 
@@ -182,6 +191,7 @@ public class PropertyStore : IStore {
              if (c == typeof(bool)  ) return getBool   (key);
         else if (c == typeof(int)   ) return getInteger(key);
         else if (c == typeof(long)  ) return getLong   (key);
+        else if (c == typeof(float) ) return getSingle (key);
         else if (c == typeof(double)) return getDouble (key);
         else throw new Exception("not primitive "+key+", "+c);//App.getException("PropertyStore.e6",new Object[] { key, c.getName() });
     }
@@ -194,6 +204,7 @@ public class PropertyStore : IStore {
         * we can't handle primitive types here.  Use getPrimitive instead.
         */
     public void getObject(string key, object o) {
+        Debug.Log("get "+key+" for "+o.ToString());
         Type c = o.GetType();
 
              if (c.IsPrimitive) throw new Exception("not object "+key+", "+o+", "+c);//App.getException("PropertyStore.e7",new object[] { key, c.getName() });
@@ -213,6 +224,10 @@ public class PropertyStore : IStore {
 
     public void putLong(string key, long l) {
         p.Add(key,l.ToString());
+    }
+
+    public void putSingle(string key, float d) {
+        p.Add(key,d.ToString());
     }
 
     public void putDouble(string key, double d) {
@@ -269,6 +284,7 @@ public class PropertyStore : IStore {
              if (c == typeof(bool)  ) putBool   (key,((bool)  o));
         else if (c == typeof(int)   ) putInteger(key,((int)   o));
         else if (c == typeof(long)  ) putLong   (key,((long)  o));
+        else if (c == typeof(float) ) putSingle (key,((float) o));
         else if (c == typeof(double)) putDouble (key,((double)o));
 
         else if (c.IsPrimitive) throw new Exception("not object");//App.getException("PropertyStore.e8",new object[] { key, c.getName() });
