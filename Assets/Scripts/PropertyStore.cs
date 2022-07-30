@@ -163,8 +163,6 @@ public class PropertyStore : IStore {
             string fieldKey = FieldKey(key,field[i]);
 
             try {
-                Debug.Log("isPrimitive: "+fieldType);
-
                 if (fieldType.IsPrimitive) field[i].SetValue(o,getPrimitive(fieldKey,fieldType));
                 else getObject(fieldKey,field[i].GetValue(o));
 
@@ -196,7 +194,6 @@ public class PropertyStore : IStore {
         * we can't handle primitive types here.  Use getPrimitive instead.
         */
     public void getObject(string key, object o) {
-        Debug.Log("getObject key: "+key+", object: "+o);
         Type c = o.GetType();
 
              if (c.IsPrimitive) throw new Exception("not object "+key+", "+o+", "+c);//App.getException("PropertyStore.e7",new object[] { key, c.getName() });

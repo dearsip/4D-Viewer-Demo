@@ -32,7 +32,6 @@ public class PropertyFile
                 string key = line.Substring(0, index).Trim();
                 string value = line.Substring(index + 1).Trim();
                 dict.Add(key, value);
-                Debug.Log("import key: "+key+", value: "+value);
             }
         }
     }

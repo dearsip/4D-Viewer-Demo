@@ -731,14 +731,15 @@ public class Core : MonoBehaviour
         Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
 
         if (FileBrowser.Success) {
-            if (PropertyFile.test(FileBrowser.Result)) menuCommand = doLoadMaze;
+            reloadFile = FileBrowser.Result;
+            if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
             else menuCommand = doLoadGeom;
         }
     }
 
     private void doLoadMaze()
     {
-        Dictionary<string, string> p = PropertyFile.load(FileBrowser.Result);
+        Dictionary<string, string> p = PropertyFile.load(reloadFile);
         try {
             PropertyStore store = new PropertyStore(p);
             loadMaze(store);
@@ -752,7 +753,7 @@ public class Core : MonoBehaviour
     {
         try
         {
-            loadGeom(FileBrowser.Result);
+            loadGeom(reloadFile);
         }
         catch (Exception t)
         {
@@ -1048,6 +1049,33 @@ public class Core : MonoBehaviour
         // done
 
         return model;
+    }
+
+    public void doReload(int delta) {
+        if (reloadFile == null) return;
+
+        Debug.Log(reloadFile);
+        if (delta != 0) {
+            string[] f = Array.ConvertAll<FileInfo, string>(Directory.GetParent(reloadFile).GetFiles(), s => s.ToString());
+            Debug.Log(string.Join(",",f));
+            Array.Sort(f);
+            Debug.Log(string.Join(",",f));
+
+            // results of listFiles have same parent directory so names are sufficient
+            // (and probably faster for sorting)
+
+            int i = Array.IndexOf(f,reloadFile);
+            Debug.Log(i);
+            if (i != -1) {
+                i += delta;
+                if (i >= 0 && i < f.Length) reloadFile = f[i];
+                else return; // we're at the end, don't do a reload
+            }
+            // else not found, fall through and report that error
+        }
+
+        if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
+        else menuCommand = doLoadGeom;
     }
 
     private void load()
