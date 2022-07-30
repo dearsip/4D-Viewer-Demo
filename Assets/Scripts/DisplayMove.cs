@@ -9,8 +9,14 @@ public class DisplayMove : MonoBehaviour
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean grab;
     public SteamVR_Action_Pose pose;
+    private Quaternion relarot;
     void Update()
     {
-        if (grab.GetState(hand)) transform.position += pose.GetLocalPosition(hand) - pose.GetLastLocalPosition(hand);
+        if (grab.GetState(hand)) {
+            transform.position += pose.GetLocalPosition(hand) - pose.GetLastLocalPosition(hand);
+            relarot = pose.GetLocalRotation(hand) * Quaternion.Inverse(pose.GetLastLocalRotation(hand));
+            relarot.x = 0; relarot.z = 0;
+            transform.rotation *= relarot;
+        }
     }
 }

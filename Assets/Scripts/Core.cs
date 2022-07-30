@@ -55,8 +55,8 @@ public class Core : MonoBehaviour
     public SteamVR_Action_Boolean trigger, move, menu;
     public SteamVR_Action_Pose pose;
     public SteamVR_Input_Sources left, right;
-    private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight;
-    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, relarot;
+    private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight, dlPosLeft, dfPosLeft, dlPosRight, dfPosRight;
+    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, dlRotLeft, dfRotLeft, dlRotRight, dfRotRight, relarot;
     private bool leftTrigger, rightTrigger, lastLeftTrigger, lastRightTrigger, leftTriggerPressed, rightTriggerPressed,
         leftMove, rightMove;
     public Menu menuPanel;
@@ -422,15 +422,22 @@ public class Core : MonoBehaviour
 
     private void calcInput()
     {
+        relarot = Quaternion.Inverse(transform.rotation);
         lastPosLeft = posLeft; lastPosRight = posRight;
         lastRotLeft = rotLeft; lastRotRight = rotRight;
-        posLeft = pose.GetLocalPosition(left); rotLeft = pose.GetLocalRotation(left);
-        posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
+        posLeft = pose.GetLocalPosition(left); posRight = pose.GetLocalPosition(right);
+        rotLeft = pose.GetLocalRotation(left); rotRight = pose.GetLocalRotation(right);
+        dlPosLeft = relarot * (posLeft - lastPosLeft); dlPosRight = relarot * (posRight - lastPosRight);
+        dfPosLeft = relarot * (posLeft - fromPosLeft); dfPosRight = relarot * (posRight - fromPosRight);
+        dlRotLeft = relarot * rotLeft * Quaternion.Inverse(relarot * lastRotLeft);
+        dlRotRight = relarot * rotRight * Quaternion.Inverse(relarot * lastRotRight);
+        dfRotLeft = relarot * rotLeft * Quaternion.Inverse(relarot * fromRotLeft);
+        dfRotRight = relarot * rotRight * Quaternion.Inverse(relarot * fromRotRight);
         lastLeftTrigger = leftTrigger; lastRightTrigger = rightTrigger;
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
-        reg1 = transform.position - player.hmdTransform.position;
+        reg1 = Quaternion.Inverse(transform.rotation) * (transform.position - player.hmdTransform.position);
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
@@ -462,22 +469,22 @@ public class Core : MonoBehaviour
             if (leftMove)
             {
                 if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControll.INPUTTYPE_DRAG) {
-                    for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - lastPosLeft[i];
+                    for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
                     Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
                 }
                 else {
-                    for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
+                    for (int i = 0; i < 3; i++) reg2[i] = dfPosLeft[i];
                     Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                 }
                 if (opt.oo.limit3D) reg2[2] = 0;
                 Array.Copy(reg2, reg3, 3);
                 if (!alignMode && opt.oo.inputTypeForward == OptionsControll.INPUTTYPE_DRAG) {
-                    relarot = rotLeft * Quaternion.Inverse(lastRotLeft);
+                    relarot = dlRotLeft;
                     reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
                     reg3[3] /= maxAng * Math.PI / 180 * dMove;
                 }
                 else {
-                    relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
+                    relarot = dfRotLeft;
                     reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
                     reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
                 }
@@ -505,7 +512,7 @@ public class Core : MonoBehaviour
             {
                 if (alignMode)
                 {
-                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                    for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
                     if (opt.oo.limit3D) reg2[2] = 0;
                     Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                     if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
@@ -522,7 +529,7 @@ public class Core : MonoBehaviour
                     }
                     if (command == null)
                     {
-                        relarot = rotRight * Quaternion.Inverse(fromRotRight);
+                        relarot = dfRotRight;
                         if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                         if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                         for (int i = 0; i < 3; i++)
@@ -543,10 +550,10 @@ public class Core : MonoBehaviour
                 {
                     Vec.unitVector(reg3, 3);
                     if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
-                        for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - lastPosRight[i];
+                        for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
                     }
                     else {
-                        for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
+                        for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
                     }
                     if (opt.oo.limit3D) reg2[2] = 0;
                     if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
@@ -567,10 +574,10 @@ public class Core : MonoBehaviour
 
                     float f;
                     if (opt.oo.inputTypeRoll == OptionsControll.INPUTTYPE_DRAG) {
-                        relarot = rotRight * Quaternion.Inverse(lastRotRight);
+                        relarot = dlRotRight;
                     }
                     else {
-                        relarot = rotRight * Quaternion.Inverse(fromRotRight);
+                        relarot = dfRotRight;
                         f = Mathf.Acos(relarot.w);
                         if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
                         relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
