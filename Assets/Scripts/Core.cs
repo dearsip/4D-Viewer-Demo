@@ -65,7 +65,7 @@ public class Core : MonoBehaviour
     private double[] reg2, reg3, reg4, reg5, reg6;
     public Player player;
     public Camera fixedCamera;
-    private bool focusOnVR;
+    public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
     private double[] eyeVector;
     private double[] cursor;
     private double[][] cursorAxis;
@@ -197,7 +197,6 @@ public class Core : MonoBehaviour
         menu.AddOnStateUpListener(OpenMenu_, left);
         menu.AddOnStateUpListener(OpenMenu_, right);
         trigger.AddOnStateDownListener(RightClick, right);
-        SteamVR_Events.InputFocus.Listen(OnInputFocus);
     }
 
     private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -253,12 +252,6 @@ public class Core : MonoBehaviour
             };
             ws.Connect();
         }
-    }
-
-    private void OnInputFocus(bool hasFocus)
-    {
-        if (hasFocus) focusOnVR = true;
-        else          focusOnVR = false;
     }
 
     private void openMenu()
@@ -461,7 +454,8 @@ public class Core : MonoBehaviour
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
         reg1 = Quaternion.Inverse(transform.rotation) * 
-               (transform.position - ((focusOnVR) ? player.hmdTransform.position : fixedCamera.transform.position));
+               (transform.position - ((headsetOnHead.GetState(SteamVR_Input_Sources.Head)) ? 
+                player.hmdTransform.position : fixedCamera.transform.position));
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
@@ -511,7 +505,7 @@ public class Core : MonoBehaviour
                 reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
             }
 
-            if (opt.oo.limit3D) reg2[2] = 0;
+            if (opt.oo.limit3D) reg3[2] = 0;
             if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
             if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
             if (!leftMove) Vec.zero(reg3);
@@ -583,12 +577,12 @@ public class Core : MonoBehaviour
                 if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
                     for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
                     t = Vec.norm(reg2);
-                    Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max);
+                    if (t>0) Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max / t);
                 }
                 else {
                     for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
                     t = Vec.norm(reg2);
-                    Vec.scale(reg2, reg2, Math.Min(limit, t) / limit);
+                    if (t>0) Vec.scale(reg2, reg2, Math.Min(limit, t) / limit / t);
                 }
                 if (opt.oo.limit3D) reg2[2] = 0;
                 if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
@@ -859,7 +853,6 @@ public class Core : MonoBehaviour
 
     public void doQuit()
     {
-        SteamVR_Events.InputFocus.Remove(OnInputFocus);
         try {
             PropertyFile.save(fileCurrent,save);
         } catch (Exception e) {
