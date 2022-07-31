@@ -64,6 +64,8 @@ public class Core : MonoBehaviour
     private Vector3 reg0, reg1;
     private double[] reg2, reg3, reg4, reg5, reg6;
     public Player player;
+    public Camera fixedCamera;
+    private bool focusOnVR;
     private double[] eyeVector;
     private double[] cursor;
     private double[][] cursorAxis;
@@ -195,6 +197,7 @@ public class Core : MonoBehaviour
         menu.AddOnStateUpListener(OpenMenu_, left);
         menu.AddOnStateUpListener(OpenMenu_, right);
         trigger.AddOnStateDownListener(RightClick, right);
+        SteamVR_Events.InputFocus.Listen(OnInputFocus);
     }
 
     private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -228,6 +231,7 @@ public class Core : MonoBehaviour
         menu.RemoveOnStateUpListener(OpenMenu_, left);
         menu.RemoveOnStateUpListener(OpenMenu_, right);
         trigger.RemoveOnStateDownListener(RightClick, right);
+        SteamVR_Events.InputFocus.Remove(OnInputFocus);
         try {
             PropertyFile.save(fileCurrent,save);
         } catch (Exception e) {
@@ -255,6 +259,12 @@ public class Core : MonoBehaviour
             };
             ws.Connect();
         }
+    }
+
+    private void OnInputFocus(bool hasFocus)
+    {
+        if (hasFocus) focusOnVR = true;
+        else          focusOnVR = false;
     }
 
     private void openMenu()
@@ -456,7 +466,8 @@ public class Core : MonoBehaviour
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
-        reg1 = Quaternion.Inverse(transform.rotation) * (transform.position - player.hmdTransform.position);
+        reg1 = Quaternion.Inverse(transform.rotation) * 
+               (transform.position - ((focusOnVR) ? player.hmdTransform.position : fixedCamera.transform.position));
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
@@ -485,142 +496,152 @@ public class Core : MonoBehaviour
         if (command != null) command();
         else
         {
-            if (leftMove)
+            // left hand
+            if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControll.INPUTTYPE_DRAG) {
+                for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
+                Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
+            }
+            else {
+                for (int i = 0; i < 3; i++) reg2[i] = dfPosLeft[i];
+                Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+            }
+            Array.Copy(reg2, reg3, 3);
+            if (!alignMode && opt.oo.inputTypeForward == OptionsControll.INPUTTYPE_DRAG) {
+                relarot = dlRotLeft;
+                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                reg3[3] /= maxAng * Math.PI / 180 * dMove;
+            }
+            else {
+                relarot = dfRotLeft;
+                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
+            }
+
+            if (opt.oo.limit3D) reg2[2] = 0;
+            if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
+            if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
+            if (!leftMove) Vec.zero(reg3);
+            keyControll(KEYMODE_SLIDE);
+
+            if (alignMode)
             {
-                if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControll.INPUTTYPE_DRAG) {
-                    for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
-                    Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
-                }
-                else {
-                    for (int i = 0; i < 3; i++) reg2[i] = dfPosLeft[i];
-                    Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
-                }
-                if (opt.oo.limit3D) reg2[2] = 0;
-                Array.Copy(reg2, reg3, 3);
-                if (!alignMode && opt.oo.inputTypeForward == OptionsControll.INPUTTYPE_DRAG) {
-                    relarot = dlRotLeft;
-                    reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
-                    reg3[3] /= maxAng * Math.PI / 180 * dMove;
-                }
-                else {
-                    relarot = dfRotLeft;
-                    reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
-                    reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
-                }
-                if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
-                if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
-                if (alignMode)
+                for (int i = 0; i < reg3.Length; i++)
                 {
-                    for (int i = 0; i < reg3.Length; i++)
+                    if (Math.Abs(reg3[i]) > 0.8)
                     {
-                        if (Math.Abs(reg3[i]) > 0.8)
-                        {
-                            nActive = nMove;
-                            ad0 = Dir.forAxis(i, reg3[i] < 0);
-                            if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
-                        }
+                        nActive = nMove;
+                        ad0 = Dir.forAxis(i, reg3[i] < 0);
+                        if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
                     }
                 }
-                else
-                {
-                    Vec.scale(reg3, reg3, dMove);
-                    target.move(reg3);
-                }
             }
-            if (rightMove)
+            else
             {
-                if (alignMode)
+                Vec.scale(reg3, reg3, dMove);
+                target.move(reg3);
+            }
+
+            // right hand
+            if (alignMode)
+            {
+                for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
+                Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                if (opt.oo.limit3D) reg2[2] = 0;
+                if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
+                if (!rightMove) Vec.zero(reg2);
+                keyControll(KEYMODE_TURN);
+                for (int i = 0; i < reg2.Length; i++)
                 {
-                    for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
-                    if (opt.oo.limit3D) reg2[2] = 0;
-                    Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
-                    if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
-                    for (int i = 0; i < reg2.Length; i++)
+                    if (Math.Abs(reg2[i]) > 0.8)
                     {
-                        if (Math.Abs(reg2[i]) > 0.8)
+                        nActive = nRotate;
+                        ad0 = Dir.forAxis(dim - 1);
+                        ad1 = Dir.forAxis(i, reg2[i] < 0);
+                        command = alignRotate;
+                        break;
+                    }
+                }
+                if (command == null)
+                {
+                    relarot = dfRotRight;
+                    for (int i = 0; i < 3; i++) reg0[i] = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
+                    if (opt.oo.limit3D) { reg0[0] = 0; reg0[1] = 0; }
+                    if (opt.oo.invertRoll) reg0 = -reg0;
+                    if (!rightMove) reg0 = Vector3.zero;
+                    keyControll(KEYMODE_SPIN);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (Mathf.Abs(reg0[i]) > 0.8)
                         {
                             nActive = nRotate;
-                            ad0 = Dir.forAxis(dim - 1);
-                            ad1 = Dir.forAxis(i, reg2[i] < 0);
+                            ad0 = Dir.forAxis((i + 1) % 3);
+                            ad1 = Dir.forAxis((i + 2) % 3, reg0[i] < 0);
                             command = alignRotate;
                             break;
                         }
                     }
-                    if (command == null)
-                    {
-                        relarot = dfRotRight;
-                        if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
-                        if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
-                        for (int i = 0; i < 3; i++)
-                        {
-                            float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
-                            if (Mathf.Abs(f) > 0.8)
-                            {
-                                nActive = nRotate;
-                                ad0 = Dir.forAxis((i + 1) % 3);
-                                ad1 = Dir.forAxis((i + 2) % 3, f < 0);
-                                command = alignRotate;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    Vec.unitVector(reg3, 3);
-                    if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
-                        for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
-                    }
-                    else {
-                        for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
-                    }
-                    if (opt.oo.limit3D) reg2[2] = 0;
-                    if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
-                    double t = Vec.norm(reg2);
-                    if (t != 0)
-                    {
-                        if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
-                            t = Math.PI / 2 * Math.Min(max, t) / max;
-                        }
-                        else {
-                            t = dRotate * Math.PI / 180 * Math.Min(limit, t) / limit;
-                        }
-                        Vec.normalize(reg2, reg2);
-                        for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
-                        reg4[3] = Math.Cos(t);
-                        target.rotateAngle(reg3, reg4);
-                    }
-
-                    float f;
-                    if (opt.oo.inputTypeRoll == OptionsControll.INPUTTYPE_DRAG) {
-                        relarot = dlRotRight;
-                    }
-                    else {
-                        relarot = dfRotRight;
-                        f = Mathf.Acos(relarot.w);
-                        if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
-                        relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
-                    }
-                    if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
-                    if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
-                    if (relarot.w < 1f) {
-                        relarot.ToAngleAxis(out f, out reg0);
-                        //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
-                        reg1.Set(1, 0, 0);
-                        Vector3.OrthoNormalize(ref reg0, ref reg1);
-                        //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
-                        //relarot[3] = Mathf.Cos(f);
-                        reg0 = relarot * reg1;
-                        for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
-                        reg3[3] = 0;
-                        for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
-                        reg4[3] = 0;
-                        Vec.normalize(reg3, reg3);
-                        Vec.normalize(reg4, reg4);
-                        target.rotateAngle(reg4, reg3);
-                    }
                 }
             }
+            else
+            {
+                Vec.unitVector(reg3, 3);
+                double t;
+                if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
+                    for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
+                    t = Vec.norm(reg2);
+                    Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max);
+                }
+                else {
+                    for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
+                    t = Vec.norm(reg2);
+                    Vec.scale(reg2, reg2, Math.Min(limit, t) / limit);
+                }
+                if (opt.oo.limit3D) reg2[2] = 0;
+                if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
+                if (!rightMove) Vec.zero(reg2);
+                keyControll(KEYMODE_TURN);
+                t = Vec.norm(reg2);
+                if (t != 0)
+                {
+                    t *= dRotate * Math.PI / 180;
+                    Vec.normalize(reg2, reg2);
+                    for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
+                    reg4[3] = Math.Cos(t);
+                    target.rotateAngle(reg3, reg4);
+                }
+
+                float f;
+                if (opt.oo.inputTypeRoll == OptionsControll.INPUTTYPE_DRAG) {
+                    relarot = dlRotRight;
+                }
+                else {
+                    relarot = dfRotRight;
+                    f = Mathf.Acos(relarot.w);
+                    if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
+                    relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
+                }
+                if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
+                if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
+                if (!rightMove) relarot = Quaternion.identity;
+                keyControll(KEYMODE_SPIN2);
+                if (relarot.w < 1f) {
+                    relarot.ToAngleAxis(out f, out reg0);
+                    //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
+                    reg1.Set(1, 0, 0);
+                    Vector3.OrthoNormalize(ref reg0, ref reg1);
+                    //for (int i = 0; i < 3; i++) relarot[i] = reg0[i] * Mathf.Sin(f);
+                    //relarot[3] = Mathf.Cos(f);
+                    reg0 = relarot * reg1;
+                    for (int i = 0; i < 3; i++) reg3[i] = reg0[i];
+                    reg3[3] = 0;
+                    for (int i = 0; i < 3; i++) reg4[i] = reg1[i];
+                    reg4[3] = 0;
+                    Vec.normalize(reg3, reg3);
+                    Vec.normalize(reg4, reg4);
+                    target.rotateAngle(reg4, reg3);
+                }
+            }
+
             if (leftTrigger)
             {
 
@@ -710,6 +731,69 @@ public class Core : MonoBehaviour
             alignMode = engineAlignMode; // restore
         }
         command = null;
+    }
+
+    private KeyCode KEY_SLIDELEFT  = KeyCode.S;
+    private KeyCode KEY_SLIDERIGHT = KeyCode.F;
+    private KeyCode KEY_SLIDEUP    = KeyCode.A;
+    private KeyCode KEY_SLIDEDOWN  = KeyCode.Z;
+    private KeyCode KEY_SLIDEIN    = KeyCode.W;
+    private KeyCode KEY_SLIDEOUT   = KeyCode.R;
+    private KeyCode KEY_FORWARD    = KeyCode.E;
+    private KeyCode KEY_BACK       = KeyCode.D;
+    private KeyCode KEY_TURNLEFT   = KeyCode.J;
+    private KeyCode KEY_TURNRIGHT  = KeyCode.L;
+    private KeyCode KEY_TURNUP     = KeyCode.I;
+    private KeyCode KEY_TURNDOWN   = KeyCode.K;
+    private KeyCode KEY_TURNIN     = KeyCode.U;
+    private KeyCode KEY_TURNOUT    = KeyCode.O;
+    private KeyCode KEY_SPINLEFT   = KeyCode.J;
+    private KeyCode KEY_SPINRIGHT  = KeyCode.L;
+    private KeyCode KEY_SPINUP     = KeyCode.I;
+    private KeyCode KEY_SPINDOWN   = KeyCode.K;
+    private KeyCode KEY_SPININ     = KeyCode.U;
+    private KeyCode KEY_SPINOUT    = KeyCode.O;
+    private const int KEYMODE_SLIDE = 0;
+    private const int KEYMODE_TURN = 1;
+    private const int KEYMODE_SPIN = 2;
+    private const int KEYMODE_SPIN2 = 3;
+    private void keyControll(int keyMode) {
+        if (keyMode == KEYMODE_SLIDE) {
+            if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
+            if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
+            if (Input.GetKey(KEY_SLIDEUP   )) reg3[1] =  1;
+            if (Input.GetKey(KEY_SLIDEDOWN )) reg3[1] = -1;
+            if (Input.GetKey(KEY_SLIDEIN   )) reg3[2] =  1;
+            if (Input.GetKey(KEY_SLIDEOUT  )) reg3[2] = -1;
+            if (Input.GetKey(KEY_FORWARD   )) reg3[3] =  1;
+            if (Input.GetKey(KEY_BACK      )) reg3[3] = -1;
+        }
+        if (keyMode == KEYMODE_TURN) {
+            if (Input.GetKey(KEY_TURNLEFT ) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] = -1;
+            if (Input.GetKey(KEY_TURNRIGHT) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] =  1;
+            if (Input.GetKey(KEY_TURNUP   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] =  1;
+            if (Input.GetKey(KEY_TURNDOWN ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] = -1;
+            if (Input.GetKey(KEY_TURNIN   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] =  1;
+            if (Input.GetKey(KEY_TURNOUT  ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] = -1;
+        }
+        if (keyMode == KEYMODE_SPIN) {
+            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] = -1;
+            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] =  1;
+            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] =  1;
+            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] = -1;
+            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] =  1;
+            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] = -1;
+        }
+        if (keyMode == KEYMODE_SPIN2) {
+            Quaternion q = Quaternion.identity;
+            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(-(float)dRotate,0,0);
+            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler( (float)dRotate,0,0);
+            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0, (float)dRotate,0);
+            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,-(float)dRotate,0);
+            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0, (float)dRotate);
+            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0,-(float)dRotate);
+            if (q != Quaternion.identity) relarot = q;
+        }
     }
 
     public OptionsAll getOptionsAll()

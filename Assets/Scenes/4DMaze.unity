@@ -9017,6 +9017,7 @@ MonoBehaviour:
   right: 2
   menuPanel: {fileID: 9960764}
   player: {fileID: 1277694492}
+  fixedCamera: {fileID: 1022013572}
   hapActive: 0
   hapticsTester: {fileID: 89358606}
 --- !u!114 &322209024
@@ -38330,7 +38331,7 @@ PrefabInstance:
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 78
+      value: 78.000046
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
