@@ -231,12 +231,6 @@ public class Core : MonoBehaviour
         menu.RemoveOnStateUpListener(OpenMenu_, left);
         menu.RemoveOnStateUpListener(OpenMenu_, right);
         trigger.RemoveOnStateDownListener(RightClick, right);
-        SteamVR_Events.InputFocus.Remove(OnInputFocus);
-        try {
-            PropertyFile.save(fileCurrent,save);
-        } catch (Exception e) {
-            Debug.Log(e);
-        }
     }
 
     private void initHaptics()
@@ -865,6 +859,12 @@ public class Core : MonoBehaviour
 
     public void doQuit()
     {
+        SteamVR_Events.InputFocus.Remove(OnInputFocus);
+        try {
+            PropertyFile.save(fileCurrent,save);
+        } catch (Exception e) {
+            Debug.Log(e);
+        }
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #elif UNITY_STANDALONE
