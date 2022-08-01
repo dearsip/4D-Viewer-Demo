@@ -16,7 +16,7 @@ public class Options : ScriptableObject //implements IValidate
     public OptionsColor /*oc3,*/ oc4;
     public OptionsView /*ov3,*/ ov4;
     public OptionsDisplay od;
-    public OptionsControll oo;
+    public OptionsControl oo;
     //public OptionsStereo os;
     //public OptionsKeys ok3, ok4;
     //public OptionsKeysConfig okc;
@@ -35,7 +35,7 @@ public class Options : ScriptableObject //implements IValidate
         //ov3 = new OptionsView();
         ov4 = new OptionsView();
         od = new OptionsDisplay();
-        oo = new OptionsControll();
+        oo = new OptionsControl();
         //os = new OptionsStereo();
         //ok3 = new OptionsKeys(3);
         //ok4 = new OptionsKeys(4);

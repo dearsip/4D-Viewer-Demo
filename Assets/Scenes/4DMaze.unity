@@ -9002,22 +9002,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   alignMode: 0
   trigger:
-    actionPath: /actions/controll/in/Trigger
+    actionPath: /actions/control/in/Trigger
     needsReinit: 0
   move:
-    actionPath: /actions/controll/in/Move
+    actionPath: /actions/control/in/Move
     needsReinit: 0
   menu:
-    actionPath: /actions/controll/in/Menu
+    actionPath: /actions/control/in/Menu
     needsReinit: 0
   pose:
-    actionPath: /actions/controll/in/Pose
+    actionPath: /actions/control/in/Pose
     needsReinit: 0
   left: 1
   right: 2
   menuPanel: {fileID: 9960764}
   player: {fileID: 1277694492}
   fixedCamera: {fileID: 1022013572}
+  headsetOnHead:
+    actionPath: /actions/default/in/HeadsetOnHead
+    needsReinit: 0
   hapActive: 0
   hapticsTester: {fileID: 89358606}
 --- !u!114 &322209024
@@ -38326,7 +38329,7 @@ PrefabInstance:
     - target: {fileID: 224000010383356806, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000022888184
+      value: -0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}

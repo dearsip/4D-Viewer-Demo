@@ -1,6 +1,6 @@
 ﻿
 
-public class OptionsControll// : IValidate
+public class OptionsControl// : IValidate
 {
 
     // --- fields ---
@@ -17,13 +17,13 @@ public class OptionsControll// : IValidate
 
     // --- construction ---
 
-    public OptionsControll()
+    public OptionsControl()
     {
     }
 
     // --- structure methods ---
 
-    public static void copy(OptionsControll dest, OptionsControll src)
+    public static void copy(OptionsControl dest, OptionsControl src)
     {
         dest.inputTypeLeftAndRight = src.inputTypeLeftAndRight;
         dest.inputTypeForward = src.inputTypeForward;

@@ -79,21 +79,21 @@
       "requirement": "optional"
     },
     {
-      "name": "/actions/controll/in/Menu",
+      "name": "/actions/control/in/Menu",
       "type": "boolean",
       "requirement": "suggested"
     },
     {
-      "name": "/actions/controll/in/Trigger",
+      "name": "/actions/control/in/Trigger",
       "type": "boolean"
     },
     {
-      "name": "/actions/controll/in/Move",
+      "name": "/actions/control/in/Move",
       "type": "boolean",
       "requirement": "mandatory"
     },
     {
-      "name": "/actions/controll/in/Pose",
+      "name": "/actions/control/in/Pose",
       "type": "pose",
       "requirement": "mandatory"
     }
@@ -116,7 +116,7 @@
       "usage": "single"
     },
     {
-      "name": "/actions/controll",
+      "name": "/actions/control",
       "usage": "single"
     }
   ],

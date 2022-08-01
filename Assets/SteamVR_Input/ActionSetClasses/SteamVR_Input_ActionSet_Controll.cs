@@ -14,14 +14,14 @@ namespace Valve.VR
     using UnityEngine;
     
     
-    public class SteamVR_Input_ActionSet_controll : Valve.VR.SteamVR_ActionSet
+    public class SteamVR_Input_ActionSet_control : Valve.VR.SteamVR_ActionSet
     {
         
         public virtual SteamVR_Action_Boolean Menu
         {
             get
             {
-                return SteamVR_Actions.controll_Menu;
+                return SteamVR_Actions.control_Menu;
             }
         }
         
@@ -29,7 +29,7 @@ namespace Valve.VR
         {
             get
             {
-                return SteamVR_Actions.controll_Trigger;
+                return SteamVR_Actions.control_Trigger;
             }
         }
         
@@ -37,7 +37,7 @@ namespace Valve.VR
         {
             get
             {
-                return SteamVR_Actions.controll_Move;
+                return SteamVR_Actions.control_Move;
             }
         }
         
@@ -45,7 +45,7 @@ namespace Valve.VR
         {
             get
             {
-                return SteamVR_Actions.controll_Pose;
+                return SteamVR_Actions.control_Pose;
             }
         }
     }

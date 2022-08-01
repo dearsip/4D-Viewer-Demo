@@ -25,7 +25,7 @@ namespace Valve.VR
         
         private static SteamVR_Input_ActionSet_mixedreality p_mixedreality;
         
-        private static SteamVR_Input_ActionSet_controll p_controll;
+        private static SteamVR_Input_ActionSet_control p_control;
         
         public static SteamVR_Input_ActionSet_default _default
         {
@@ -59,11 +59,11 @@ namespace Valve.VR
             }
         }
         
-        public static SteamVR_Input_ActionSet_controll controll
+        public static SteamVR_Input_ActionSet_control control
         {
             get
             {
-                return SteamVR_Actions.p_controll.GetCopy<SteamVR_Input_ActionSet_controll>();
+                return SteamVR_Actions.p_control.GetCopy<SteamVR_Input_ActionSet_control>();
             }
         }
         
@@ -73,13 +73,13 @@ namespace Valve.VR
             SteamVR_Actions.p_platformer = ((SteamVR_Input_ActionSet_platformer)(SteamVR_ActionSet.Create<SteamVR_Input_ActionSet_platformer>("/actions/platformer")));
             SteamVR_Actions.p_buggy = ((SteamVR_Input_ActionSet_buggy)(SteamVR_ActionSet.Create<SteamVR_Input_ActionSet_buggy>("/actions/buggy")));
             SteamVR_Actions.p_mixedreality = ((SteamVR_Input_ActionSet_mixedreality)(SteamVR_ActionSet.Create<SteamVR_Input_ActionSet_mixedreality>("/actions/mixedreality")));
-            SteamVR_Actions.p_controll = ((SteamVR_Input_ActionSet_controll)(SteamVR_ActionSet.Create<SteamVR_Input_ActionSet_controll>("/actions/controll")));
+            SteamVR_Actions.p_control = ((SteamVR_Input_ActionSet_control)(SteamVR_ActionSet.Create<SteamVR_Input_ActionSet_control>("/actions/control")));
             Valve.VR.SteamVR_Input.actionSets = new Valve.VR.SteamVR_ActionSet[] {
                     SteamVR_Actions._default,
                     SteamVR_Actions.platformer,
                     SteamVR_Actions.buggy,
                     SteamVR_Actions.mixedreality,
-                    SteamVR_Actions.controll};
+                    SteamVR_Actions.control};
         }
     }
 }

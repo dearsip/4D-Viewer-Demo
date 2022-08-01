@@ -67,14 +67,14 @@
             }
          ]
       },
-      "/actions/controll" : {
+      "/actions/control" : {
          "poses" : [
             {
-               "output" : "/actions/controll/in/pose",
+               "output" : "/actions/control/in/pose",
                "path" : "/user/hand/left/pose/handgrip"
             },
             {
-               "output" : "/actions/controll/in/pose",
+               "output" : "/actions/control/in/pose",
                "path" : "/user/hand/right/pose/handgrip"
             }
          ],
@@ -82,7 +82,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/trigger"
+                     "output" : "/actions/control/in/trigger"
                   }
                },
                "mode" : "button",
@@ -91,7 +91,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/trigger"
+                     "output" : "/actions/control/in/trigger"
                   }
                },
                "mode" : "button",
@@ -100,7 +100,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/menu"
+                     "output" : "/actions/control/in/menu"
                   }
                },
                "mode" : "button",
@@ -109,7 +109,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/menu"
+                     "output" : "/actions/control/in/menu"
                   }
                },
                "mode" : "button",
@@ -118,7 +118,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/move"
+                     "output" : "/actions/control/in/move"
                   }
                },
                "mode" : "button",
@@ -127,7 +127,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/controll/in/move"
+                     "output" : "/actions/control/in/move"
                   }
                },
                "mode" : "button",

@@ -611,7 +611,7 @@ public class Engine : IMove
 
     // --- rendering ---
 
-    public void renderAbsolute(double[] eyeVector, OptionsControll oo)
+    public void renderAbsolute(double[] eyeVector, OptionsControl oo)
     {
         model.animate();
         model.render(origin);
@@ -657,7 +657,7 @@ public class Engine : IMove
     }
 
     private readonly Color trans = new Color(0, 0, 0, 0);
-    private void RenderRelative(double[] eyeVector, OptionsControll oo)
+    private void RenderRelative(double[] eyeVector, OptionsControl oo)
     {
         if (OptionsFisheye.of.fisheye)
         {
@@ -791,7 +791,7 @@ public class Engine : IMove
 
     private double width = 0.005;
     private float t2 = 1f;
-    private void convert(double[] eyeVector, OptionsControll oo)
+    private void convert(double[] eyeVector, OptionsControl oo)
     {
         int count = 0;
         Polygon p;

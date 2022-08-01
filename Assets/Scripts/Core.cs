@@ -151,8 +151,8 @@ public class Core : MonoBehaviour
    // Start is called before the first frame update
     void Start() // ルーチン開始
     {
-        SteamVR_Actions.controll.Activate(left);
-        SteamVR_Actions.controll.Activate(right);
+        SteamVR_Actions.control.Activate(left);
+        SteamVR_Actions.control.Activate(right);
 
         addEvevts();
 
@@ -256,8 +256,8 @@ public class Core : MonoBehaviour
 
     private void openMenu()
     {
-        SteamVR_Actions.controll.Deactivate(left);
-        SteamVR_Actions.controll.Deactivate(right);
+        SteamVR_Actions.control.Deactivate(left);
+        SteamVR_Actions.control.Deactivate(right);
         menuPanel.Activate(oa);
     }
 
@@ -297,7 +297,7 @@ public class Core : MonoBehaviour
             calcInput();
             menuCommand?.Invoke();
             menuCommand = null;
-            controll();
+            control();
             engine.renderAbsolute(eyeVector, opt.oo);
             //doHaptics();
             GetComponent<MeshFilter>().sharedMesh = mesh;
@@ -472,10 +472,10 @@ public class Core : MonoBehaviour
     private double limitAngRoll = 30;
     private double limitAngForward = 30;
     private double maxAng = 60;
-    private double limit = 0.1; // Controller Transform Unit
+    private double limit = 0.1; // controler Transform Unit
     private double limitLR = 0.3; // LR Drag Unit
     private double max = 0.2; // YP Drag Unit
-    private void controll()
+    private void control()
     {
         // save state
 
@@ -485,7 +485,7 @@ public class Core : MonoBehaviour
         else
         {
             // left hand
-            if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControll.INPUTTYPE_DRAG) {
+            if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControl.INPUTTYPE_DRAG) {
                 for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
                 Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
             }
@@ -494,7 +494,7 @@ public class Core : MonoBehaviour
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
             }
             Array.Copy(reg2, reg3, 3);
-            if (!alignMode && opt.oo.inputTypeForward == OptionsControll.INPUTTYPE_DRAG) {
+            if (!alignMode && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG) {
                 relarot = dlRotLeft;
                 reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
                 reg3[3] /= maxAng * Math.PI / 180 * dMove;
@@ -509,7 +509,7 @@ public class Core : MonoBehaviour
             if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
             if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
             if (!leftMove) Vec.zero(reg3);
-            keyControll(KEYMODE_SLIDE);
+            keyControl(KEYMODE_SLIDE);
 
             if (alignMode)
             {
@@ -537,7 +537,7 @@ public class Core : MonoBehaviour
                 if (opt.oo.limit3D) reg2[2] = 0;
                 if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                 if (!rightMove) Vec.zero(reg2);
-                keyControll(KEYMODE_TURN);
+                keyControl(KEYMODE_TURN);
                 for (int i = 0; i < reg2.Length; i++)
                 {
                     if (Math.Abs(reg2[i]) > 0.8)
@@ -556,7 +556,7 @@ public class Core : MonoBehaviour
                     if (opt.oo.limit3D) { reg0[0] = 0; reg0[1] = 0; }
                     if (opt.oo.invertRoll) reg0 = -reg0;
                     if (!rightMove) reg0 = Vector3.zero;
-                    keyControll(KEYMODE_SPIN);
+                    keyControl(KEYMODE_SPIN);
                     for (int i = 0; i < 3; i++)
                     {
                         if (Mathf.Abs(reg0[i]) > 0.8)
@@ -574,7 +574,7 @@ public class Core : MonoBehaviour
             {
                 Vec.unitVector(reg3, 3);
                 double t;
-                if (opt.oo.inputTypeYawAndPitch == OptionsControll.INPUTTYPE_DRAG) {
+                if (opt.oo.inputTypeYawAndPitch == OptionsControl.INPUTTYPE_DRAG) {
                     for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
                     t = Vec.norm(reg2);
                     if (t>0) Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max / t);
@@ -587,7 +587,7 @@ public class Core : MonoBehaviour
                 if (opt.oo.limit3D) reg2[2] = 0;
                 if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                 if (!rightMove) Vec.zero(reg2);
-                keyControll(KEYMODE_TURN);
+                keyControl(KEYMODE_TURN);
                 t = Vec.norm(reg2);
                 if (t != 0)
                 {
@@ -599,7 +599,7 @@ public class Core : MonoBehaviour
                 }
 
                 float f;
-                if (opt.oo.inputTypeRoll == OptionsControll.INPUTTYPE_DRAG) {
+                if (opt.oo.inputTypeRoll == OptionsControl.INPUTTYPE_DRAG) {
                     relarot = dlRotRight;
                 }
                 else {
@@ -611,7 +611,7 @@ public class Core : MonoBehaviour
                 if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                 if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                 if (!rightMove) relarot = Quaternion.identity;
-                keyControll(KEYMODE_SPIN2);
+                keyControl(KEYMODE_SPIN2);
                 if (relarot.w < 1f) {
                     relarot.ToAngleAxis(out f, out reg0);
                     //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
@@ -745,7 +745,7 @@ public class Core : MonoBehaviour
     private const int KEYMODE_TURN = 1;
     private const int KEYMODE_SPIN = 2;
     private const int KEYMODE_SPIN2 = 3;
-    private void keyControll(int keyMode) {
+    private void keyControl(int keyMode) {
         if (keyMode == KEYMODE_SLIDE) {
             if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
             if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
@@ -844,8 +844,8 @@ public class Core : MonoBehaviour
 
     public void closeMenu()
     {
-        SteamVR_Actions.controll.Activate(left);
-        SteamVR_Actions.controll.Activate(right);
+        SteamVR_Actions.control.Activate(left);
+        SteamVR_Actions.control.Activate(right);
         menuPanel.gameObject.SetActive(false);
         lastLeftTrigger = true;
         lastRightTrigger = true;
@@ -918,7 +918,7 @@ public class Core : MonoBehaviour
    private static readonly string KEY_OPTIONS_VIEW  = "ov";
    private static readonly string KEY_OPTIONS_SEED  = "oe";
    private static readonly string KEY_OPTIONS_DISPLAY = "od";
-   private static readonly string KEY_OPTIONS_CONTROLL = "oo";
+   private static readonly string KEY_OPTIONS_CONTROL = "oo";
    private static readonly string KEY_ALIGN_MODE    = "align";
 
     public void loadMaze(IStore store){
