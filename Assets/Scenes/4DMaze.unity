@@ -1717,7 +1717,7 @@ GameObject:
   m_Component:
   - component: {fileID: 33194916}
   m_Layer: 5
-  m_Name: Controll
+  m_Name: Control
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16798,7 +16798,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Yellow:'
+  m_Text: 'Purple:
+
+'
 --- !u!222 &577506978
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -35971,7 +35973,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Controll
+  m_Text: Control
 --- !u!222 &1144331432
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -38329,7 +38331,7 @@ PrefabInstance:
     - target: {fileID: 224000010383356806, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0000076293945
+      value: 0.000022888184
       objectReference: {fileID: 0}
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -39390,7 +39392,7 @@ GameObject:
   - component: {fileID: 1243344352}
   - component: {fileID: 1243344351}
   m_Layer: 5
-  m_Name: Button-Controll
+  m_Name: Button-Control
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -56878,7 +56880,7 @@ GameObject:
   - component: {fileID: 1908383579}
   - component: {fileID: 1908383578}
   m_Layer: 5
-  m_Name: Yellow
+  m_Name: Purple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

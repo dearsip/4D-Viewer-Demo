@@ -439,8 +439,8 @@ public class RenderAbsolute
     private static Color COLOR_START = Color.gray;
     private static Color COLOR_START_ALTERNATE = OptionsColor.RIGHTGRAY;
 
-    private static Color COLOR_FINISH = Color.yellow; // the idea is, gold
-    private static Color COLOR_FINISH_ALTERNATE = OptionsColor.ORANGE;
+    private static Color COLOR_FINISH = Color.yellow * OptionsColor.fixer; // the idea is, gold
+    private static Color COLOR_FINISH_ALTERNATE = OptionsColor.ORANGE * OptionsColor.fixer;
 
     // alternate colors are used when a start or finish mark
     // would be indistinguishable from a normal texture
