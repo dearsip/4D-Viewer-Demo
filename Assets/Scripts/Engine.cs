@@ -644,6 +644,10 @@ public class Engine : IMove
         }
     }
 
+    private void renderPolygon(PolygonBuffer buf, double[][] obj, int n) // for sliceMode
+    {
+        renderPolygon(buf, obj, n, Color.clear);
+    }
     private void renderPolygon(PolygonBuffer buf, double[][] obj, int n, Color color)
     {
         Polygon poly = new Polygon();
@@ -655,8 +659,38 @@ public class Engine : IMove
             buf.add(poly);
         }
     }
+    private void renderPolygon(PolygonBuffer buf, double[][] obj, int n, int dir)
+    {
+        Polygon poly = new Polygon();
+        poly.vertex = new double[n][];
+        for (int i = 0; i < obj.Length; i += n)
+        {
+            for (int j = 0; j < n; j++) {
+                switch (dir) {
+                    case 1:
+                        reg3[0] = obj[i + j][2];
+                        reg3[1] = obj[i + j][1];
+                        reg3[2] =-obj[i + j][0];
+                        break;
+                    case 2:
+                        reg3[0] = obj[i + j][0];
+                        reg3[1] =-obj[i + j][2];
+                        reg3[2] = obj[i + j][1];
+                        break;
+                    default:
+                        reg3[0] = obj[i + j][0];
+                        reg3[1] = obj[i + j][1];
+                        reg3[2] = obj[i + j][2];
+                        break;
+                }
+                poly.vertex[j] = new double[3]; 
+                Vec.copy(poly.vertex[j], reg3);
+            }
+            poly.color = Color.clear;
+            buf.add(poly);
+        }
+    }
 
-    private readonly Color trans = new Color(0, 0, 0, 0);
     private void RenderRelative(double[] eyeVector, OptionsControl oo)
     {
         if (OptionsFisheye.of.fisheye)
@@ -675,14 +709,14 @@ public class Engine : IMove
         {
             renderRelative.run(axis);
             renderObject(bufRelative, objRetina);
-            renderPolygon(bufRelative, objRetinaPoly, 3, trans);
+            renderPolygon(bufRelative, objRetinaPoly, 3, oo.sliceDir);
             renderObject(bufRelative, objCross);
-            renderPolygon(bufRelative, objCrossPoly, 4, trans);
+            renderPolygon(bufRelative, objCrossPoly, 4, oo.sliceDir);
         }
 
         if (win)
         {
-            renderPolygon(bufRelative, objWinSlice, 4, trans);
+            renderPolygon(bufRelative, objWinSlice, 4, oo.sliceDir);
             renderObject(bufRelative, objWin);
         }
         //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
@@ -691,7 +725,7 @@ public class Engine : IMove
         {
             bufRelative.add(((MapModel)model).bufRelative);
             renderObject(bufRelative, objCrossMap);
-            renderPolygon(bufRelative, objCrossMapPoly, 4, trans);
+            renderPolygon(bufRelative, objCrossMapPoly, 4, oo.sliceDir);
         }
 
         //renderDisplay();
@@ -802,7 +836,7 @@ public class Engine : IMove
         {
             p = bufRelative.get(i);
             int v = p.vertex.Length;
-            if (oo.sliceMode) p.color.a *= oo.baseTransparency;
+            if (oo.sliceMode && oo.sliceDir < 3) p.color.a *= oo.baseTransparency;
             if (v == 2)
             {
                 v = 4;
@@ -848,33 +882,36 @@ public class Engine : IMove
                     tris.Add(count + j + 1);
                     tris.Add(count + j + 2);
                 }
-                if (oo.sliceMode)
+                if (oo.sliceMode && oo.sliceDir < 3)
                 {
                     int k = 0;
+                    int x =  oo.sliceDir;
+                    int y = (oo.sliceDir + 1) % 3;
+                    int z = (oo.sliceDir + 2) % 3;
                     for (int j = 0; j < v - 1; j++)
                     {
-                        if (p.vertex[j][2] * p.vertex[j + 1][2] < 0)
+                        if (p.vertex[j][z] * p.vertex[j + 1][z] < 0)
                         {
                             if (k == 0)
                             {
-                                reg7[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
-                                reg7[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
-                                reg7[2] = 0;
+                                reg7[x] = (p.vertex[j][x] * Math.Abs(p.vertex[j + 1][z]) + p.vertex[j + 1][x] * Math.Abs(p.vertex[j][z])) / (Math.Abs(p.vertex[j][z]) + Math.Abs(p.vertex[j + 1][z]));
+                                reg7[y] = (p.vertex[j][y] * Math.Abs(p.vertex[j + 1][z]) + p.vertex[j + 1][y] * Math.Abs(p.vertex[j][z])) / (Math.Abs(p.vertex[j][z]) + Math.Abs(p.vertex[j + 1][z]));
+                                reg7[z] = 0;
                             }
                             else
                             {
-                                reg8[0] = (p.vertex[j][0] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][0] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
-                                reg8[1] = (p.vertex[j][1] * Math.Abs(p.vertex[j + 1][2]) + p.vertex[j + 1][1] * Math.Abs(p.vertex[j][2])) / (Math.Abs(p.vertex[j][2]) + Math.Abs(p.vertex[j + 1][2]));
-                                reg8[2] = 0;
+                                reg8[x] = (p.vertex[j][x] * Math.Abs(p.vertex[j + 1][z]) + p.vertex[j + 1][x] * Math.Abs(p.vertex[j][z])) / (Math.Abs(p.vertex[j][z]) + Math.Abs(p.vertex[j + 1][z]));
+                                reg8[y] = (p.vertex[j][y] * Math.Abs(p.vertex[j + 1][z]) + p.vertex[j + 1][y] * Math.Abs(p.vertex[j][z])) / (Math.Abs(p.vertex[j][z]) + Math.Abs(p.vertex[j + 1][z]));
+                                reg8[z] = 0;
                             }
                             k += 1;
                         }
                     }
                     if (k == 1)
                     {
-                        reg8[0] = (p.vertex[0][0] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][0] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
-                        reg8[1] = (p.vertex[0][1] * Math.Abs(p.vertex[v - 1][2]) + p.vertex[v - 1][1] * Math.Abs(p.vertex[0][2])) / (Math.Abs(p.vertex[0][2]) + Math.Abs(p.vertex[v - 1][2]));
-                        reg8[2] = 0;
+                        reg8[x] = (p.vertex[0][x] * Math.Abs(p.vertex[v - 1][z]) + p.vertex[v - 1][x] * Math.Abs(p.vertex[0][z])) / (Math.Abs(p.vertex[0][z]) + Math.Abs(p.vertex[v - 1][z]));
+                        reg8[y] = (p.vertex[0][y] * Math.Abs(p.vertex[v - 1][z]) + p.vertex[v - 1][y] * Math.Abs(p.vertex[0][z])) / (Math.Abs(p.vertex[0][z]) + Math.Abs(p.vertex[v - 1][z]));
+                        reg8[z] = 0;
                     }
                     if (k > 0)
                     {

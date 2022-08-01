@@ -630,9 +630,9 @@ public class Core : MonoBehaviour
                 }
             }
 
-            if (leftTrigger)
+            if (leftTrigger && ! lastLeftTrigger)
             {
-
+                opt.oo.sliceDir = (opt.oo.sliceDir + 1) % 4;
             }
             if (rightTrigger)
             {

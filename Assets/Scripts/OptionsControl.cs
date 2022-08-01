@@ -7,8 +7,8 @@ public class OptionsControl// : IValidate
 
     public int inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
     public bool invertLeftAndRight, invertForward, invertYawAndPitch, invertRoll, sliceMode, limit3D;
-
     public float baseTransparency, sliceTransparency;
+    public int sliceDir; // x direction (for intuitive switching)
 
     // --- constants ---
 
@@ -37,6 +37,7 @@ public class OptionsControl// : IValidate
         dest.baseTransparency = src.baseTransparency;
         dest.sliceTransparency = src.sliceTransparency;
         dest.limit3D = src.limit3D;
+        dest.sliceDir = src.sliceDir;
     }
 
 }
