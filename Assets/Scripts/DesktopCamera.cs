@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class DesktopCamera : MonoBehaviour
 {
-    public Camera left, right, fix, fLeft, fRight;
+    public Camera center, left, right, fix, fLeft, fRight;
     private int mode = 0;
-    private Rect rLeft, rRight, frLeft, frRight;
+    private Rect rCenter, rLeft, rRight;
     // Start is called before the first frame update
     void Start()
     {
@@ -15,17 +15,16 @@ public class DesktopCamera : MonoBehaviour
         fix.enabled = false;
         fLeft.enabled = false;
         fRight.enabled = false;
+        rCenter = center.rect;
         rLeft = left.rect;
         rRight = right.rect;
-        frLeft = fLeft.rect;
-        frRight = fRight.rect;
     }
 
     // Update is called once per frame
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space))
-            switch (mode++ % 6)
+            switch (mode++ % 7)
             {
                 case 0:
                     left.enabled = true;
@@ -46,16 +45,24 @@ public class DesktopCamera : MonoBehaviour
                     fix.enabled = false;
                     fLeft.enabled = true;
                     fRight.enabled = true;
-                    fLeft.rect = frRight;
-                    fRight.rect = frLeft;
+                    fLeft.rect = rRight;
+                    fRight.rect = rLeft;
                     break;
                 case 4:
-                    fLeft.rect = frLeft;
-                    fRight.rect = frRight;
+                    fLeft.rect = rLeft;
+                    fRight.rect = rRight;
                     break;
                 case 5:
                     fLeft.enabled = false;
                     fRight.enabled = false;
+                    fix.enabled = true;
+                    center.rect = rLeft;
+                    fix.rect = rRight;
+                    break;
+                case 6:
+                    fix.enabled = false;
+                    center.rect = rCenter;
+                    fix.rect = rCenter;
                     break;
             }
     }
