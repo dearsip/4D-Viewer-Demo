@@ -469,6 +469,8 @@ public class Core : MonoBehaviour
         //reg1 = pose.GetLocalRotation(right)*Vector3.forward;
         //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
+
+    private double tAlign = 0.5;
     private double limitAng = 30;
     private double limitAngRoll = 30;
     private double limitAngForward = 30;
@@ -516,7 +518,7 @@ public class Core : MonoBehaviour
             {
                 for (int i = 0; i < reg3.Length; i++)
                 {
-                    if (Math.Abs(reg3[i]) > 0.8)
+                    if (Math.Abs(reg3[i]) > tAlign)
                     {
                         nActive = nMove;
                         ad0 = Dir.forAxis(i, reg3[i] < 0);
@@ -541,7 +543,7 @@ public class Core : MonoBehaviour
                 keyControl(KEYMODE_TURN);
                 for (int i = 0; i < reg2.Length; i++)
                 {
-                    if (Math.Abs(reg2[i]) > 0.8)
+                    if (Math.Abs(reg2[i]) > tAlign)
                     {
                         nActive = nRotate;
                         ad0 = Dir.forAxis(dim - 1);
@@ -560,7 +562,7 @@ public class Core : MonoBehaviour
                     keyControl(KEYMODE_SPIN);
                     for (int i = 0; i < 3; i++)
                     {
-                        if (Mathf.Abs(reg0[i]) > 0.8)
+                        if (Mathf.Abs(reg0[i]) > tAlign)
                         {
                             nActive = nRotate;
                             ad0 = Dir.forAxis((i + 1) % 3);
@@ -956,6 +958,11 @@ public class Core : MonoBehaviour
         oa.omCurrent = omLoad; // may as well transfer as copy
         oa.ocCurrent = ocLoad;
         oa.ovCurrent = ovLoad;
+        oa.oeCurrent = oeLoad;
+
+        oa.opt.om4 = omLoad;
+        oa.opt.oc4 = ocLoad;
+        oa.opt.ov4 = ovLoad;
         oa.oeCurrent = oeLoad;
         // oeNext is not modified by loading a game
 

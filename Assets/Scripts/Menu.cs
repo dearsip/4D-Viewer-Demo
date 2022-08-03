@@ -260,6 +260,10 @@ public class Menu : MonoBehaviour
             oa.opt.ot4.timeRotate = getDouble(timeRotateField, false);
             oa.opt.ot4.timeAlignMove = getDouble(timeAlignMoveField, false);
             oa.opt.ot4.timeAlignRotate = getDouble(timeAlignRotateField, false);
+
+            oa.omCurrent = oa.opt.om4;
+            oa.ocCurrent = oa.opt.oc4;
+            oa.ovCurrent = oa.opt.ov4;
         }
         catch (Exception e) { Debug.Log(e); }
 
