@@ -445,9 +445,10 @@ public class Core : MonoBehaviour
         rotLeft = pose.GetLocalRotation(left); rotRight = pose.GetLocalRotation(right);
         dlPosLeft = relarot * (posLeft - lastPosLeft); dlPosRight = relarot * (posRight - lastPosRight);
         dfPosLeft = relarot * (posLeft - fromPosLeft); dfPosRight = relarot * (posRight - fromPosRight);
-        dlRotLeft = relarot * rotLeft * Quaternion.Inverse(relarot * lastRotLeft);
+        Quaternion lRel = Quaternion.Inverse(fromRotLeft);
+        dlRotLeft = lRel * rotLeft * Quaternion.Inverse(lRel * lastRotLeft);
         dlRotRight = relarot * rotRight * Quaternion.Inverse(relarot * lastRotRight);
-        dfRotLeft = relarot * rotLeft * Quaternion.Inverse(relarot * fromRotLeft);
+        dfRotLeft = lRel * rotLeft * Quaternion.Inverse(lRel * fromRotLeft);
         dfRotRight = relarot * rotRight * Quaternion.Inverse(relarot * fromRotRight);
         lastLeftTrigger = leftTrigger; lastRightTrigger = rightTrigger;
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
@@ -496,12 +497,12 @@ public class Core : MonoBehaviour
             Array.Copy(reg2, reg3, 3);
             if (!alignMode && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG) {
                 relarot = dlRotLeft;
-                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                reg3[3] = Math.Asin(relarot.z) * Math.Sign(relarot.w);
                 reg3[3] /= maxAng * Math.PI / 180 * dMove;
             }
             else {
                 relarot = dfRotLeft;
-                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
+                reg3[3] = Math.Asin(relarot.z) * Math.Sign(relarot.w);
                 reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
             }
 
