@@ -16,7 +16,7 @@ public class VRInputField : MonoBehaviour
 
     private void Update()
     {
-        if (inputField.isFocused && !keyboard.isActive)
+        if (inputField.isFocused)
         {
             keyboard.TextField = inputField;
             keyboard.ShowLayout(layout);
