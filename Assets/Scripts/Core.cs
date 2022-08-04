@@ -499,12 +499,12 @@ public class Core : MonoBehaviour
             Array.Copy(reg2, reg3, 3);
             if (!alignMode && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG) {
                 relarot = dlRotLeft;
-                reg3[3] = Math.Asin(relarot.z) * Math.Sign(relarot.w);
+                reg3[3] = -Math.Asin(relarot.z) * Math.Sign(relarot.w);
                 reg3[3] /= maxAng * Math.PI / 180 * dMove;
             }
             else {
                 relarot = dfRotLeft;
-                reg3[3] = Math.Asin(relarot.z) * Math.Sign(relarot.w);
+                reg3[3] = -Math.Asin(relarot.z) * Math.Sign(relarot.w);
                 reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
             }
 
