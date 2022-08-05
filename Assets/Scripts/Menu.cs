@@ -302,6 +302,7 @@ public class Menu : MonoBehaviour
 
     public void doNewGame()
     {
+        doOK();
         core.menuCommand = core.newGame;
     }
 

@@ -635,7 +635,7 @@ public class Core : MonoBehaviour
 
             if (leftTrigger && ! lastLeftTrigger)
             {
-                opt.oo.sliceDir = (opt.oo.sliceDir + 1) % 4;
+                opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
             }
             if (rightTrigger)
             {

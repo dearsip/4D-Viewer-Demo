@@ -667,12 +667,12 @@ public class Engine : IMove
         {
             for (int j = 0; j < n; j++) {
                 switch (dir) {
-                    case 1:
+                    case 2:
                         reg3[0] = obj[i + j][2];
                         reg3[1] = obj[i + j][1];
                         reg3[2] =-obj[i + j][0];
                         break;
-                    case 2:
+                    case 3:
                         reg3[0] = obj[i + j][0];
                         reg3[1] =-obj[i + j][2];
                         reg3[2] = obj[i + j][1];
@@ -836,7 +836,7 @@ public class Engine : IMove
         {
             p = bufRelative.get(i);
             int v = p.vertex.Length;
-            if (oo.sliceMode && oo.sliceDir < 3) p.color.a *= oo.baseTransparency;
+            if (oo.sliceDir > 0) p.color.a *= oo.baseTransparency;
             if (v == 2)
             {
                 v = 4;
@@ -882,12 +882,12 @@ public class Engine : IMove
                     tris.Add(count + j + 1);
                     tris.Add(count + j + 2);
                 }
-                if (oo.sliceMode && oo.sliceDir < 3)
+                if (oo.sliceDir > 0)
                 {
                     int k = 0;
-                    int x =  oo.sliceDir;
-                    int y = (oo.sliceDir + 1) % 3;
-                    int z = (oo.sliceDir + 2) % 3;
+                    int x =  oo.sliceDir - 1;
+                    int y =  oo.sliceDir      % 3;
+                    int z = (oo.sliceDir + 1) % 3;
                     for (int j = 0; j < v - 1; j++)
                     {
                         if (p.vertex[j][z] * p.vertex[j + 1][z] < 0)
