@@ -302,6 +302,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1640469480078517481, guid: cfb51bb8f8a226240a691235576cd3b6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1640469480078517487, guid: cfb51bb8f8a226240a691235576cd3b6,
         type: 3}
       propertyPath: m_LocalRotation.x
@@ -834,7 +839,7 @@ Camera:
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
-  m_TargetEye: 3
+  m_TargetEye: 0
   m_HDR: 1
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0

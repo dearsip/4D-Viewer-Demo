@@ -46,7 +46,7 @@ public class ThreeDDisplay : MonoBehaviour
     private Vector3 reg1;
     private Vector3 reg2;
     private double[] relapos;
-    private Quaternion relarot;
+    private Quaternion relarot, baserot;
 
     private double[][] rotate; // 4DSoftware への出力。double[0]からdouble[1]、double[2]からdouble[3]への回転を意味する。
 
@@ -156,11 +156,12 @@ public class ThreeDDisplay : MonoBehaviour
     // コントローラーの情報を回転に変換する。
     private void calcInput()
     {
+        baserot = Quaternion.Inverse(transform.rotation);
         if (move.GetState(hand) && !menuPanel.activeSelf)
         {
             if (wRotate)
             {
-                reg1 = pose.GetLocalPosition(hand) - pose.GetLastLocalPosition(hand); // コントローラーの移動距離 (Vector3)
+                reg1 = baserot * (pose.GetLocalPosition(hand) - pose.GetLastLocalPosition(hand)); // コントローラーの移動距離 (Vector3)
                 if (!zRotate) reg1.z = 0;
                 for (int i = 0; i < 3; i++) relapos[i] = (double)reg1[i]; // double に変換
                 double t = 2 * Math.PI * Vec.norm(relapos); // ノルムを定数倍して回転角とする
@@ -169,7 +170,7 @@ public class ThreeDDisplay : MonoBehaviour
                 // relapos の向きへ、角度 t だけ回転（rotate[0] が奥向き（正）なのでマイナスを付ける）
             } else Vec.unitVector(rotate[1], 3);
 
-            relarot = pose.GetLocalRotation(hand) * Quaternion.Inverse(pose.GetLastLocalRotation(hand)); // コントローラーの回転
+            relarot = baserot * pose.GetLocalRotation(hand) * Quaternion.Inverse(baserot * pose.GetLastLocalRotation(hand)); // コントローラーの回転
             if (!zRotate) { relarot[0] = 0; relarot[1] = 0; }
             reg1.Set(relarot[0], relarot[1], relarot[2]); // 回転軸方向
             reg2.Set(1, 0, 0);
@@ -187,11 +188,11 @@ public class ThreeDDisplay : MonoBehaviour
             Vec.unitVector(rotate[3], 0);
         }
 
-        reg1 = this.transform.position - head.position;
+        reg1 = baserot * (this.transform.position - head.position);
         for (int i = 0; i < 3; i++) eyeVector[i] = (double)reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
-        reg1 = (pose.GetLocalPosition(hand) - this.transform.position) / 0.3f * 2f / display.localScale[0];
+        reg1 = baserot * (pose.GetLocalPosition(hand) - this.transform.position) / 0.3f * 2f / display.localScale[0];
         for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
 
         for (int i = 0; i < 3; i++) cursorAxis[0][i] = hand_.right[i];

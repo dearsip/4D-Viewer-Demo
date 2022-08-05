@@ -454,7 +454,7 @@ public class Core : MonoBehaviour
         leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
-        reg1 = Quaternion.Inverse(transform.rotation) * 
+        reg1 = relarot * 
                (transform.position - ((headsetOnHead.GetState(SteamVR_Input_Sources.Head)) ? 
                 player.hmdTransform.position : fixedCamera.transform.position));
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
