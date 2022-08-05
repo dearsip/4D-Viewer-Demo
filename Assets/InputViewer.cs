@@ -14,7 +14,7 @@ public class InputViewer : MonoBehaviour
     public SteamVR_Input_Sources hand;
     public SteamVR_Action_Boolean move;
     public Transform pose, screen;
-    private Vector3 fromPos, dPos, origin, reg;
+    private Vector3 fromPos, fromForward, dPos, origin, reg;
     private Quaternion fromRot, dRot;
     public bool isMover;
     private bool limit3D;
@@ -50,13 +50,14 @@ public class InputViewer : MonoBehaviour
         if (move.GetStateDown(hand)) {
             fromPos = pose.position;
             fromRot = pose.rotation;
-            origin = fromPos + pose.forward * dist;
+            fromForward = pose.forward;
+            origin = fromPos + fromForward * dist;
         }
         
         if (move.GetState(hand)) {
             dPos = pose.position - fromPos;
             dRot = pose.rotation * Quaternion.Inverse(fromRot);
-            if (isMover) RotationProject(ref dRot, pose.forward);
+            if (isMover) RotationProject(ref dRot, fromForward);
             if (limit3D) {
                 reg = Vector3.Dot(dPos, screen.transform.forward) * screen.transform.forward;
                 dPos = dPos - reg;
