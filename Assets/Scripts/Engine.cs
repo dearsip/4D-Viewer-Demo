@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Threading;
 
 /**
  * The game graphics engine.
@@ -613,9 +614,11 @@ public class Engine : IMove
 
     public void renderAbsolute(double[] eyeVector, OptionsControl oo)
     {
+        try {
         model.animate();
         model.render(origin);
         RenderRelative(eyeVector, oo);
+        }catch(Exception e) {Debug.Log(e);};
     }
 
     private readonly Color white = new Color(0, 0, 0);
@@ -950,6 +953,9 @@ public class Engine : IMove
             }
             count += v;
         }
+    }
+
+    public void ApplyMesh() {
         if (verts.Count < mesh.vertices.Length) // triangles の参照する項が vertices から消えるとエラーを吐くため注意する
         {
             mesh.triangles = tris.ToArray();

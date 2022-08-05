@@ -59,6 +59,7 @@ public class ThreeDDisplay : MonoBehaviour
     void Start()
     {
         mesh = new Mesh();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
         soft = new FourDDemo();
         relapos = new double[3];
         rotate = new double[4][];
@@ -149,7 +150,6 @@ public class ThreeDDisplay : MonoBehaviour
         }
         mesh.colors = colors;
         mesh.RecalculateNormals();
-        GetComponent<MeshFilter>().sharedMesh = mesh;
         hapticsTester.transform.rotation = hand_.rotation;
     }
 

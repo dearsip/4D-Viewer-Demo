@@ -42,6 +42,7 @@ public class InputViewer : MonoBehaviour
         for (int i = 0; i < ringTriangles.Length; i++)
             triangles[arrowTriangles.Length+i] = ringTriangles[i]+arrowVector.Length;
         for (int i = 0; i < colors.Length; i++) colors[i] = color;
+        GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 
     // Update is called once per frame
@@ -70,12 +71,10 @@ public class InputViewer : MonoBehaviour
             mesh.colors = colors;
             mesh.triangles = triangles;
             mesh.RecalculateNormals();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
         }
         
         if (move.GetStateUp(hand)) {
             mesh.Clear();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
         }
     }
 

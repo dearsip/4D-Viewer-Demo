@@ -9,6 +9,7 @@ using System.IO;
 using SimpleFileBrowser;
 using static FourDDemo;
 using WebSocketSharp;
+using System.Threading.Tasks;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -31,14 +32,9 @@ public class Core : MonoBehaviour
     private bool engineAlignMode;
     private bool active, excluded;
     private int[] param;
-    private int nMove;
-    private int nRotate;
-    private int nAlignMove; // these two only used inside setOptions
-    private int nAlignRotate;
-    private double dMove;
-    private double dRotate;
-    private double dAlignMove;
-    private double dAlignRotate;
+    private double timeMove, timeRotate, timeAlignMove, timeAlignRotate;
+    private int nMove, nRotate, nAlignMove, nAlignRotate;
+    private double dMove, dRotate, dAlignedMove, dAlignedRotate, dAlignMove, dAlignRotate;
     private bool alwaysRun;
     private IMove target;
     private double[] saveOrigin;
@@ -172,6 +168,7 @@ public class Core : MonoBehaviour
 
         eyeVector = new double[3];
         mesh = new Mesh();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
         engine = new Engine(mesh);
 
         //initHaptics();
@@ -187,7 +184,6 @@ public class Core : MonoBehaviour
 
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
-        StartCoroutine(tick());
     }
 
     private void addEvevts()
@@ -289,68 +285,33 @@ public class Core : MonoBehaviour
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
     }
 
-    IEnumerator tick()
+    Task renderTask = Task.CompletedTask;
+    float now = 0;
+    float last = 0;
+    float dTime = 0;
+    float fps = 60;
+    bool nextFrame = true;
+    int frameCount = 0;
+    void Update()
     {
-        int base_ = Environment.TickCount;
-        while (true)
-        {
+        if (renderTask.IsCompleted) {
+            frameCount++;
+            now = Time.realtimeSinceStartup;
+            float dTime = now - last;
+            if (dTime >= 1) {
+                fps = frameCount / dTime;
+                frameCount = 0;
+                last = now;
+            }
+
+            engine.ApplyMesh();
+            nextFrame = false;
             calcInput();
             menuCommand?.Invoke();
             menuCommand = null;
-            control();
-            engine.renderAbsolute(eyeVector, opt.oo);
+            control(fps);
+            try {renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo));} catch (Exception e) {Debug.Log(e);}
             //doHaptics();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-
-            int now = Environment.TickCount;
-            int next = base_ + interval; // unsynchronized use of interval is OK
-
-            if (now < next)
-            { // we have time, sleep a bit
-
-                int t = next - now;
-
-                // I don't understand this at all, but sometimes the current time
-                // jumps back by 4-6 minutes for no reason.  does it drift forward
-                // and then get corrected?  does it jump forward and then back?
-                // no idea.  in any case, if we don't detect and stop it, the game
-                // will lock up for that many minutes.
-                //
-                if (t > 1000)
-                {
-                    t = interval; // standard interval is best guess for sleep time
-                    next = now + interval;
-                }
-
-                yield return new WaitForSeconds(t * 0.001f);
-                base_ = next; // same equation as below would work, but this is clearer
-
-            }
-            else
-            { // no time left, tick again immediately
-                yield return null;
-                base_ = Math.Max(next, now - 3 * interval); // see note below
-            }
-
-            // on my system, the actual sleep duration is granular,
-            // with each grain being approximately 55 ms.
-            // so, if you ask to sleep for 100 ms, you usually sleep for 110.
-
-            // the code above is designed to compensate for this.
-            // as long as we are producing frames sufficiently quickly,
-            // base will advance by the exact interval,
-            // so oversleeping will lead to requesting shorter wait times.
-
-            // if we are not producing frames quickly enough,
-            // there's no sense accumulating a large sleep debt,
-            // just go ahead and reset the base.
-            // actually, it would be nice to be able to recover from a few slow frames,
-            // so do let debt accumulate, but limit it to a fixed number of multiples
-            //else
-            //{
-            //    yield return new WaitForSeconds(0.1f);
-
-            //}
         }
     }
 
@@ -478,9 +439,18 @@ public class Core : MonoBehaviour
     private double limit = 0.1; // controler Transform Unit
     private double limitLR = 0.3; // LR Drag Unit
     private double max = 0.2; // YP Drag Unit
-    private void control()
+    private const double epsilon = 0.000001;
+    private void control(float fps)
     {
-        // save state
+        nMove = (int)Math.Ceiling(fps * timeMove + epsilon);
+        nRotate = (int)Math.Ceiling(fps * timeRotate + epsilon);
+        nAlignMove = (int)Math.Ceiling(fps * timeAlignMove + epsilon);
+        nAlignRotate = (int)Math.Ceiling(fps * timeAlignRotate + epsilon);
+
+        dMove = 1 / (double)nMove;
+        dRotate = 90 / (double)nRotate;
+        dAlignMove = 1 / (double)nAlignMove;
+        dAlignRotate = 90 / (double)nAlignRotate;
 
         IMove saveTarget = target;
         target.save(saveOrigin, saveAxis);
@@ -521,6 +491,7 @@ public class Core : MonoBehaviour
                     if (Math.Abs(reg3[i]) > tAlign)
                     {
                         nActive = nMove;
+                        dAlignedMove = 1 / (double)nMove;
                         ad0 = Dir.forAxis(i, reg3[i] < 0);
                         if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
                     }
@@ -546,6 +517,7 @@ public class Core : MonoBehaviour
                     if (Math.Abs(reg2[i]) > tAlign)
                     {
                         nActive = nRotate;
+                        dAlignedRotate = 90 / (double)nRotate;
                         ad0 = Dir.forAxis(dim - 1);
                         ad1 = Dir.forAxis(i, reg2[i] < 0);
                         command = alignRotate;
@@ -565,6 +537,7 @@ public class Core : MonoBehaviour
                         if (Mathf.Abs(reg0[i]) > tAlign)
                         {
                             nActive = nRotate;
+                            dAlignedRotate = 90 / (double)nRotate;
                             ad0 = Dir.forAxis((i + 1) % 3);
                             ad1 = Dir.forAxis((i + 2) % 3, reg0[i] < 0);
                             command = alignRotate;
@@ -669,7 +642,7 @@ public class Core : MonoBehaviour
     private void alignMove()
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
-        Vec.scale(reg3, reg3, Dir.getSign(ad0) * dMove);
+        Vec.scale(reg3, reg3, Dir.getSign(ad0) * dAlignedMove);
         target.move(reg3);
         if (--nActive <= 0)
         {
@@ -682,7 +655,7 @@ public class Core : MonoBehaviour
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
         Vec.scale(reg3, reg3, Dir.getSign(ad0));
-        Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dRotate);
+        Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dAlignedRotate);
         target.rotateAngle(reg3, reg4);
         if (--nActive <= 0)
         {
@@ -818,20 +791,25 @@ public class Core : MonoBehaviour
         //    nAlignRotate = (int)Math.Ceiling(ot.frameRate * 0.5);
         //}
         //else
-        {
-            nMove = (int)Math.Ceiling(ot.frameRate * ot.timeMove);
-            nRotate = (int)Math.Ceiling(ot.frameRate * ot.timeRotate);
-            nAlignMove = (int)Math.Ceiling(ot.frameRate * ot.timeAlignMove);
-            nAlignRotate = (int)Math.Ceiling(ot.frameRate * ot.timeAlignRotate);
-        }
+        //{
+            //nMove = (int)Math.Ceiling(ot.frameRate * ot.timeMove);
+            //nRotate = (int)Math.Ceiling(ot.frameRate * ot.timeRotate);
+            //nAlignMove = (int)Math.Ceiling(ot.frameRate * ot.timeAlignMove);
+            //nAlignRotate = (int)Math.Ceiling(ot.frameRate * ot.timeAlignRotate);
+        //}
 
         // ... therefore, the distances will never exceed 1,
         // and the angles will never exceed 90 degrees
 
-        dMove = 1 / (double)nMove;
-        dRotate = 90 / (double)nRotate;
-        dAlignMove = 1 / (double)nAlignMove;
-        dAlignRotate = 90 / (double)nAlignRotate;
+        //dMove = 1 / (double)nMove;
+        //dRotate = 90 / (double)nRotate;
+        //dAlignMove = 1 / (double)nAlignMove;
+        //dAlignRotate = 90 / (double)nAlignRotate;
+
+        timeMove =  ot.timeMove;
+        timeRotate =  ot.timeRotate;
+        timeAlignMove =  ot.timeAlignMove;
+        timeAlignRotate =  ot.timeAlignRotate;
     }
 
     public void updateOptions()

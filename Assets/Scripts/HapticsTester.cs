@@ -28,6 +28,7 @@ public class HapticsTester : MonoBehaviour
     {
         GetComponent<Transform>().localScale *= scale;
         mesh = new Mesh();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
         vertices = new Vector3[oNum * 8];
         colors = new Color[oNum * 8];
         triangles = new int[oNum * 36];
@@ -86,6 +87,5 @@ public class HapticsTester : MonoBehaviour
         mesh.vertices = vertices;
 
         mesh.RecalculateNormals();
-        GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 }
