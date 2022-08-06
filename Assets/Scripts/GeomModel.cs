@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 //import java.awt.Color;
 //import java.io.File;
 //import java.io.FileWriter;
@@ -959,15 +960,22 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         buf.clear();
         Vec.copy(this.origin, origin);
 
+        double[] dist = new double[shapes.Length];
+        for (int i = 0; i < shapes.Length; i++) dist[i] = Vec.dist2(shapes[i].aligncenter, origin);
+        int[] s= dist.Select((x, i) => new KeyValuePair<double,int>(x,i))
+                         .OrderBy(x => -x.Key)
+                         .Select(x => x.Value)
+                         .ToArray();
+
         // calcViewBoundaries is expensive, but we always need the boundaries
         // to draw the scenery correctly
         currentDraw = buf;
         for (int i = 0; i < shapes.Length; i++)
         {
-            if (shapes[i] == null) continue;
-            calcVisShape(shapes[i]);
-            clipUnits[i].setBoundaries(Clip.calcViewBoundaries(origin, shapes[i]));
-            currentDraw = clipUnits[i].chain(currentDraw); // set up for floor drawing
+            if (shapes[s[i]] == null) continue;
+            calcVisShape(shapes[s[i]]);
+            clipUnits[s[i]].setBoundaries(Clip.calcViewBoundaries(origin, shapes[s[i]]));
+            currentDraw = clipUnits[s[i]].chain(currentDraw); // set up for floor drawing
         }
 
         // currentDraw includes all objects, scenery must be distant
@@ -985,8 +993,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             currentDraw = buf;
             for (int h = 0; h < shapes.Length; h++)
             {
-                if (shapes[h] == null) continue;
-                if (inFront[h][i]) currentDraw = clipUnits[h].chain(currentDraw);
+                if (shapes[s[h]] == null) continue;
+                if (inFront[s[h]][i]) currentDraw = clipUnits[s[h]].chain(currentDraw);
             }
             drawShape(shapes[i]);
         }
