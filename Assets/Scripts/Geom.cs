@@ -381,6 +381,7 @@ public class Geom
 
         public int getSize() { return cell.Length; }
         public Clip.Boundary getBoundary(int i) { return cell[i]; }
+        public void sort(double[] from) {}
 
         public void unglue(List<ShapeInterface> c)
         {
