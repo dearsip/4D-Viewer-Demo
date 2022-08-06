@@ -205,6 +205,7 @@ public class Engine : IMove
     private void updateRetina()
     {
         renderRelative.setRetina(getRetina());
+        if (getSaveType() != IModel.SAVE_MAZE) ((GeomModel)model).setRetina(getRetina());
     }
 
     // --- implementation of IStorable ---
@@ -616,7 +617,7 @@ public class Engine : IMove
     {
         try {
         model.animate();
-        model.render(origin);
+        model.render(origin, axis);
         RenderRelative(eyeVector, oo);
         }catch(Exception e) {Debug.Log(e);};
     }
@@ -710,7 +711,7 @@ public class Engine : IMove
         }
         else
         {
-            renderRelative.run(axis);
+            renderRelative.run(axis, model.getSaveType()==IModel.SAVE_MAZE);
             renderObject(bufRelative, objRetina);
             renderPolygon(bufRelative, objRetinaPoly, 3, oo.sliceDir);
             renderObject(bufRelative, objCross);
@@ -754,7 +755,7 @@ public class Engine : IMove
     {
         int f = sraxis.Length - 1;
 
-        renderRelative.run(axis, true, mt);
+        renderRelative.run(axis, true, mt, model.getSaveType()==IModel.SAVE_MAZE);
         renderRelative.runObject(objCross, -1, ct);
 
         for (int i = 0; i < f; i++)
@@ -768,7 +769,7 @@ public class Engine : IMove
         int f = sraxis.Length - 1;
 
         reg3[1] = -OptionsFisheye.rdist;
-        renderRelative.run(axis, true, mt);
+        renderRelative.run(axis, true, mt, model.getSaveType()==IModel.SAVE_MAZE);
         renderRelative.runObject(objRetina, r, mt);
         renderRelative.runObject(objCross, -1, ct);
         renderPair(f, 0, 0); // x pair offset in x
@@ -783,7 +784,7 @@ public class Engine : IMove
         Vec.copy(sraxis[0], axis[2]);
 
         reg3[1] = OptionsFisheye.rdist;
-        renderRelative.run(sraxis, false, mt);
+        renderRelative.run(sraxis, false, mt, model.getSaveType()==IModel.SAVE_MAZE);
         renderRelative.runObject(objRetina, r, mt);
         renderRelative.runObject(objCross, -1, ct);
         renderPair(f, 2, 0); // z pair offset in x
@@ -802,14 +803,14 @@ public class Engine : IMove
         Vec.scale(sraxis[j], axis[f], -1);
         Vec.copy(sraxis[f], axis[i]);
         st.configure(j, 1);
-        renderRelative.run(sraxis, false, st);
+        renderRelative.run(sraxis, false, st, model.getSaveType()==IModel.SAVE_MAZE);
         renderRelative.runObject(objRetina, rmask[n], st);
 
         reg3[j] = -OptionsFisheye.offset;
         Vec.copy(sraxis[j], axis[f]);
         Vec.scale(sraxis[f], axis[i], -1);
         st.configure(j, -1);
-        renderRelative.run(sraxis, false, st);
+        renderRelative.run(sraxis, false, st, model.getSaveType()==IModel.SAVE_MAZE);
         renderRelative.runObject(objRetina, rmask[n + 1], st);
 
         // now put everything back

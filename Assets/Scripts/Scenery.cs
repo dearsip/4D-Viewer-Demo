@@ -496,8 +496,10 @@ public class Scenery
             // basically turns ColorBlend back into an array, but also handles ColorConstant
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int dir = 0; dir < color.Length; dir++)
             {
                 int a = Dir.getAxis(dir);
@@ -517,9 +519,9 @@ public class Scenery
                     reg1[b] -= width;
                     reg2[b] += width;
 
-                    currentDraw.drawLine(reg0, reg1, color[dir], origin);
-                    currentDraw.drawLine(reg0, reg2, color[dir], origin);
-                    currentDraw.drawLine(reg1, reg2, color[dir], origin);
+                    drawLine(reg0, reg1, color[dir]);
+                    drawLine(reg0, reg2, color[dir]);
+                    drawLine(reg1, reg2, color[dir]);
 
                 }
                 else
@@ -533,28 +535,30 @@ public class Scenery
                     reg2[b] += width;
                     reg2[c] -= width;
 
-                    currentDraw.drawLine(reg0, reg2, color[dir], origin);
-                    currentDraw.drawLine(reg1, reg2, color[dir], origin);
+                    drawLine(reg0, reg2, color[dir]);
+                    drawLine(reg1, reg2, color[dir]);
 
                     reg1[b] += 2 * width;
                     reg1[c] += 2 * width;
 
-                    currentDraw.drawLine(reg0, reg1, color[dir], origin);
-                    currentDraw.drawLine(reg1, reg2, color[dir], origin);
+                    drawLine(reg0, reg1, color[dir]);
+                    drawLine(reg1, reg2, color[dir]);
 
                     reg2[b] -= 2 * width;
                     reg2[c] += 2 * width;
 
-                    currentDraw.drawLine(reg0, reg2, color[dir], origin);
-                    currentDraw.drawLine(reg1, reg2, color[dir], origin);
+                    drawLine(reg0, reg2, color[dir]);
+                    drawLine(reg1, reg2, color[dir]);
 
                     reg1[b] -= 2 * width;
                     reg1[c] -= 2 * width;
 
-                    currentDraw.drawLine(reg0, reg1, color[dir], origin);
-                    currentDraw.drawLine(reg1, reg2, color[dir], origin);
+                    drawLine(reg0, reg1, color[dir]);
+                    drawLine(reg1, reg2, color[dir]);
                 }
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -594,8 +598,10 @@ public class Scenery
             imax = new int[dim];
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
 
             for (int i = 0; i < dim; i++)
             {
@@ -619,6 +625,8 @@ public class Scenery
                 draw2(2, 3, 0);
                 draw2(3, 0, 2);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
 
         private void draw1(int a, int c)
@@ -669,7 +677,7 @@ public class Scenery
                 reg1[c] = dmin[c];
                 reg2[c] = dmax[c];
             }
-            currentDraw.drawLine(reg1, reg2, color, origin);
+            drawLine(reg1, reg2, color);
         }
     }
 
@@ -689,8 +697,10 @@ public class Scenery
             this.radius = radius;
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.edge.Length; i++)
             {
                 Geom.Edge edge = mesh.edge[i];
@@ -703,8 +713,10 @@ public class Scenery
                 // force to the ground
 
                 Color c = (edge.color != null) ? edge.color : color;
-                currentDraw.drawLine(reg1, reg2, c, origin);
+                drawLine(reg1, reg2, c);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -727,15 +739,19 @@ public class Scenery
             mesh.project(reg0, 0, mode, value);
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.edge.Length; i++)
             {
                 Geom.Edge edge = mesh.edge[i];
 
                 Color c = (edge.color != null) ? edge.color : color;
-                currentDraw.drawLine(mesh.vertex[edge.iv1], mesh.vertex[edge.iv2], c, origin);
+                drawLine(mesh.vertex[edge.iv1], mesh.vertex[edge.iv2], c);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -760,8 +776,10 @@ public class Scenery
             this.color = color;
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.edge.Length; i++)
             {
                 Geom.Edge edge = mesh.edge[i];
@@ -770,8 +788,10 @@ public class Scenery
                 Vec.add(reg2, origin, mesh.vertex[edge.iv2]);
 
                 Color c = (edge.color != null) ? edge.color : color;
-                currentDraw.drawLine(reg1, reg2, c, origin);
+                drawLine(reg1, reg2, c);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -801,8 +821,10 @@ public class Scenery
         public double getHeight(double[] d) { return fMax.getHeight(d); }
         // can't use cache values, might be different set of vertices
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.edge.Length; i++)
             {
                 Geom.Edge edge = mesh.edge[i];
@@ -847,8 +869,10 @@ public class Scenery
                 // note this is not real clipping against the
                 // full height function, just a sample of two endpoints.
 
-                currentDraw.drawLine(reg1, reg2, color, origin);
+                drawLine(reg1, reg2, color);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -889,8 +913,10 @@ public class Scenery
             }
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.vertex.Length; i++)
             {
 
@@ -907,9 +933,11 @@ public class Scenery
                     double h1 = height[2 * h];
                     reg1[1] = reg0[1] + ((h1 < clip) ? clip : h1);
                     reg2[1] = reg0[1] + h2;
-                    currentDraw.drawLine(reg1, reg2, color[h][i], origin);
+                    drawLine(reg1, reg2, color[h][i]);
                 }
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -929,8 +957,10 @@ public class Scenery
             this.height = height;
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             for (int i = 0; i < mesh.edge.Length; i++)
             {
                 Geom.Edge edge = mesh.edge[i];
@@ -942,8 +972,10 @@ public class Scenery
                 reg2[1] += height;
                 // could pre-add height, but then we couldn't share the mesh
 
-                currentDraw.drawLine(reg1, reg2, color, origin);
+                drawLine(reg1, reg2, color);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 

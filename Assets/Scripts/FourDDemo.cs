@@ -465,7 +465,7 @@ public class FourDDemo
             drawShape(shapes[i], eyeVector);
         }
 
-        renderRelative.run(axis);
+        renderRelative.run(axis, false);
         //for (int i = 0; i < objRetina3.Length; i += 2) bufRelative.add(objRetina3[i], objRetina3[i + 1], edgeColor);
 
         bufRelative.sort(eyeVector); // できる限り自然な描画にするために、meshを大まかに並べ替える。

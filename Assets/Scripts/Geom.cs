@@ -1001,7 +1001,7 @@ public class Geom
 
     public interface CustomTexture
     {
-        void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency);
+        void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin);
     }
 
     // --- texture ---
@@ -1078,18 +1078,15 @@ public class Geom
             }
         }
 
-        public void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency)
+        public void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin)
         {
-            Polygon poly = new Polygon();
-            poly.vertex = new double[2][];
-            for (int i = 0; i < edge.Length; i++)
-            {
+            texture = new double[edge.Length*2][];
+            textureColor = new Color[edge.Length];
+            for (int i=0; i<edge.Length; i++) {
                 Edge e = edge[i];
-                poly.vertex[0] = vertex[e.iv1];
-                poly.vertex[1] = vertex[e.iv2];
-                poly.color = getColor(e.color, cell.color);
-                poly.color.a = (float)transparency;
-                currentDraw.drawPolygon(poly, origin);
+                texture[i*2  ] = vertex[e.iv1];
+                texture[i*2+1] = vertex[e.iv2];
+                textureColor[i] = e.color;
             }
         }
 

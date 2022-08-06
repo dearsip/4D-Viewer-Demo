@@ -93,7 +93,7 @@ public class RenderRelative
     // and we know there are no lines through the origin
     // because we're not allowed to move onto the walls.
 
-    private bool convert(Polygon dest, Polygon src, double[][] axis)
+    private bool convert(Polygon dest, Polygon src, double[][] axis, bool viewClip)
     {
         reg.vertex = new double[src.vertex.Length][];
         for (int i = 0; i < src.vertex.Length; i++)
@@ -101,18 +101,20 @@ public class RenderRelative
             reg.vertex[i] = new double[4];
             Vec.toAxisCoordinates(reg.vertex[i], src.vertex[i], axis);
         }
-        if (reg.vertex.Length == 2)
-        {
-            for (int i = 0; i < clip.Length; i++)
+        if (viewClip) {
+            if (reg.vertex.Length == 2)
             {
-                if (Vec.clip(reg.vertex[0], reg.vertex[1], clip[i].n, clip[i].getThreshold(), 1)) return false;
+                for (int i = 0; i < clip.Length; i++)
+                {
+                    if (Vec.clip(reg.vertex[0], reg.vertex[1], clip[i].n, clip[i].getThreshold(), 1)) return false;
+                }
             }
-        }
-        else
-        {
-            for (int i = 0; i < clip.Length; i++)
+            else
             {
-                if (Clip.clip(reg, clip[i])) return false;
+                for (int i = 0; i < clip.Length; i++)
+                {
+                    if (Clip.clip(reg, clip[i])) return false;
+                }
             }
         }
 
@@ -134,19 +136,19 @@ public class RenderRelative
         return true;
     }
 
-    public void run(double[][] axis)
+    public void run(double[][] axis, bool viewClip)
     {
-      bout.clear();
+        bout.clear();
         for (int i = 0; i <bin.getSize(); i++)
         {
             Polygon src = bin.get(i);
             Polygon dest = bout.getNext();
 
-            if (!convert(dest, src, axis)) bout.unget();
+            if (!convert(dest, src, axis, viewClip)) bout.unget();
         }
     }
 
-    public void run(double[][] axis, bool clear, PointTransform pt)
+    public void run(double[][] axis, bool clear, PointTransform pt, bool viewClip)
     {
         if (clear) bout.clear();
         for (int i = 0; i <bin.getSize(); i++)
@@ -154,7 +156,7 @@ public class RenderRelative
             Polygon src = bin.get(i);
             Polygon dest = bout.getNext();
 
-            if (convert(dest, src, axis))
+            if (convert(dest, src, axis, viewClip))
             {
                 foreach (double[] v in dest.vertex) pt.transform(v);
             }

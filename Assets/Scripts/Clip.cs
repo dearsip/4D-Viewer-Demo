@@ -280,7 +280,7 @@ public class Clip
     {
 
         public double[] n;
-        private double t;
+        public double t;
 
         public CustomBoundary(double[] n, double t)
         {

@@ -181,13 +181,13 @@ public class MapModel : IModel
     }
 
     private Polygon p;
-    public override void render(double[] origin)
+    public override void render(double[] origin, double[][] axis)
     {
         renderAbsolute.run(origin);
         if (showMap) {
-            Vec.addScaled(reg, origin, axis[3], -distance);
-            geomModel.render(reg);
-            geomRelative.run(axis);
+            Vec.addScaled(reg, origin, this.axis[3], -distance);
+            geomModel.render(reg, axis);
+            geomRelative.run(this.axis, false);
             for (int i = 0; i < bufRelative.getSize(); i++)
             {
                 p = bufRelative.get(i);

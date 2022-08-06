@@ -105,6 +105,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clipResult = new Clip.Result();
 
         paintColor = Color.red; // annoying to have to set up every time
+
+        clip = new Clip.CustomBoundary[2 * (dim - 1)];
+        axisClip = new Clip.CustomBoundary[2 * (dim - 1)];
+        for (int i = 0; i < axisClip.Length; i++) axisClip[i] = new Clip.CustomBoundary(new double[dim], 0);
     }
 
     public int getDimension() { return dim; }
@@ -880,6 +884,54 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         useSeparation = od.separate;
     }
 
+    private double retina;
+    private Clip.CustomBoundary[] clip, axisClip;
+    private double orthoRetina = 2;
+    public void setRetina(double retina) // almost same as RenderRelative.setRetina
+    {
+        this.retina = retina;
+
+        int next = 0;
+        double[] reg;
+        if (retina > 0)
+        for (int a = 0; a < dim - 1; a++)
+        {
+
+            reg = new double[dim];
+            reg[a] = 1;
+            reg[dim - 1] = retina;
+            Vec.normalize(reg, reg); // for convert
+            clip[next] = new Clip.CustomBoundary(reg, 0);
+            next++;
+
+            reg = new double[dim];
+            reg[a] = -1;
+            reg[dim - 1] = retina;
+            clip[next] = new Clip.CustomBoundary(reg, 0);
+            next++;
+
+            // no need to zero other components,
+            // they never become nonzero
+        }
+        else 
+        for (int a = 0; a < dim - 1; a++)
+        {
+
+            reg = new double[dim];
+            reg[a] = 1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            reg = new double[dim];
+            reg[a] = -1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            // no need to zero other components,
+            // they never become nonzero
+        }
+    }
+
     public override bool isAnimated()
     {
         return false;
@@ -950,15 +1002,16 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     {
     }
 
-    public override void render(double[] origin)
+    public override void render(double[] origin, double[][] axis)
     {
-        renderer(origin);
+        renderer(origin, axis);
     }
 
-    protected void renderer(double[] origin)
+    protected void renderer(double[] origin, double[][] axis)
     {
         buf.clear();
         Vec.copy(this.origin, origin);
+        viewBoundaryConvert(axis);
 
         double[] dist = new double[shapes.Length];
         for (int i = 0; i < shapes.Length; i++) dist[i] = Vec.dist2(shapes[i].aligncenter, origin);
@@ -981,7 +1034,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         // currentDraw includes all objects, scenery must be distant
         for (int i = 0; i < scenery.Count; i++)
         {
-            (scenery[i]).draw(currentDraw, origin);
+            double[][] texture;
+            Color[] textureColor;
+            scenery[i].draw(out texture, out textureColor, origin);
+            for (int j = 0; j < textureColor.Length; j++) drawLine(texture[j*2], texture[j*2+1], textureColor[j]);
         }
 
         calcInFront();
@@ -996,7 +1052,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
                 if (shapes[s[h]] == null) continue;
                 if (inFront[s[h]][i]) currentDraw = clipUnits[s[h]].chain(currentDraw);
             }
+            int bn = buf.getSize();
             drawShape(shapes[i]);
+            if (bn == buf.getSize()) for (int j = 0; j < shapes.Length; j++) inFront[i][j] = inFront[j][i] = false;
         }
     }
 
@@ -1050,7 +1108,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
         if (cell.customTexture != null)
         {
-            cell.customTexture.draw(shape, cell, currentDraw, origin, transparency);
+            double[][] texture;
+            Color[] textureColor;
+            cell.customTexture.draw(out texture, out textureColor, cell, origin);
+            for (int i = 0; i < textureColor.Length; i++) drawLine(texture[i*2], texture[i*2+1], textureColor[i]);
         }
         else
         {
@@ -1092,14 +1153,14 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             }
             poly.color = getColor(Geom.getColor(/*edge.color, */cell.color));
             poly.color.a = (float)transparency;
-            currentDraw.drawPolygon(poly, origin);
+            drawPolygon(poly);
         }
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
             Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
             Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, Geom.getColor(/*edge.color, */cell.color), origin);
+            drawLine(reg1, reg2, Geom.getColor(/*edge.color, */cell.color));
         }
     }
 
@@ -1117,16 +1178,40 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             }
             poly.color = color;
             poly.color.a = (float)transparency;
-            currentDraw.drawPolygon(poly, origin);
+            drawPolygon(poly);
         }
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
             Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
             Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, color, origin);
+            drawLine(reg1, reg2, color);
         }
     }
 
+    private void drawPolygon(Polygon polygon)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Clip.clip(polygon, axisClip[i])) return;
+        }
+        currentDraw.drawPolygon(polygon, origin);
+    }
+
+    private void drawLine(double[] p1, double[] p2, Color color)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Vec.clip(p1, p2, axisClip[i].n, axisClip[i].getThreshold(), 1)) return;
+        }
+        currentDraw.drawLine(p1, p2, color, origin);
+    }
+
+    private void viewBoundaryConvert(double[][] axis) {
+        for (int i = 0; i < clip.Length; i++) {
+            Vec.fromAxisCoordinates(axisClip[i].n, clip[i].n, axis);
+            axisClip[i].t = Vec.dot(origin, axisClip[i].n);
+        }
+    }
 }
 
