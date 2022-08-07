@@ -167,105 +167,97 @@ public class Menu : MonoBehaviour
     {
         if (isActivating) return;
         OptionsAll oa = core.getOptionsAll();
-        try
-        {
-            oa.opt.oc4.colorMode = getInt(colorMode);
-            oa.opt.oc4.dimSameParallel = getInt(dimSameParallelField, OptionsColor.DIM_SAME_MIN, OptionsColor.DIM_SAME_MAX);
-            oa.opt.oc4.dimSamePerpendicular = getInt(dimSamePerpendicularField, OptionsColor.DIM_SAME_MIN, OptionsColor.DIM_SAME_MAX);
-            getBool(enable, oa.opt.oc4.enable);
+        oa.opt.oc4.colorMode = getInt(colorMode);
+        getInt(ref oa.opt.oc4.dimSameParallel, dimSameParallelField, OptionsColor.DIM_SAME_MIN, OptionsColor.DIM_SAME_MAX);
+        getInt(ref oa.opt.oc4.dimSamePerpendicular, dimSamePerpendicularField, OptionsColor.DIM_SAME_MIN, OptionsColor.DIM_SAME_MAX);
+        getBool(enable, oa.opt.oc4.enable);
 
-            oa.opt.ov4.depth = getInt(depthField, OptionsView.DEPTH_MIN, OptionsView.DEPTH_MAX);
-            getBool(texture, oa.opt.ov4.texture);
-            oa.opt.ov4.retina = getDouble(retinaField, false);
-            oa.opt.ov4.scale = getDouble(scaleField, OptionsView.SCALE_MIN, OptionsView.SCALE_MAX, false);
+        getInt(ref oa.opt.ov4.depth, depthField, OptionsView.DEPTH_MIN, OptionsView.DEPTH_MAX);
+        getBool(texture, oa.opt.ov4.texture);
+        getDouble(ref oa.opt.ov4.retina, retinaField, false);
+        getDouble(ref oa.opt.ov4.scale, scaleField, OptionsView.SCALE_MIN, OptionsView.SCALE_MAX, false);
 
-            oa.opt.od.transparency = getDouble(transparencyField, OptionsDisplay.TRANSPARENCY_MIN, OptionsDisplay.TRANSPARENCY_MAX, true);
-            oa.opt.od.border = getDouble(borderField, OptionsDisplay.BORDER_MIN, OptionsDisplay.BORDER_MAX, true);
-            oa.opt.od.useEdgeColor = getBool(useEdgeColor);
-            oa.opt.od.hidesel = getBool(hideSel);
-            oa.opt.od.invertNormals = getBool(invertNormals);
-            oa.opt.od.separate = getBool(separate);
-            oa.opt.od.map = getBool(map);
-            oa.opt.od.trainSpeed = getInt(trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
+        getDouble(ref oa.opt.od.transparency, transparencyField, OptionsDisplay.TRANSPARENCY_MIN, OptionsDisplay.TRANSPARENCY_MAX, true);
+        getDouble(ref oa.opt.od.border, borderField, OptionsDisplay.BORDER_MIN, OptionsDisplay.BORDER_MAX, true);
+        oa.opt.od.useEdgeColor = getBool(useEdgeColor);
+        oa.opt.od.hidesel = getBool(hideSel);
+        oa.opt.od.invertNormals = getBool(invertNormals);
+        oa.opt.od.separate = getBool(separate);
+        oa.opt.od.map = getBool(map);
+        getInt(ref oa.opt.od.trainSpeed, trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
 
-            oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
-            oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
-            oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
-            oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
-            oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
-            oa.opt.oo.invertForward = getBool(invertForward);
-            oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
-            oa.opt.oo.invertRoll = getBool(invertRoll);
-            oa.opt.oo.sliceMode = getBool(sliceMode);
-            oa.opt.oo.baseTransparency = getFloat(baseTransparencyField, true);
-            oa.opt.oo.sliceTransparency = getFloat(sliceTransparencyField, true);
-            oa.opt.oo.limit3D = getBool(limit3D);
+        oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
+        oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
+        oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
+        oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
+        oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
+        oa.opt.oo.invertForward = getBool(invertForward);
+        oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
+        oa.opt.oo.invertRoll = getBool(invertRoll);
+        oa.opt.oo.sliceMode = getBool(sliceMode);
+        getFloat(ref oa.opt.oo.baseTransparency, baseTransparencyField, true);
+        getFloat(ref oa.opt.oo.sliceTransparency, sliceTransparencyField, true);
+        oa.opt.oo.limit3D = getBool(limit3D);
 
-            OptionsFisheye ofTemp = new OptionsFisheye();
-            ofTemp.fisheye = getBool(fisheye);
-            ofTemp.adjust = getBool(custom);
-            ofTemp.rainbow = getBool(rainbow);
-            ofTemp.width = getDouble(width, 0, 1, false);
-            ofTemp.flare = getDouble(flare, 0, 1, true);
-            ofTemp.rainbowGap = getDouble(rainbowGap, 0, 1, true);
-            OptionsFisheye.copy(OptionsFisheye.of, ofTemp);
-            OptionsFisheye.recalculate();
-        }
-        catch (Exception e) { Debug.Log(e); }
+        OptionsFisheye ofTemp = new OptionsFisheye();
+        ofTemp.fisheye = getBool(fisheye);
+        ofTemp.adjust = getBool(custom);
+        ofTemp.rainbow = getBool(rainbow);
+        getDouble(ref ofTemp.width, width, 0, 1, false);
+        getDouble(ref ofTemp.flare, flare, 0, 1, true);
+        getDouble(ref ofTemp.rainbowGap, rainbowGap, 0, 1, true);
+        OptionsFisheye.copy(OptionsFisheye.of, ofTemp);
+        OptionsFisheye.recalculate();
         core.menuCommand = core.updateOptions;
     }
 
     public void doOK()
     {
         OptionsAll oa = core.getOptionsAll();
-        try
+        getInt(ref oa.opt.om4.dimMap, dimNext, OptionsMap.DIM_MAP_MIN, OptionsMap.DIM_MAP_MAX);
+        getDimMap(oa.opt.om4.size, sizeNext);
+        getDouble(ref oa.opt.om4.density, densityNext, OptionsMap.DENSITY_MIN, OptionsMap.DIM_MAP_MAX, true);
+        getDouble(ref oa.opt.om4.twistProbability, twistProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
+        getDouble(ref oa.opt.om4.branchProbability, branchProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
+        oa.opt.om4.allowLoops = getBool(allowLoopsNext);
+        getDouble(ref oa.opt.om4.loopCrossProbability, loopCrossProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
+
+        if (mazeNext.text.Length > 0)
         {
-            oa.opt.om4.dimMap = getInt(dimNext, OptionsMap.DIM_MAP_MIN, OptionsMap.DIM_MAP_MAX);
-            getDimMap(oa.opt.om4.size, sizeNext);
-            oa.opt.om4.density = getDouble(densityNext, OptionsMap.DENSITY_MIN, OptionsMap.DIM_MAP_MAX, true);
-            oa.opt.om4.twistProbability = getDouble(twistProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
-            oa.opt.om4.branchProbability = getDouble(branchProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
-            oa.opt.om4.allowLoops = getBool(allowLoopsNext);
-            oa.opt.om4.loopCrossProbability = getDouble(loopCrossProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
-
-            if (mazeNext.text.Length > 0)
-            {
-                oa.oeNext.mapSeedSpecified = true;
-                oa.oeNext.mapSeed = getInt(mazeNext);
-            }
-            else oa.oeNext.mapSeedSpecified = false;
-            if(colorCurrent.text.Length > 0)
-            {
-                oa.oeCurrent.colorSeed = getInt(colorCurrent);
-                oa.oeCurrent.forceSpecified();
-            }
-            if(colorNext.text.Length > 0)
-            {
-                oa.oeNext.colorSeedSpecified = true;
-                oa.oeNext.colorSeed = getInt(colorNext);
-            }
-            else oa.oeNext.colorSeedSpecified = false;
-
-            oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
-            oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
-            oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
-            oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
-            oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
-            oa.opt.oo.invertForward = getBool(invertForward);
-            oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
-            oa.opt.oo.invertRoll = getBool(invertRoll);
-
-            oa.opt.ot4.frameRate = getInt(frameRateField, false);
-            oa.opt.ot4.timeMove = getDouble(timeMoveField, false);
-            oa.opt.ot4.timeRotate = getDouble(timeRotateField, false);
-            oa.opt.ot4.timeAlignMove = getDouble(timeAlignMoveField, false);
-            oa.opt.ot4.timeAlignRotate = getDouble(timeAlignRotateField, false);
-
-            oa.omCurrent = oa.opt.om4;
-            oa.ocCurrent = oa.opt.oc4;
-            oa.ovCurrent = oa.opt.ov4;
+            oa.oeNext.mapSeedSpecified = true;
+            getInt(ref oa.oeNext.mapSeed, mazeNext);
         }
-        catch (Exception e) { Debug.Log(e); }
+        else oa.oeNext.mapSeedSpecified = false;
+        if(colorCurrent.text.Length > 0)
+        {
+            getInt(ref oa.oeCurrent.colorSeed, colorCurrent);
+            oa.oeCurrent.forceSpecified();
+        }
+        if(colorNext.text.Length > 0)
+        {
+            oa.oeNext.colorSeedSpecified = true;
+            getInt(ref oa.oeNext.colorSeed, colorNext);
+        }
+        else oa.oeNext.colorSeedSpecified = false;
+
+        oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
+        oa.opt.oo.inputTypeForward = getInt(inputTypeForward);
+        oa.opt.oo.inputTypeYawAndPitch = getInt(inputTypeYawAndPitch);
+        oa.opt.oo.inputTypeRoll = getInt(inputTypeRoll);
+        oa.opt.oo.invertLeftAndRight = getBool(invertLeftAndRight);
+        oa.opt.oo.invertForward = getBool(invertForward);
+        oa.opt.oo.invertYawAndPitch = getBool(invertYawAndPitch);
+        oa.opt.oo.invertRoll = getBool(invertRoll);
+
+        getDouble(ref oa.opt.ot4.frameRate, frameRateField, false);
+        getDouble(ref oa.opt.ot4.timeMove, timeMoveField, false);
+        getDouble(ref oa.opt.ot4.timeRotate, timeRotateField, false);
+        getDouble(ref oa.opt.ot4.timeAlignMove, timeAlignMoveField, false);
+        getDouble(ref oa.opt.ot4.timeAlignRotate, timeAlignRotateField, false);
+
+        oa.omCurrent = oa.opt.om4;
+        oa.ocCurrent = oa.opt.oc4;
+        oa.ovCurrent = oa.opt.ov4;
 
         // command
         core.menuCommand = core.setOptions;
@@ -360,67 +352,81 @@ public class Menu : MonoBehaviour
         dropdown.value = value;
     }
 
-    private int getInt(InputField inputField)
+    private void getInt(ref int i, InputField inputField)
     {
-        int i = int.Parse(inputField.text);
-        return i;
+        try {
+            i = int.Parse(inputField.text);
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private int getInt(InputField inputField, bool allowZero)
+    private void getInt(ref int i, InputField inputField, bool allowZero)
     {
-        int i = int.Parse(inputField.text);
+        try {
+            i = int.Parse(inputField.text);
         if (i < 0 || (!allowZero && i == 0)) throw new Exception();
-        return i;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private int getInt(InputField inputField, int min, int max)
+    private void getInt(ref int i, InputField inputField, int min, int max)
     {
-        int i = int.Parse(inputField.text);
-        if (i < min || i > max) throw new Exception();
-        return i;
+        try {
+            int i_ = int.Parse(inputField.text);
+            if (i_ < min || i_ > max) throw new Exception();
+            i = i_;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private float getFloat(InputField inputField, bool allowZero)
+    private void getFloat(ref float f, InputField inputField, bool allowZero)
     {
-        float f = float.Parse(inputField.text);
-        if (f < 0 || (!allowZero && f == 0)) throw new Exception();
-        return f;
+        try {
+            float f_ = float.Parse(inputField.text);
+            if (f_ < 0 || (!allowZero && f_ == 0)) throw new Exception();
+            f = f_;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private float getFloat(InputField inputField, float min, float max, bool allowMin)
+    private void getFloat(ref float f, InputField inputField, float min, float max, bool allowMin)
     {
-        float f = float.Parse(inputField.text);
-        if (f > max || f < min || (!allowMin && f == min)) throw new Exception();
-        return f;
+        try {
+            float f_ = float.Parse(inputField.text);
+            if (f_ > max || f_ < min || (!allowMin && f_ == min)) throw new Exception();
+            f = f_;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private double getDouble(InputField inputField, bool allowZero)
+    private void getDouble(ref double d, InputField inputField, bool allowZero)
     {
-        double d = float.Parse(inputField.text);
-        if (d < 0 || (!allowZero && d == 0)) throw new Exception();
-        return d;
+        try {
+            double d_ = float.Parse(inputField.text);
+            if (d_ < 0 || (!allowZero && d_ == 0)) throw new Exception();
+            d = d_;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
-    private double getDouble(InputField inputField, double min, double max, bool allowMin)
+    private void getDouble(ref double d, InputField inputField, double min, double max, bool allowMin)
     {
-        double d = float.Parse(inputField.text);
-        if (d > max || d < min || (!allowMin && d == min)) throw new Exception();
-        return d;
+        try {
+            double d_ = float.Parse(inputField.text);
+            if (d_ > max || d_ < min || (!allowMin && d_ == min)) throw new Exception();
+            d = d_;
+        } catch (Exception e) { Debug.LogException(e); }
     }
 
     readonly char[] separator = new char[] { ',' };
     private void getDimMap(int[] dest, InputField inputField)
     {
-        string[] reg = inputField.text.Split(separator);
-        if (reg.Length == 1)
-        {
-            int j = int.Parse(reg[0].Trim());
-            for (int i = 0; i < dest.Length; i++) dest[i] = j;
-            return;
-        }
-        int[] n = new int[dest.Length];
-        for (int i = 0; i < n.Length; i++) n[i] = int.Parse(reg[i].Trim());
-        for (int i = 0; i < n.Length; i++) dest[i] = n[i];
+        try {
+            string[] reg = inputField.text.Split(separator);
+            if (reg.Length == 1)
+            {
+                int j = int.Parse(reg[0].Trim());
+                for (int i = 0; i < dest.Length; i++) dest[i] = j;
+                return;
+            }
+            int[] n = new int[dest.Length];
+            for (int i = 0; i < n.Length; i++) n[i] = int.Parse(reg[i].Trim());
+            for (int i = 0; i < n.Length; i++) dest[i] = n[i];
+        } catch ( Exception e) { Debug.LogException(e); }
     }
 
     private int getInt(Dropdown dropdown) { return dropdown.value; }

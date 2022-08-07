@@ -726,6 +726,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         //if (a1 >= 2 || a2 >= 2) theta = -theta;
         //selectedShape.rotateFrame(axisDirection[a1], axisDirection[a2], theta, null);
 
+        if (from[3]==0) Vec.swap(from, to, reg1);
         Vec.fromAxisCoordinates(reg1, from, axis);
         Vec.fromAxisCoordinates(reg2, to, axis);
         Vec.normalize(reg1, reg1);
@@ -1100,7 +1101,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         if (texture[0])
         {
             if (useEdgeColor) drawEdgeColor(shape, cell, 0.999999);
-            else drawTexture(shape, cell, getColor(Color.white), 0.999999);
+            else drawTexture(shape, cell, getColor(Color.white * OptionsColor.fixer), 0.999999);
         }
 
         bool selected = (shape == selectedShape) && !hideSel;

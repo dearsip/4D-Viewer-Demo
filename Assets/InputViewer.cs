@@ -21,7 +21,7 @@ public class InputViewer : MonoBehaviour
     public Toggle toggleLimit3D;
 
     private const float threshold = 0.1f;
-    private const float dist = 0.1f;
+    private const float dist = 0.06f;
     private const float ringScale = 0.05f;
 
     public void ToggleLimit3D () {

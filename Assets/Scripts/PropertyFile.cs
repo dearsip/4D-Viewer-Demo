@@ -81,7 +81,7 @@ public class PropertyFile
         try {
             PropertyStore store = new PropertyStore(p);
             storable(store);
-        } catch (ValidationException e) {
+        } catch (Exception e) {
             Debug.Log(e);
         }
 

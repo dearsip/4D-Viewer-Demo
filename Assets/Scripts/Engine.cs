@@ -247,7 +247,7 @@ public class Engine : IMove
             // carrying a message similar to Engine.e1
 
         }
-        catch (Exception e)
+        catch (Exception)
         {
             initPlayer();
             throw new Exception("Unable to set position, restarting saved game.");

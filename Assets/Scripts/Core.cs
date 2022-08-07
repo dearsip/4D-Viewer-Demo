@@ -197,12 +197,14 @@ public class Core : MonoBehaviour
 
     private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
-        fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
+        posLeft = fromPosLeft = pose.GetLocalPosition(left);
+        rotLeft = fromRotLeft = pose.GetLocalRotation(left);
     }
 
     private void RightDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
-        fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
+        posRight = fromPosRight = pose.GetLocalPosition(right);
+        rotRight = fromRotRight = pose.GetLocalRotation(right);
     }
 
     private void OpenMenu_(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -280,6 +282,7 @@ public class Core : MonoBehaviour
         setOptions();
 
         target = engine;
+        command = null;
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
@@ -302,6 +305,7 @@ public class Core : MonoBehaviour
                 fps = frameCount / dTime;
                 frameCount = 0;
                 last = now;
+                Debug.Log(fps);
             }
 
             engine.ApplyMesh();
@@ -683,7 +687,8 @@ public class Core : MonoBehaviour
 
     public void click()
     {
-        target = ((GeomModel)engine.retrieveModel()).click(engine.getOrigin(), engine.getViewAxis(), engine.getAxisArray());
+        try {target = ((GeomModel)engine.retrieveModel()).click(engine.getOrigin(), engine.getViewAxis(), engine.getAxisArray());}
+        catch (InvalidCastException){ return; }
         if (target != null)
         {
             engineAlignMode = alignMode; // save
@@ -851,9 +856,11 @@ public class Core : MonoBehaviour
         StartCoroutine(ShowLoadDialogCoroutine());
     }
 
+    private bool opened;
     IEnumerator ShowLoadDialogCoroutine()
     {
-        yield return FileBrowser.WaitForLoadDialog(false, null, "Load File", "Load");
+        yield return FileBrowser.WaitForLoadDialog(false, opened ? null : Directory.GetCurrentDirectory(), "Load File", "Load");
+        opened = true;
 
         Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
 
@@ -951,6 +958,7 @@ public class Core : MonoBehaviour
         setOptions();
 
         target = engine;
+        command = null;
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
@@ -1001,15 +1009,12 @@ public class Core : MonoBehaviour
 
         updateOptions();
         setOptions();
-        //controller.setOptions(oa.opt.okc, ot());
-        //controller.setKeysNew(model);
-        //controller.setAlwaysRun(model.isAnimated());
-        //clock.setFrameRate(ot().frameRate);
 
-        //keyMapper().releaseAll(); // sync up key mapper, which may have changed with dim
-
-        //controller.reset(dim, model.getAlignMode(/* defaultAlignMode = */ ok().startAlignMode));
-        // clock will stop when controller reports idle
+        target = engine;
+        command = null;
+        saveOrigin = new double[this.dim];
+        saveAxis = new double[this.dim][];
+        for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
     }
 
     public static GeomModel buildModel(Context c) //throws Exception
@@ -1209,7 +1214,7 @@ public class Core : MonoBehaviour
         try {
             PropertyFile.load(nameDefault, delegate(IStore store) { loadDefault(store); });
             if (File.Exists(fileCurrent)) PropertyFile.load(fileCurrent, load);
-        } catch (ValidationException e) {
+        } catch (Exception e) {
             Debug.Log(e);
             return false;
         }

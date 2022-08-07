@@ -143,6 +143,8 @@ public class Clip
     // 出力は複数の凸多角形になるので、list に入れる。
     public static void clip(Polygon polygon, BoundaryList boundaryList, List<Polygon> list)
     {
+        Polygon reg = new Polygon();
+        reg.copy(polygon);
         if (boundaryList.getSize() == 0)
         {
             list.Add(polygon);
@@ -153,7 +155,11 @@ public class Clip
         {
             Boundary boundary = boundaryList.getBoundary(i);
             polygon = clip(polygon, boundary, list); // 隠れる部分が返されるので、次の boundary を適用する
-            if (polygon == null) break; // 隠れる部分が無ければその時点で終了
+            if (polygon == null) { // 隠れる部分が無ければ、元のpolygonを返す
+                list.Clear();
+                list.Add(reg);
+                break;
+            }
         }
 
     }
