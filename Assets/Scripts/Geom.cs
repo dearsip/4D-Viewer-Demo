@@ -1317,6 +1317,11 @@ public class Geom
             return enew.ToArray();
         }
 
+        public Face[] toFaceArray()
+        {
+            return fnew.ToArray();
+        }
+
         // face functions (that do call edge functions)
 
         // of course there's some similarity to GeomUtil.edgeRing,

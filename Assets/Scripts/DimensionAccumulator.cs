@@ -1,18 +1,38 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿/*
+ * DimensionAccumulator.java
+ */
 
-public class DimensionAcumulator : MonoBehaviour
+/**
+ * The one implementation of IDimensionMultiDest.
+ * It has three states: first, normal, and error.
+ */
+
+public class DimensionAccumulator : IDimensionMultiDest
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public bool first;
+    public int dim;
+    public bool error;
+
+    public DimensionAccumulator()
     {
-        
+        first = true;
+        dim = 0;
+        error = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void putDimension(int dim)
     {
-        
+        if (first)
+        {
+            this.dim = dim;
+            first = false;
+        }
+        else
+        {
+            if (dim != this.dim) error = true;
+        }
     }
+
 }
+

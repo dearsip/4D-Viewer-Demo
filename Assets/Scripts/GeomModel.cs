@@ -279,10 +279,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     // --- implementation of IKeysNew ---
 
-    public void adjustSpeed(int dv) { }
-    public void toggleTrack() { }
+    public virtual void adjustSpeed(int dv) { }
+    public virtual void toggleTrack() { }
 
-    public void toggleEdgeColor()
+    public virtual void toggleEdgeColor()
     {
         useEdgeColor = !useEdgeColor;
     }
@@ -337,11 +337,11 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    protected void clickNoShape(double[] origin, double[] viewAxis)
+    protected virtual void clickNoShape(double[] origin, double[] viewAxis)
     {
     }
 
-    protected void clickNoUserMove(Geom.Shape shape, double[] origin, double[] viewAxis)
+    protected virtual void clickNoUserMove(Geom.Shape shape, double[] origin, double[] viewAxis)
     {
     }
 

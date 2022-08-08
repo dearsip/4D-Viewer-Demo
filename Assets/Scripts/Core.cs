@@ -1042,8 +1042,8 @@ public class Core : MonoBehaviour
     {
 
         DimensionAccumulator da = new DimensionAccumulator();
-        //Track track = null;
-        //LinkedList tlist = new LinkedList();
+        Track track = null;
+        List<Train> tlist = new List<Train>();
         List<IScenery> scenery = new List<IScenery>();
         List<Geom.ShapeInterface> slist = new List<Geom.ShapeInterface>();
         //LinkedList elist = new LinkedList();
@@ -1072,12 +1072,12 @@ public class Core : MonoBehaviour
             {
                 throw new Exception("Unused null object on stack.");
             }
-            //else if (o is Track) {
-            //    if (track != null) throw new Exception("Only one track object allowed (but it can have disjoint loops).");
-            //    track = (Track)o;
-            //} else if (o is Train) {
-            //    tlist.add(o);
-            //} 
+            else if (o is Track) {
+                if (track != null) throw new Exception("Only one track object allowed (but it can have disjoint loops).");
+                track = (Track)o;
+            } else if (o is Train) {
+                tlist.Add((Train)o);
+            } 
             else if (o is IScenery)
             {
                 scenery.Add((IScenery)o);
@@ -1135,19 +1135,21 @@ public class Core : MonoBehaviour
         Geom.Shape[] shapes = new Geom.Shape[slist.Count];
         for (int i = 0; i < slist.Count; i++) shapes[i] = (Geom.Shape)slist[i];
         //Train[] trains = (Train[])tlist.toArray(new Train[tlist.size()]);
+        Train[] trains = new Train[tlist.Count];
+        for (int i = 0; i < tlist.Count; i++) trains[i] = tlist[i];
         //Enemy[] enemies = (Enemy[])elist.toArray(new Enemy[elist.size()]);
 
-        //if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
+        if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
 
         if (scenery.Count == 0) scenery.Add((dtemp == 3) ? new Mat.Mat3() : (IScenery)new Mat.Mat4());
-        //if (track != null) scenery.add(track); // add last so it draws over other scenery
+        if (track != null) scenery.Add(track); // add last so it draws over other scenery
 
         GeomModel model;
         //if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
         //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
         //else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
-        //else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
-        /*:*/
+        /*else */model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
+        :
         model = new GeomModel(dtemp, shapes, drawInfo, viewInfo);
         model.addAllScenery(scenery);
 

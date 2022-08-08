@@ -4,6 +4,7 @@
 
 using UnityEngine;
 using System;
+using System.Reflection;
 //import java.awt.Color;
 //import java.lang.reflect.Array;
 //import java.lang.reflect.Method;
@@ -675,208 +676,208 @@ public class Command
 
     // --- train commands ---
 
-    //    public class NewTrack : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            double velStep = toDbl(c.stack.Pop());
-    //            bool expand = toBool(c.stack.Pop());
-    //            Color colorSel = (Color)c.stack.Pop();
-    //            Color color = (Color)c.stack.Pop();
-    //            int arcn = toInt(c.stack.Pop());
-    //            double margin = toDbl(c.stack.Pop());
-    //            double width = toDbl(c.stack.Pop());
-    //            double carScale = toDbl(c.stack.Pop());
-    //            double carLen = toDbl(c.stack.Pop());
-    //            int dim = toInt(c.stack.Pop());
-    //            Track track = new Track(dim, carLen, carScale, width, margin, arcn, color, colorSel, expand, velStep);
-    //            c.stack.Push(track);
-    //        }
-    //    }
+        public class NewTrack : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                double velStep = toDbl(c.stack.Pop());
+                bool expand = toBool(c.stack.Pop());
+                Color colorSel = (Color)c.stack.Pop();
+                Color color = (Color)c.stack.Pop();
+                int arcn = toInt(c.stack.Pop());
+                double margin = toDbl(c.stack.Pop());
+                double width = toDbl(c.stack.Pop());
+                double carScale = toDbl(c.stack.Pop());
+                double carLen = toDbl(c.stack.Pop());
+                int dim = toInt(c.stack.Pop());
+                Track track = new Track(dim, carLen, carScale, width, margin, arcn, color, colorSel, expand, velStep);
+                c.stack.Push(track);
+            }
+        }
 
-    //    public class NewTrack2 : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            double vradius = toDbl(c.stack.Pop());
-    //            double vtheta = toDbl(c.stack.Pop());
-    //            double vscale = toDbl(c.stack.Pop());
-    //            double velStep = toDbl(c.stack.Pop());
-    //            bool expand = toBool(c.stack.Pop());
-    //            Color colorSel = (Color)c.stack.Pop();
-    //            Color color = (Color)c.stack.Pop();
-    //            int arcn = toInt(c.stack.Pop());
-    //            double margin = toDbl(c.stack.Pop());
-    //            double width = toDbl(c.stack.Pop());
-    //            double carScale = toDbl(c.stack.Pop());
-    //            double carLen = toDbl(c.stack.Pop());
-    //            int dim = toInt(c.stack.Pop());
-    //            Track track = new Track(dim, carLen, carScale, width, margin, arcn, color, colorSel, expand, velStep,
-    //                                    vscale, vtheta, vradius);
-    //            c.stack.Push(track);
-    //        }
-    //    }
+        public class NewTrack2 : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                double vradius = toDbl(c.stack.Pop());
+                double vtheta = toDbl(c.stack.Pop());
+                double vscale = toDbl(c.stack.Pop());
+                double velStep = toDbl(c.stack.Pop());
+                bool expand = toBool(c.stack.Pop());
+                Color colorSel = (Color)c.stack.Pop();
+                Color color = (Color)c.stack.Pop();
+                int arcn = toInt(c.stack.Pop());
+                double margin = toDbl(c.stack.Pop());
+                double width = toDbl(c.stack.Pop());
+                double carScale = toDbl(c.stack.Pop());
+                double carLen = toDbl(c.stack.Pop());
+                int dim = toInt(c.stack.Pop());
+                Track track = new Track(dim, carLen, carScale, width, margin, arcn, color, colorSel, expand, velStep,
+                                        vscale, vtheta, vradius);
+                c.stack.Push(track);
+            }
+        }
 
-    //    public class Set : ICommand
-    //    {
-    //        private Method m;
-    //        public Set(Class cl, String methodName)
-    //        {
-    //            this(cl, methodName, Double.TYPE);
-    //        }
-    //        public Set(Class cl, String methodName, Class argClass)
-    //        {
-    //            try
-    //            {
-    //                m = cl.getMethod(methodName, new Class[] { argClass });
-    //            }
-    //            catch (NoSuchMethodException e)
-    //            {
-    //                throw new RuntimeException(e);
-    //            }
-    //        }
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            object arg = c.stack.Pop();
-    //            object o = c.stack.Peek();
-    //            m.invoke(o, new object[] { arg });
-    //        }
-    //    }
+        public class Set : ICommand
+        {
+            private MethodInfo m;
+            public Set(Type cl, String methodName) : this(cl, methodName, typeof(double))
+            {
+            }
+            public Set(Type cl, String methodName, Type argType)
+            {
+                //try
+                //{
+                    m = cl.GetMethod(methodName, new Type[] { argType });
+                //}
+                //catch (NoSuchMethodException e)
+                //{
+                    //throw new RuntimeException(e);
+                //}
+            }
+            public void exec(Context c) //throws Exception
+            {
+                object arg = c.stack.Pop();
+                object o = c.stack.Peek();
+                m.Invoke(o, new object[] { arg });
+            }
+        }
 
-    //    public class AddTrack : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            String s = ((String)c.stack.Pop()).toLowerCase();
-    //            int dir2 = toInt(c.stack.Pop());
-    //            int dir1 = toInt(c.stack.Pop());
-    //            int[]
-    //       pos = toIntArray((double[])c.stack.Pop());
-    //            Track track = (Track)c.stack.Peek();
-    //            track.build(pos, dir1, dir2, s);
-    //        }
-    //    }
+        public class AddTrack : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                String s = ((String)c.stack.Pop()).ToLower();
+                int dir2 = toInt(c.stack.Pop());
+                int dir1 = toInt(c.stack.Pop());
+                int[]
+           pos = toIntArray((double[])c.stack.Pop());
+                Track track = (Track)c.stack.Peek();
+                track.build(pos, dir1, dir2, s);
+            }
+        }
 
-    //    public class AddPlatforms : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            int ymax = toInt(c.stack.Pop());
-    //            int ymin = toInt(c.stack.Pop());
-    //            Track track = (Track)c.stack.Pop();
-    //            c.stack.addAll(Platform.createPlatforms(track, ymin, ymax));
-    //            c.stack.Push(track); // float up the stack
-    //        }
-    //    }
+        public class AddPlatforms : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                int ymax = toInt(c.stack.Pop());
+                int ymin = toInt(c.stack.Pop());
+                Track track = (Track)c.stack.Pop();
+                foreach (Geom.ShapeInterface s in (new Platform()).createPlatforms(track, ymin, ymax))
+                    c.stack.Push(s);
+                c.stack.Push(track); // float up the stack
+            }
+        }
 
-    //    public class AddPlatform : ICommand
-    //    {
-    //        private bool setRounding;
-    //        public AddPlatform(bool setRounding) { this.setRounding = setRounding; }
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            int rounding = setRounding ? toInt(c.stack.Pop()) : -1;
-    //            int[]
-    //       max = toIntArray((double[])c.stack.Pop());
-    //            int[]
-    //       min = toIntArray((double[])c.stack.Pop());
-    //            Track track = (Track)c.stack.Pop();
-    //            c.stack.Push(Platform.createPlatform(track, min, max, rounding));
-    //            c.stack.Push(track); // float up the stack
-    //        }
-    //    }
+        public class AddPlatform : ICommand
+        {
+            private bool setRounding;
+            public AddPlatform(bool setRounding) { this.setRounding = setRounding; }
+            public void exec(Context c) //throws Exception
+            {
+                int rounding = setRounding ? toInt(c.stack.Pop()) : -1;
+                int[]
+           max = toIntArray((double[])c.stack.Pop());
+                int[]
+           min = toIntArray((double[])c.stack.Pop());
+                Track track = (Track)c.stack.Pop();
+                c.stack.Push((new Platform()).createPlatform(track, min, max, rounding));
+                c.stack.Push(track); // float up the stack
+            }
+        }
 
-    //    public class RoundShape : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
+        public class RoundShape : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
 
-    //            // get parameters
+                // get parameters
 
-    //            bool corner = toBool(c.stack.Pop());
-    //            double margin = toDbl(c.stack.Pop());
-    //            int rounding = toInt(c.stack.Pop());
-    //            int[]
-    //       max = toIntArray((double[])c.stack.Pop());
-    //            int[]
-    //       min = toIntArray((double[])c.stack.Pop());
+                bool corner = toBool(c.stack.Pop());
+                double margin = toDbl(c.stack.Pop());
+                int rounding = toInt(c.stack.Pop());
+                int[]
+           max = toIntArray((double[])c.stack.Pop());
+                int[]
+           min = toIntArray((double[])c.stack.Pop());
 
-    //            // compute others
+                // compute others
 
-    //            // note that the y coordinates of min and max will not be used!
+                // note that the y coordinates of min and max will not be used!
 
-    //            int dim = min.Length;
-    //            // could validate against max.Length, but rplatform doesn't
+                int dim = min.Length;
+                // could validate against max.Length, but rplatform doesn't
 
-    //            if (min[1] != max[1]) throw new Exception("Inconsistent platform level.");
-    //            // only thing rplatform does that we want
+                if (min[1] != max[1]) throw new Exception("Inconsistent platform level.");
+                // only thing rplatform does that we want
 
-    //            Arc arc = Arc.curve((dim == 4) ? 3 : 7, false, margin, 1);
-    //            // set arcn to 7 in 3D, not worth having more options
+                Arc arc = Arc.curve((dim == 4) ? 3 : 7, false, margin, 1);
+                // set arcn to 7 in 3D, not worth having more options
 
-    //            // make the call
+                // make the call
 
-    //            c.stack.Push(Platform.getRoundOutline(dim, min, max, rounding, arc, corner));
-    //        }
-    //    }
+                c.stack.Push((new Platform()).getRoundOutline(dim, min, max, rounding, arc, corner));
+            }
+        }
 
-    //    public class AddRamp : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            int[]
-    //       pos = toIntArray((double[])c.stack.Pop());
-    //            Track track = (Track)c.stack.Pop();
-    //            c.stack.Push(Platform.createRamp(track, pos));
-    //            c.stack.Push(track); // float up the stack
-    //        }
-    //    }
+        public class AddRamp : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                int[]
+           pos = toIntArray((double[])c.stack.Pop());
+                Track track = (Track)c.stack.Pop();
+                c.stack.Push(Platform.createRamp(track, pos));
+                c.stack.Push(track); // float up the stack
+            }
+        }
 
-    //    public class AddPylon : ICommand
-    //    {
-    //        private bool setBase;
-    //        public AddPylon(bool setBase) { this.setBase = setBase; }
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            int base = setBase ? toInt(c.stack.Pop()) : -1;
-    //            double[]
-    //       dpos = (double[])c.stack.Pop();
-    //            Track track = (Track)c.stack.Pop();
-    //            c.stack.Push(Platform.createPylon(track, dpos, base));
-    //            c.stack.Push(track); // float up the stack
-    //        }
-    //    }
+        public class AddPylon : ICommand
+        {
+            private bool setBase;
+            public AddPylon(bool setBase) { this.setBase = setBase; }
+            public void exec(Context c) //throws Exception
+            {
+                int base_ = setBase ? toInt(c.stack.Pop()) : -1;
+                double[]
+           dpos = (double[])c.stack.Pop();
+                Track track = (Track)c.stack.Pop();
+                c.stack.Push(Platform.createPylon(track, dpos, base_));
+                c.stack.Push(track); // float up the stack
+            }
+        }
 
-    //    public class TrainCtor : ICommand
-    //    {
-    //        public void exec(Context c) //throws Exception
-    //        {
-    //            int trainMode = toInt(c.stack.Pop());
-    //            double d0 = toDbl(c.stack.Pop());
-    //            int toDir = toInt(c.stack.Pop());
-    //            int fromDir = toInt(c.stack.Pop());
-    //            int[]
-    //       pos = toIntArray((double[])c.stack.Pop());
-    //            double gap = toDbl(c.stack.Pop());
-    //            Car[]
-    //            cars = (Car[])c.stack.Pop();
-    //            Train train = new Train(cars, gap, pos, fromDir, toDir, d0, trainMode);
-    //            c.stack.Push(train);
-    //        }
-    //    }
+        public class TrainCtor : ICommand
+        {
+            public void exec(Context c) //throws Exception
+            {
+                int trainMode = toInt(c.stack.Pop());
+                double d0 = toDbl(c.stack.Pop());
+                int toDir = toInt(c.stack.Pop());
+                int fromDir = toInt(c.stack.Pop());
+                int[]
+           pos = toIntArray((double[])c.stack.Pop());
+                double gap = toDbl(c.stack.Pop());
+                Car[]
+                cars = (Car[])c.stack.Pop();
+                Train train = new Train(cars, gap, pos, fromDir, toDir, d0, trainMode);
+                c.stack.Push(train);
+            }
+        }
 
-    //    public class CarCtor : ICommand
-    //    {
-    //        private bool override;
-    //      public CarCtor(bool override) { this.override = override; }
-    //    public void exec(Context c) //throws Exception
-    //    {
-    //        double carLenOverride = override ? toDbl(c.stack.Pop()) : 0;
-    //    Geom.Shape shape = (Geom.Shape)c.stack.Pop();
-    //    Car car = new Car(shape, carLenOverride);
-    //    c.stack.Push(car);
-    //}
-    //   }
+        public class CarCtor : ICommand
+        {
+            private bool override_;
+          public CarCtor(bool override_) { this.override_ = override_; }
+        public void exec(Context c) //throws Exception
+        {
+            double carLenOverride = override_ ? toDbl(c.stack.Pop()) : 0;
+        Geom.Shape shape = (Geom.Shape)c.stack.Pop();
+        Car car = new Car(shape, carLenOverride);
+        c.stack.Push(car);
+    }
+       }
 
     // --- scenery ---
 
