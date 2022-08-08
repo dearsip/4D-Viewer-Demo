@@ -5,19 +5,23 @@ using UnityEngine;
 public class DesktopCamera : MonoBehaviour
 {
     public Camera center, left, right, fix, fLeft, fRight;
-    private int mode = 0;
+    private int mode = 5;
     private Rect rCenter, rLeft, rRight;
     // Start is called before the first frame update
     void Start()
     {
-        left.enabled = false;
-        right.enabled = false;
-        fix.enabled = false;
-        fLeft.enabled = false;
-        fRight.enabled = false;
         rCenter = center.rect;
         rLeft = left.rect;
         rRight = right.rect;
+
+        left.enabled = false;
+        right.enabled = false;
+        fLeft.enabled = false;
+        fRight.enabled = false;
+        center.enabled = true;
+        fix.enabled = true;
+        center.rect = rLeft;
+        fix.rect = rRight;
     }
 
     // Update is called once per frame

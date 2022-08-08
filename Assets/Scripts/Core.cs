@@ -295,7 +295,7 @@ public class Core : MonoBehaviour
     float lastOneSec = 0;
     float dTime = 0;
     float dOneSec = 0;
-    float fps = 60;
+    float fps;
     bool nextFrame = true;
     int frameCount = 0;
     void Update()
@@ -310,7 +310,7 @@ public class Core : MonoBehaviour
                 fps = frameCount / dOneSec;
                 frameCount = 0;
                 lastOneSec = now;
-                Debug.Log(fps);
+                //Debug.Log(fps);
             }
 
             engine.ApplyMesh();
@@ -319,7 +319,7 @@ public class Core : MonoBehaviour
             menuCommand?.Invoke();
             menuCommand = null;
             control(Mathf.Clamp(dTime, 0.01f, 0.5f));
-            try {renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo));} catch (Exception e) {Debug.Log(e);}
+            renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo));
             //doHaptics();
         }
     }
@@ -335,7 +335,7 @@ public class Core : MonoBehaviour
                 ws.Send(Vec.ToString(output));
             } catch (InvalidOperationException e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
                 error = true;
             }
         }
@@ -362,7 +362,7 @@ public class Core : MonoBehaviour
             reg2[2] = reg2[2] - 0.12 / opt.ov4.scale;
             Vec.fromAxisCoordinates(reg5, reg2, cursorAxis); // 向きを変更
             for (int j = 0; j < 3; j++) reg4[j] = reg5[j]; // reg4[3] (= 0) は編集されない
-            if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
+            //if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
             Vec.add(reg4, cursor, reg4);
             //verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
             //verts.Add(new Vector3((float)reg4[0]+0.03f, (float)reg4[1], (float)reg4[2]));
@@ -862,7 +862,7 @@ public class Core : MonoBehaviour
         try {
             PropertyFile.save(fileCurrent,save);
         } catch (Exception e) {
-            Debug.Log(e);
+            Debug.LogException(e);
         }
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -882,10 +882,11 @@ public class Core : MonoBehaviour
         yield return FileBrowser.WaitForLoadDialog(false, opened ? null : Directory.GetCurrentDirectory(), "Load File", "Load");
         opened = true;
 
-        Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
+        Debug.Log("LoadFile " + (FileBrowser.Success ? "successful" : "failed") + ": " + Path.GetFileName(FileBrowser.Result));
 
         if (FileBrowser.Success) {
             reloadFile = FileBrowser.Result;
+            Debug.Log("Load: " + Path.GetFileName(reloadFile));
             if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
             else menuCommand = doLoadGeom;
         }
@@ -909,10 +910,10 @@ public class Core : MonoBehaviour
             {
                 LanguageException e = (LanguageException)t;
                 //t = e.getCause();
-                s = e.getFile() + "\n" + e.getDetail() + "\n";
-                Debug.Log(s);
+                s = Path.GetFileName(e.getFile()) + "\n" + e.getDetail();
+                Debug.LogException(new Exception(s));
             }
-                Debug.Log(t);
+            else Debug.LogException(t);
             //t.printStackTrace();
             //JOptionPane.showMessageDialog(this, s + t.getClass().getName() + "\n" + t.getMessage(), App.getString("Maze.s25"), JOptionPane.ERROR_MESSAGE);
         }
@@ -996,13 +997,13 @@ public class Core : MonoBehaviour
         Language.include(c, file);
 
         // build the model
-        Debug.Log("try");
+        //Debug.Log("try");
         GeomModel model = buildModel(c);
         // run this before changing anything since it can fail
-        Debug.Log("complete");
+        //Debug.Log("complete");
         // switch to geom
 
-        dim = model.getDimension();
+        if (model.getDimension() == 3) throw new Exception("The system does not support 3D scene");
 
         // no need to modify omCurrent, just leave it with previous maze values
         oa.ocCurrent = null;
@@ -1206,18 +1207,14 @@ public class Core : MonoBehaviour
     public void doReload(int delta) {
         if (reloadFile == null) return;
 
-        Debug.Log(reloadFile);
         if (delta != 0) {
             string[] f = Array.ConvertAll<FileInfo, string>(Directory.GetParent(reloadFile).GetFiles(), s => s.ToString());
-            Debug.Log(string.Join(",",f));
             Array.Sort(f);
-            Debug.Log(string.Join(",",f));
 
             // results of listFiles have same parent directory so names are sufficient
             // (and probably faster for sorting)
 
             int i = Array.IndexOf(f,reloadFile);
-            Debug.Log(i);
             if (i != -1) {
                 i += delta;
                 if (i >= 0 && i < f.Length) reloadFile = f[i];
@@ -1225,6 +1222,7 @@ public class Core : MonoBehaviour
             }
             // else not found, fall through and report that error
         }
+        Debug.Log("Load: " + Path.GetFileName(reloadFile));
 
         if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
         else menuCommand = doLoadGeom;
@@ -1235,7 +1233,7 @@ public class Core : MonoBehaviour
             PropertyFile.load(nameDefault, delegate(IStore store) { loadDefault(store); });
             if (File.Exists(fileCurrent)) PropertyFile.load(fileCurrent, load);
         } catch (Exception e) {
-            Debug.Log(e);
+            Debug.LogException(e);
             return false;
         }
         return true;

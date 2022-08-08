@@ -433,7 +433,7 @@ public class FourDDemo
                 ws.Send(Vec.ToString(output));
             } catch (InvalidOperationException e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
                 error = true;
             }
         }

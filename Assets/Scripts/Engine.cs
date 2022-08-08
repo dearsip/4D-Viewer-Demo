@@ -616,10 +616,10 @@ public class Engine : IMove
     public void renderAbsolute(double[] eyeVector, OptionsControl oo)
     {
         try {
-        model.animate();
-        model.render(origin, axis);
-        RenderRelative(eyeVector, oo);
-        }catch(Exception e) {Debug.Log(e);};
+            model.animate();
+            model.render(origin, axis);
+            RenderRelative(eyeVector, oo);
+        }catch(Exception e) {Debug.LogException(e);};
     }
 
     private readonly Color white = new Color(0, 0, 0);
