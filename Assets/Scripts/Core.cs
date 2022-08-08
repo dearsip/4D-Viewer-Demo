@@ -32,16 +32,17 @@ public class Core : MonoBehaviour
     private bool engineAlignMode;
     private bool active, excluded;
     private int[] param;
+    private double delta;
     private double timeMove, timeRotate, timeAlignMove, timeAlignRotate;
     private int nMove, nRotate, nAlignMove, nAlignRotate;
-    private double dMove, dRotate, dAlignedMove, dAlignedRotate, dAlignMove, dAlignRotate;
+    private double dMove, dRotate, dAlignMove, dAlignRotate;
     private bool alwaysRun;
     private IMove target;
     private double[] saveOrigin;
     private double[][] saveAxis;
     public bool alignMode;
     private int ad0, ad1;
-    private int nActive;
+    private double tActive;
     private Align alignActive;
 
     private int interval;
@@ -291,7 +292,9 @@ public class Core : MonoBehaviour
     Task renderTask = Task.CompletedTask;
     float now = 0;
     float last = 0;
+    float lastOneSec = 0;
     float dTime = 0;
+    float dOneSec = 0;
     float fps = 60;
     bool nextFrame = true;
     int frameCount = 0;
@@ -300,11 +303,13 @@ public class Core : MonoBehaviour
         if (renderTask.IsCompleted) {
             frameCount++;
             now = Time.realtimeSinceStartup;
-            float dTime = now - last;
-            if (dTime >= 1) {
-                fps = frameCount / dTime;
+            dTime = now - last;
+            last = now;
+            dOneSec = now - lastOneSec;
+            if (dOneSec >= 1) {
+                fps = frameCount / dOneSec;
                 frameCount = 0;
-                last = now;
+                lastOneSec = now;
                 Debug.Log(fps);
             }
 
@@ -313,7 +318,7 @@ public class Core : MonoBehaviour
             calcInput();
             menuCommand?.Invoke();
             menuCommand = null;
-            control(fps);
+            control(Mathf.Clamp(dTime, 0.01f, 0.5f));
             try {renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo));} catch (Exception e) {Debug.Log(e);}
             //doHaptics();
         }
@@ -444,17 +449,23 @@ public class Core : MonoBehaviour
     private double limitLR = 0.3; // LR Drag Unit
     private double max = 0.2; // YP Drag Unit
     private const double epsilon = 0.000001;
-    private void control(float fps)
+    private void control(float delta)
     {
-        nMove = (int)Math.Ceiling(fps * timeMove + epsilon);
-        nRotate = (int)Math.Ceiling(fps * timeRotate + epsilon);
-        nAlignMove = (int)Math.Ceiling(fps * timeAlignMove + epsilon);
-        nAlignRotate = (int)Math.Ceiling(fps * timeAlignRotate + epsilon);
+        //nMove = (int)Math.Ceiling(fps * timeMove + epsilon);
+        //nRotate = (int)Math.Ceiling(fps * timeRotate + epsilon);
+        //nAlignMove = (int)Math.Ceiling(fps * timeAlignMove + epsilon);
+        //nAlignRotate = (int)Math.Ceiling(fps * timeAlignRotate + epsilon);
 
-        dMove = 1 / (double)nMove;
-        dRotate = 90 / (double)nRotate;
-        dAlignMove = 1 / (double)nAlignMove;
-        dAlignRotate = 90 / (double)nAlignRotate;
+        //dMove = 1 / (double)nMove;
+        //dRotate = 90 / (double)nRotate;
+        //dAlignMove = 1 / (double)nAlignMove;
+        //dAlignRotate = 90 / (double)nAlignRotate;
+
+        this.delta = delta;
+        dMove = delta / timeMove;
+        dRotate = 90 * delta / timeRotate;
+        dAlignMove = delta / timeAlignMove;
+        dAlignRotate = 90 * delta / timeAlignRotate;
 
         IMove saveTarget = target;
         target.save(saveOrigin, saveAxis);
@@ -494,8 +505,7 @@ public class Core : MonoBehaviour
                 {
                     if (Math.Abs(reg3[i]) > tAlign)
                     {
-                        nActive = nMove;
-                        dAlignedMove = 1 / (double)nMove;
+                        tActive = timeMove;
                         ad0 = Dir.forAxis(i, reg3[i] < 0);
                         if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
                     }
@@ -520,8 +530,7 @@ public class Core : MonoBehaviour
                 {
                     if (Math.Abs(reg2[i]) > tAlign)
                     {
-                        nActive = nRotate;
-                        dAlignedRotate = 90 / (double)nRotate;
+                        tActive = timeRotate;
                         ad0 = Dir.forAxis(dim - 1);
                         ad1 = Dir.forAxis(i, reg2[i] < 0);
                         command = alignRotate;
@@ -540,8 +549,7 @@ public class Core : MonoBehaviour
                     {
                         if (Mathf.Abs(reg0[i]) > tAlign)
                         {
-                            nActive = nRotate;
-                            dAlignedRotate = 90 / (double)nRotate;
+                            tActive = timeRotate;
                             ad0 = Dir.forAxis((i + 1) % 3);
                             ad1 = Dir.forAxis((i + 2) % 3, reg0[i] < 0);
                             command = alignRotate;
@@ -646,10 +654,16 @@ public class Core : MonoBehaviour
     private void alignMove()
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
-        Vec.scale(reg3, reg3, Dir.getSign(ad0) * dAlignedMove);
-        target.move(reg3);
-        if (--nActive <= 0)
-        {
+        double d;
+        if ((d = tActive - delta) > 0) {
+            tActive = d;
+            Vec.scale(reg3, reg3, Dir.getSign(ad0) * dMove);
+            target.move(reg3);
+        }
+        else {
+            d = tActive / timeMove;
+            Vec.scale(reg3, reg3, Dir.getSign(ad0) * d);
+            target.move(reg3);
             target.align().snap();
             command = null;
         }
@@ -659,10 +673,16 @@ public class Core : MonoBehaviour
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
         Vec.scale(reg3, reg3, Dir.getSign(ad0));
-        Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dAlignedRotate);
-        target.rotateAngle(reg3, reg4);
-        if (--nActive <= 0)
-        {
+        double d;
+        if ((d = tActive - delta) > 0) {
+            tActive = d;
+            Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dRotate);
+            target.rotateAngle(reg3, reg4);
+        }
+        else {
+            d = 90 * tActive / timeRotate;
+            Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, d);
+            target.rotateAngle(reg3, reg4);
             target.align().snap();
             command = null;
         }
