@@ -613,7 +613,8 @@ public class Clip
         // find a separator for a railcar, but railcars haven't animated yet.
         // it's just not worth getting into it.
 
-        return (gjk.separate(s1, s2) != Geom.nullSeparator);
+        //return (gjk.separate(s1, s2) != Geom.nullSeparator);
+        return (staticSeparate(s1,s2,/* any = */ true) != Geom.nullSeparator);
     }
 
     public static bool isSeparated(Geom.Shape shape, List<Geom.Shape> list, GJKTester gjk)

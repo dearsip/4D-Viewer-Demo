@@ -206,15 +206,17 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
                     if (isMobile(s1) || isMobile(s2))
                     {
-                        sep = separate(s1, s2, i, j);//Clip.staticSeparate(s1,s2,/* any = */ false);
-                                                     // don't remember the separator
+                        //sep = separate(s1, s2, i, j);
+                        sep = Clip.staticSeparate(s1,s2,/* any = */ false);
+                        // don't remember the separator
                     }
                     else
                     {
                         sep = separators[i][j];
                         if (sep == null)
                         {
-                            sep = separate(s1, s2, i, j);//Clip.staticSeparate(s1,s2,/* any = */ false);
+                            //sep = separate(s1, s2, i, j);
+                            sep = Clip.staticSeparate(s1,s2,/* any = */ false);
                             separators[i][j] = sep;
                         }
                     }
