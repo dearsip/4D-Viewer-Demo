@@ -96,7 +96,8 @@ public class Geom
 
     public static Color getColor(Color c1, Color c2)
     {
-        if (c1 != null) return c1;
+        Debug.Log(c1.ToString());
+        if (c1 != null && c1.a > 0) return c1;
         if (c2 != null) return c2;
         return Color.green; // the default color
     }
@@ -1084,9 +1085,11 @@ public class Geom
             textureColor = new Color[edge.Length];
             for (int i=0; i<edge.Length; i++) {
                 Edge e = edge[i];
-                texture[i*2  ] = vertex[e.iv1];
-                texture[i*2+1] = vertex[e.iv2];
-                textureColor[i] = e.color;
+                texture[i*2  ] = new double[vertex[0].Length];
+                Vec.copy(texture[i*2  ], vertex[e.iv1]);
+                texture[i*2+1] = new double[vertex[0].Length];
+                Vec.copy(texture[i*2+1], vertex[e.iv2]);
+                textureColor[i] = getColor(e.color,cell.color);
             }
         }
 
