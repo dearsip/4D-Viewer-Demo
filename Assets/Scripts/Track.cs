@@ -616,6 +616,8 @@ public class Track : SceneryBase, IDimension
       this.blockTiles = blockTiles;
       this.height = height;
 			this.track = track;
+      tList = new List<double[]>();
+      cList = new List<Color>();
     }
 
     public void draw(out double[][] texture, out Color[] textureColor, Geom.Cell cell, double[] origin)
@@ -1553,16 +1555,17 @@ public class Track : SceneryBase, IDimension
     public class HeadToTailIterator : ContinuousPathIterator
     {
 
-      private IEnumerator<PathSeg> li;
+      private int li;
       private PathSeg pseg;
+      private List<PathSeg> psegs;
       private double cur;
 			private ContinuousPath path;
 
       public HeadToTailIterator(ContinuousPath path)
       {
-        li = path.path.psegs.GetEnumerator();
-        li.MoveNext();
-        pseg = (PathSeg)li.Current;
+        psegs = path.path.psegs;
+        li = 0;
+        pseg = (PathSeg)psegs[li];
         cur = path.head;
 				this.path = path;
       }
@@ -1573,8 +1576,8 @@ public class Track : SceneryBase, IDimension
         while (true)
         {
           if (cur >= 0) break; // we're on this tile
-          if (!li.MoveNext()) throw new Exception("Ran out of tail segments.");
-          pseg = (PathSeg)li.Current;
+          if (++li >= psegs.Count) throw new Exception("Ran out of tail segments.");
+          pseg = (PathSeg)psegs[li];
           double len = path.detail.getLen(pseg);
           cur += len;
         }
@@ -1584,23 +1587,25 @@ public class Track : SceneryBase, IDimension
       public void prune()
       { // remove unneeded tail psegs
         path.tail = cur;
-        while (li.MoveNext()) { }
+        li++;
+        while (psegs.Count > li) { psegs.RemoveAt(li); }
       }
     }
 
     public class TailToHeadIterator : ContinuousPathIterator
     {
 
-      private IEnumerator<PathSeg> li;
+      private int li;
       private PathSeg pseg;
+      private List<PathSeg> psegs;
       private double cur;
 			private ContinuousPath path;
 
       public TailToHeadIterator(ContinuousPath path)
       {
-        li = Enumerable.Reverse(path.path.psegs).GetEnumerator();
-        li.MoveNext();
-        pseg = (PathSeg)li.Current;
+        psegs = path.path.psegs;
+        li = psegs.Count-1;
+        pseg = (PathSeg)psegs[li];
         cur = path.tail;
 				this.path = path;
 
@@ -1613,8 +1618,8 @@ public class Track : SceneryBase, IDimension
         {
           double len = path.detail.getLen(pseg);
           if (cur <= len) break; // we're on this tile
-          if (!li.MoveNext()) throw new Exception("Ran out of head segments.");
-          pseg = (PathSeg)li.Current;
+          if (--li < 0) throw new Exception("Ran out of head segments.");
+          pseg = psegs[li];
           cur -= len; // yes, len from that other pseg
         }
         path.detail.getPos(pseg, cur, pi);
@@ -1623,7 +1628,7 @@ public class Track : SceneryBase, IDimension
       public void prune()
       { // remove unneeded head psegs
         path.head = cur;
-        while (li.MoveNext()) { }
+        while (--li >= 0) { psegs.RemoveAt(li); }
       }
     }
   }

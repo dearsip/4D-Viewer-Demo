@@ -90,15 +90,14 @@ public class Geom
 
     public static Color getColor(Color c1)
     {
-        if (c1.a != 0) return c1;
+        if (c1 != null && c1.a != 0) return c1;
         return Color.green; // the default color
     }
 
     public static Color getColor(Color c1, Color c2)
     {
-        Debug.Log(c1.ToString());
         if (c1 != null && c1.a > 0) return c1;
-        if (c2 != null) return c2;
+        if (c2 != null && c2.a > 0) return c2;
         return Color.green; // the default color
     }
 
@@ -1319,7 +1318,7 @@ public class Geom
 
         public Face[] toFaceArray()
         {
-            return fnew.ToArray();
+            return (fnew != null) ? fnew.ToArray() : null;
         }
 
         // face functions (that do call edge functions)

@@ -33,7 +33,6 @@ public class TrainModel : GeomModel {
 
    public static Geom.Shape[] join(Geom.Shape[] shapes, List<Geom.Shape> list) {
       Geom.Shape[] result = new Geom.Shape[shapes.Length + list.Count];
-      UnityEngine.Debug.Log("list: "+list.Count);
       int n = 0;
 
       for (int i=0; i<shapes.Length; i++) {

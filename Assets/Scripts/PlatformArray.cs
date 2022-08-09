@@ -19,7 +19,8 @@ public class PlatformArray {
 // --- construction ---
 
    public PlatformArray(int[] min, int[] max) {
-      dim = min.Length;
+      //dim = min.Length;
+      if (min.Length == 2) throw new System.Exception("The system does not support 3D scene");
       this.min = min;
       this.max = max;
       //if (dim == 2) { // no y dimension here
@@ -28,7 +29,7 @@ public class PlatformArray {
          data = new object[max[0]-min[0]+1][][];
          for (int i = 0; i < data.Length; i++) {
             data[i] = new object[max[1]-min[1]+1][];
-            for (int j = 0; j < data.Length; j++)
+            for (int j = 0; j < data[i].Length; j++)
                 data[i][j] = new object[max[2]-min[2]+1];
          }
       //}

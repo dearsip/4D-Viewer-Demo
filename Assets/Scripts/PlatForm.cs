@@ -42,12 +42,12 @@ public class Platform
 
         List<Track.Tile> tiles = track.findAllTiles(y);
 
-        foreach (Track.Tile tile in tiles)
+        for (int i = tiles.Count - 1; i >= 0; i--)
         {
-            if (tile.isEmpty() || tile.attached || tile.isRampBottom()) { continue; }
+            if (tiles[i].isEmpty() || tiles[i].attached || tiles[i].isRampBottom()) { tiles.RemoveAt(i); continue; }
             // count ramps as part of top level
 
-            if (tile.isRampTop()) { platforms.Add(createRamp(track, tile.pos)); continue; }
+            if (tiles[i].isRampTop()) { platforms.Add(createRamp(track, tiles[i].pos)); tiles.RemoveAt(i); continue; }
         }
 
         // now the list contains only eligible platform positions.
@@ -335,14 +335,14 @@ public class Platform
 
         List<Track.Tile> tiles = track.findAllTiles(min, max);
 
-        foreach (Track.Tile tile in tiles)
+        for (int i = tiles.Count - 1; i >= 0; i--)
         {
-            if (tile.isEmpty()) { continue; } // just ignore these
+            if (tiles[i].isEmpty()) { tiles.RemoveAt(i); continue; } // just ignore these
 
-            if (tile.isVertical()) throw new Exception("Platforms must not contain ramps.");
+            if (tiles[i].isVertical()) throw new Exception("Platforms must not contain ramps.");
 
-            if (tile.attached) throw new Exception("Tile is already on a platform.");
-            tile.attached = true;
+            if (tiles[i].attached) throw new Exception("Tile is already on a platform.");
+            tiles[i].attached = true;
         }
 
         if (min[1] != max[1]) throw new Exception("Inconsistent platform level.");
@@ -1285,7 +1285,7 @@ public class Platform
         int[][][] vindex = new int[6][][];
         for (int i = 0; i < vindex.Length; i++) {
           vindex[i] = new int[6][];
-          for (int j = 0; j < vindex.Length; j++) {
+          for (int j = 0; j < vindex[i].Length; j++) {
             vindex[i][j] = new int[6];
           }
         }
