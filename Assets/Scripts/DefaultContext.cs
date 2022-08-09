@@ -211,7 +211,7 @@ public class DefaultContext
 
       c.dict.Add("finishinfo",new Command.FinishInfo());
       c.dict.Add("footinfo",new Command.FootInfo());
-      //c.dict.Add("blockinfo",new Command.BlockInfo());
+      c.dict.Add("blockinfo",new Command.BlockInfo());
 
       //c.dict.Add("enemy",new Command.NewEnemy());
 

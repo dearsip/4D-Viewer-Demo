@@ -1191,13 +1191,13 @@ public class Command
         }
     }
 
-    //public class BlockInfo : ICommand
-    //{
-    //    public void exec(Context c) //throws Exception
-    //    {
-    //        c.stack.Push(new Struct.BlockInfo());
-    //    }
-    //}
+    public class BlockInfo : ICommand
+    {
+        public void exec(Context c) //throws Exception
+        {
+            c.stack.Push(new Struct.BlockInfo());
+        }
+    }
 
     //public class NewEnemy : ICommand
     //{

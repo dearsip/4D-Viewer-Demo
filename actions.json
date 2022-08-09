@@ -96,6 +96,10 @@
       "name": "/actions/control/in/Pose",
       "type": "pose",
       "requirement": "mandatory"
+    },
+    {
+      "name": "/actions/control/in/TrackPad",
+      "type": "vector2"
     }
   ],
   "action_sets": [

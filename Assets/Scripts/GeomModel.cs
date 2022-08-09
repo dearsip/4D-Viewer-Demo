@@ -94,7 +94,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         hideSel = false;
         this.drawInfo = drawInfo;
         this.viewInfo = viewInfo;
-        gjk = new Clip.GJKTester(dim);
+        //gjk = new Clip.GJKTester(dim);
+        availableColors = new List<NamedObject<Color>>();
+        availableShapes = new List<NamedObject<Geom.Shape>>();
         //file = new File("../separateLog.txt");
 
         origin = new double[dim];
@@ -1017,7 +1019,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         viewBoundaryConvert(axis);
 
         double[] dist = new double[shapes.Length];
-        for (int i = 0; i < shapes.Length; i++) dist[i] = Vec.dist2(shapes[i].aligncenter, origin);
+        for (int i = 0; i < shapes.Length; i++) if (shapes[i] != null) dist[i] = Vec.dist2(shapes[i].aligncenter, origin);
         int[] s= dist.Select((x, i) => new KeyValuePair<double,int>(x,i))
                          .OrderBy(x => -x.Key)
                          .Select(x => x.Value)

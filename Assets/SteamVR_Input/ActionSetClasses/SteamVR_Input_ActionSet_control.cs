@@ -48,5 +48,13 @@ namespace Valve.VR
                 return SteamVR_Actions.control_Pose;
             }
         }
+        
+        public virtual SteamVR_Action_Vector2 TrackPad
+        {
+            get
+            {
+                return SteamVR_Actions.control_TrackPad;
+            }
+        }
     }
 }

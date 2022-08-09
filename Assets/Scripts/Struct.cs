@@ -66,5 +66,5 @@ public class Struct
     }
 
     // --- block info ---
-    public static class BlockInfo { }
+    public class BlockInfo { }
 }

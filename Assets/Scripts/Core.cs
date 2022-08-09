@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
@@ -10,6 +9,7 @@ using SimpleFileBrowser;
 using static FourDDemo;
 using WebSocketSharp;
 using System.Threading.Tasks;
+using System.Linq;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -51,6 +51,7 @@ public class Core : MonoBehaviour
     public Command menuCommand;
     public SteamVR_Action_Boolean trigger, move, menu;
     public SteamVR_Action_Pose pose;
+    public SteamVR_Action_Vector2 trackPad;
     public SteamVR_Input_Sources left, right;
     private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight, dlPosLeft, dfPosLeft, dlPosRight, dfPosRight;
     private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, dlRotLeft, dfRotLeft, dlRotRight, dfRotRight, relarot;
@@ -300,6 +301,7 @@ public class Core : MonoBehaviour
     int frameCount = 0;
     void Update()
     {
+        calcInputFrame();
         if (renderTask.IsCompleted) {
             frameCount++;
             now = Time.realtimeSinceStartup;
@@ -405,6 +407,30 @@ public class Core : MonoBehaviour
         //max_ = Math.Max(Vec.max(haptics), max_);
         //Debug.Log(max_);
     }
+
+    private float swipeTime = 0;
+    private float swipeTimeTor = 0.1f;
+    private int swipeDir = 0;
+    private float tSwipe = 0.3f;
+    private bool swipeLeft;
+    private bool swipeRight;
+    private void calcInputFrame() {
+        if (swipeTime > 0) swipeTime -= Time.deltaTime;
+        if (swipeTime < 0) swipeDir = 0;
+        Vector2 v = trackPad.GetAxis(right);
+        if (v == Vector2.zero) swipeDir = 0;
+        if (v.x < -tSwipe) {
+            if (swipeDir == 1) command = removeShape;
+            swipeDir = -1;
+            swipeTime = swipeTimeTor;
+        }
+        if (v.x > tSwipe) {
+            if (swipeDir == -1) command = addShapes;
+            swipeDir = 1;
+            swipeTime = swipeTimeTor;
+        }
+    }
+
 
     private void calcInput()
     {
@@ -754,6 +780,16 @@ public class Core : MonoBehaviour
         command = null;
     }
 
+    public void addShapes() {
+        engine.addShapes(alignMode);
+        command = null;
+    }
+
+    public void removeShape() {
+        engine.removeShape();
+        command = null;
+    }
+
     private KeyCode KEY_SLIDELEFT  = KeyCode.S;
     private KeyCode KEY_SLIDERIGHT = KeyCode.F;
     private KeyCode KEY_SLIDEUP    = KeyCode.A;
@@ -1084,7 +1120,7 @@ public class Core : MonoBehaviour
 
         Struct.FinishInfo finishInfo = null;
         Struct.FootInfo footInfo = null;
-        //Struct.BlockInfo blockInfo = null;
+        Struct.BlockInfo blockInfo = null;
 
         // scan for items
         foreach (object o in c.stack)
@@ -1141,10 +1177,10 @@ public class Core : MonoBehaviour
             {
                 footInfo = (Struct.FootInfo)o;
             }
-            //else if (o is Struct.BlockInfo)
-            //{
-            //    blockInfo = (Struct.BlockInfo)o;
-            //}
+            else if (o is Struct.BlockInfo)
+            {
+                blockInfo = (Struct.BlockInfo)o;
+            }
             //else if (o is Enemy)
             //{
             //    elist.add(o);
@@ -1179,7 +1215,7 @@ public class Core : MonoBehaviour
         GeomModel model;
         if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
         //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
-        //else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
+        else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
         else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
         :
         model = new GeomModel(dtemp, shapes, drawInfo, viewInfo);
@@ -1187,49 +1223,46 @@ public class Core : MonoBehaviour
 
         // gather dictionary info
 
-        List<Color> availableColors = new List<Color>();
-        List<Shapes> availableShapes = new List<Shapes>();
+        List<NamedObject<Color>> availableColors = new List<NamedObject<Color>>();
+        List<NamedObject<Geom.Shape>> availableShapes = new List<NamedObject<Geom.Shape>>();
         Dictionary<string, Color> colorNames = new Dictionary<string, Color>();
         Dictionary<string, Geom.Shape> idealNames = new Dictionary<string, Geom.Shape>();
 
-        //foreach (KeyValuePair<string, object> entry in c.dict)
-        //{
-        //    object o = entry.Value;
-        //    if (o is Color)
-        //    {
+        foreach (KeyValuePair<string, object> entry in c.dict)
+        {
+            object o = entry.Value;
+            if (o is Color)
+            {
+                Color color = (Color)o;
+                string name = entry.Key;
+                availableColors.Add(new NamedObject<Color>(name,color));
+                if (!c.topLevelDef.Contains(name))
+                {
+                    colorNames.Add(name, color);
+                }
 
-        //        availableColors.Add(entry);
+            }
+            else if (o is Geom.Shape)
+            { // not ShapeInterface, at least for now
+                Geom.Shape shape = (Geom.Shape)o;
+                if (shape.getDimension() == dtemp)
+                {
+                    string name = entry.Key;
+                    availableShapes.Add(new NamedObject<Geom.Shape>(name,shape));
+                    if (!c.topLevelDef.Contains(name))
+                    {
+                        idealNames.Add(name, shape.ideal);
+                    }
+                }
+            }
+            // else it's not something we're interested in
+        }
 
-        //        String name = (String)entry.getKey();
-        //        if (!c.topLevelDef.contains(name))
-        //        {
-        //            colorNames.Add(name, (Color)o);
-        //        }
+        availableColors.Sort();
+        availableShapes.Sort();
 
-        //    }
-        //    else if (o is Geom.Shape)
-        //    { // not ShapeInterface, at least for now
-        //        Geom.Shape shape = (Geom.Shape)o;
-        //        if (shape.getDimension() == dtemp)
-        //        {
-
-        //            availableShapes.add(new NamedObject(entry));
-
-        //            String name = (String)entry.getKey();
-        //            if (!c.topLevelDef.contains(name))
-        //            {
-        //                idealNames.put(shape.ideal, name);
-        //            }
-        //        }
-        //    }
-        //    // else it's not something we're interested in
-        //}
-
-        //Collections.sort(availableColors);
-        //Collections.sort(availableShapes);
-
-        //model.setAvailableColors(availableColors);
-        //model.setAvailableShapes(availableShapes);
+        model.setAvailableColors(availableColors);
+        model.setAvailableShapes(availableShapes);
 
         model.setSaveInfo(c.topLevelInclude, colorNames, idealNames);
 

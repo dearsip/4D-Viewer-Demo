@@ -631,6 +631,17 @@ public class Engine : IMove
         if (atFinish()) win = true;
     }
 
+    public void addShapes(bool alignMode) {
+        if (getSaveType() != IModel.SAVE_MAZE) {
+            GeomModel m = (GeomModel)model;
+            if (m.canAddShapes()) m.addShapes(1, alignMode, origin, axis[axis.Length-1]);
+        }
+    }
+
+    public void removeShape() {
+        if (getSaveType() != IModel.SAVE_MAZE) ((GeomModel)model).removeShape(origin,axis[axis.Length-1]);
+    }
+
     // --- rendering ---
 
     public void renderAbsolute(double[] eyeVector, OptionsControl oo, double delta)
