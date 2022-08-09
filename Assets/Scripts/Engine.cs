@@ -58,6 +58,7 @@ public class Engine : IMove
     private List<int> tris;
     private List<Color> cols;
     private Mesh mesh;
+    //private double border;
 
     // --- construction ---
 
@@ -341,6 +342,7 @@ public class Engine : IMove
         model.setOptions(oc, oe.colorSeed, ov.depth, ov.texture, od);
 
         setRetina(ov.retina);
+        //border = od.border;
 
         //setDisplay(dimSpaceCache, ov.scale, /*os,*/ false);
 
@@ -613,10 +615,10 @@ public class Engine : IMove
 
     // --- rendering ---
 
-    public void renderAbsolute(double[] eyeVector, OptionsControl oo)
+    public void renderAbsolute(double[] eyeVector, OptionsControl oo, double delta)
     {
         try {
-            model.animate();
+            model.animate(delta);
             model.render(origin, axis);
             RenderRelative(eyeVector, oo);
         }catch(Exception e) {Debug.LogException(e);};

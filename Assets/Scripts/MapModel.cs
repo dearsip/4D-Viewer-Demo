@@ -176,7 +176,7 @@ public class MapModel : IModel
         renderAbsolute.setBuffer(buf);
     }
 
-    public override void animate()
+    public override void animate(double delta)
     {
     }
 

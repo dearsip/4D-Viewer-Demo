@@ -293,7 +293,6 @@ public class Core : MonoBehaviour
     float now = 0;
     float last = 0;
     float lastOneSec = 0;
-    float dTime = 0;
     float dOneSec = 0;
     float fps;
     bool nextFrame = true;
@@ -303,7 +302,7 @@ public class Core : MonoBehaviour
         if (renderTask.IsCompleted) {
             frameCount++;
             now = Time.realtimeSinceStartup;
-            dTime = now - last;
+            delta = Mathf.Clamp(now-last, 0.01f, 0.5f);
             last = now;
             dOneSec = now - lastOneSec;
             if (dOneSec >= 1) {
@@ -318,8 +317,8 @@ public class Core : MonoBehaviour
             calcInput();
             menuCommand?.Invoke();
             menuCommand = null;
-            control(Mathf.Clamp(dTime, 0.01f, 0.5f));
-            renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo));
+            control();
+            renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo, delta));
             //doHaptics();
         }
     }
@@ -449,7 +448,7 @@ public class Core : MonoBehaviour
     private double limitLR = 0.3; // LR Drag Unit
     private double max = 0.2; // YP Drag Unit
     private const double epsilon = 0.000001;
-    private void control(float delta)
+    private void control()
     {
         //nMove = (int)Math.Ceiling(fps * timeMove + epsilon);
         //nRotate = (int)Math.Ceiling(fps * timeRotate + epsilon);
@@ -461,7 +460,6 @@ public class Core : MonoBehaviour
         //dAlignMove = 1 / (double)nAlignMove;
         //dAlignRotate = 90 / (double)nAlignRotate;
 
-        this.delta = delta;
         dMove = delta / timeMove;
         dRotate = 90 * delta / timeRotate;
         dAlignMove = delta / timeAlignMove;

@@ -31,13 +31,13 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected Clip.Draw[] clipUnits;
     private bool[][] inFront;
     private Geom.Separator[][] separators;
-    private bool useEdgeColor;
+    protected bool useEdgeColor;
     protected Geom.Shape selectedShape;
     protected int hitShape, drawing;
     private int[] axisDirection; // direction of each axis, chosen when shape selected
-    private bool useSeparation;
-    private bool invertNormals;
-    private bool hideSel; // hide selection marks
+    protected bool useSeparation;
+    protected bool invertNormals;
+    protected bool hideSel; // hide selection marks
     private Struct.DrawInfo drawInfo;
     private Struct.ViewInfo viewInfo;
     protected Clip.GJKTester gjk;
@@ -1001,7 +1001,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         this.buf = buf;
     }
 
-    public override void animate()
+    public override void animate(double delta)
     {
     }
 
@@ -1081,7 +1081,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             const double epsilon = -1e-9;
 
             Vec.sub(reg1, cell.center, origin); // vector from origin to face center
-            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon);
+            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon) ^ invertNormals;
         }
         else
         {

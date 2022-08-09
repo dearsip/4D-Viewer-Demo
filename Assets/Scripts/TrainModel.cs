@@ -55,6 +55,17 @@ public class TrainModel : GeomModel {
       return list;
    }
 
+    public override void setOptions(OptionsColor oc, int seed, int depth, bool[] texture, OptionsDisplay od)
+    {
+        setTexture(texture);
+        setTransparency(od.transparency);
+        useEdgeColor = od.useEdgeColor;
+        hideSel = od.hidesel;
+        invertNormals = od.invertNormals;
+        useSeparation = od.separate;
+        velNumber = od.trainSpeed;
+    }
+
    public override bool isAnimated() {
       return true;
    }
@@ -63,8 +74,8 @@ public class TrainModel : GeomModel {
       return IModel.SAVE_NONE;
    }
 
-   public override void animate() {
-      double d = velNumber*track.getVelStep();
+   public override void animate(double delta) {
+      double d = velNumber*delta*30*track.getVelStep();
       if (d == 0) return;
       for (int i=0; i<trains.Length; i++) {
          bool ok = (d > 0) ? trains[i].moveForward(d) : trains[i].moveReverse(-d);
