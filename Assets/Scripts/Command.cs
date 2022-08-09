@@ -247,7 +247,7 @@ public class Command
         public void exec(Context c) //throws Exception
         {
             Geom.Edge e = new Geom.Edge();
-            e.color = (Color)c.stack.Pop();
+            e.color = (Color)c.stack.Pop()*OptionsColor.fixer;
             e.iv2 = toInt(c.stack.Pop());
             e.iv1 = toInt(c.stack.Pop());
             c.stack.Push(e);
@@ -438,7 +438,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             int j = toInt(c.stack.Pop());
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Peek();
             shape.setFaceColor(j, color,/* xor = */ false);
@@ -449,7 +449,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             int j = toInt(c.stack.Pop());
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Peek();
             shape.setEdgeColor(j, color);
@@ -619,7 +619,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture t = (Geom.Texture)c.stack.Peek();
             t.setTextureColor(color);
         }
@@ -682,8 +682,8 @@ public class Command
             {
                 double velStep = toDbl(c.stack.Pop());
                 bool expand = toBool(c.stack.Pop());
-                Color colorSel = (Color)c.stack.Pop();
-                Color color = (Color)c.stack.Pop();
+                Color colorSel = (Color)c.stack.Pop()*OptionsColor.fixer;
+                Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
                 int arcn = toInt(c.stack.Pop());
                 double margin = toDbl(c.stack.Pop());
                 double width = toDbl(c.stack.Pop());
@@ -704,8 +704,8 @@ public class Command
                 double vscale = toDbl(c.stack.Pop());
                 double velStep = toDbl(c.stack.Pop());
                 bool expand = toBool(c.stack.Pop());
-                Color colorSel = (Color)c.stack.Pop();
-                Color color = (Color)c.stack.Pop();
+                Color colorSel = (Color)c.stack.Pop()*OptionsColor.fixer;
+                Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
                 int arcn = toInt(c.stack.Pop());
                 double margin = toDbl(c.stack.Pop());
                 double width = toDbl(c.stack.Pop());
@@ -898,7 +898,7 @@ public class Command
         public ConstructSetColor(Type cl) { this.cl = cl; }
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             object o = Activator.CreateInstance(cl);
             ((Mat.SetColor)o).setColor(color);
             c.stack.Push(o);
@@ -1029,7 +1029,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             c.stack.Push(new Scenery.ColorConstant(color));
         }
     }
@@ -1048,8 +1048,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color[]
-            color = (Color[])c.stack.Pop();
+            Color[] color = (Color[])c.stack.Pop();
             c.stack.Push(new Scenery.ColorBlend(color));
         }
     }
@@ -1078,7 +1077,7 @@ public class Command
             double _base = toDbl(c.stack.Pop());
             bool round = toBool(c.stack.Pop());
             double radius = toDbl(c.stack.Pop());
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             c.stack.Push(new Scenery.Grid(dim, color, radius, round, _base, interval));
         }
     }
@@ -1088,7 +1087,7 @@ public class Command
         public void exec(Context c) //throws Exception
         {
             double radius = toDbl(c.stack.Pop());
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture mesh = (Geom.Texture)c.stack.Pop();
             c.stack.Push(new Scenery.Ground(mesh, color, radius));
         }
@@ -1101,7 +1100,7 @@ public class Command
             double[]
        value = (double[])c.stack.Pop();
             int mode = toInt(c.stack.Pop());
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture mesh = (Geom.Texture)c.stack.Pop();
             c.stack.Push(new Scenery.GroundTexture(mesh, color, mode, value));
         }
@@ -1111,7 +1110,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture mesh = (Geom.Texture)c.stack.Pop();
             c.stack.Push(new Scenery.Monolith(mesh, color));
         }
@@ -1123,7 +1122,7 @@ public class Command
         {
             Scenery.HeightFunction fClip = (Scenery.HeightFunction)c.stack.Pop();
             Scenery.HeightFunction f = (Scenery.HeightFunction)c.stack.Pop();
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture mesh = (Geom.Texture)c.stack.Pop();
             c.stack.Push(new Scenery.Horizon(mesh, color, f, fClip));
         }
@@ -1136,7 +1135,7 @@ public class Command
             Scenery.HeightFunction fClip = (Scenery.HeightFunction)c.stack.Pop();
             double[]
        sunBlend = (double[])c.stack.Pop();
-            Color sunColor = (Color)c.stack.Pop();
+            Color sunColor = (Color)c.stack.Pop()*OptionsColor.fixer;
             double[]
        height = (double[])c.stack.Pop();
             Scenery.ColorFunction f = (Scenery.ColorFunction)c.stack.Pop();
@@ -1150,7 +1149,7 @@ public class Command
         public void exec(Context c) //throws Exception
         {
             double height = toDbl(c.stack.Pop());
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.Texture mesh = (Geom.Texture)c.stack.Pop();
             c.stack.Push(new Scenery.Sun(mesh, color, height));
         }

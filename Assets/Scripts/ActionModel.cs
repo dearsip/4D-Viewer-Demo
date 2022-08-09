@@ -93,7 +93,7 @@ public class ActionModel : GeomModel {
       renderer(reg3, axis);
 
         currentDraw = buf;
-      if (bfoot) { drawPoint(origin,Color.green,0.001); }
+      if (bfoot) { drawPoint(origin,Color.green,0.02); }
       if (bcompass) {
          origin[1] += 0.5;
          for (int i=0; i<2*(dim-1); i++) {

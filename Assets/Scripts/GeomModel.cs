@@ -1057,7 +1057,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             }
             int bn = buf.getSize();
             drawShape(shapes[i]);
-            if (bn == buf.getSize()) for (int j = 0; j < shapes.Length; j++) inFront[i][j] = inFront[j][i] = false;
+            //if (bn == buf.getSize()) for (int j = 0; j < shapes.Length; j++) inFront[i][j] = inFront[j][i] = false;
         }
     }
 
