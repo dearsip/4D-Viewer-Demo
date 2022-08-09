@@ -428,7 +428,7 @@ public class Command
     {
         public void exec(Context c) //throws Exception
         {
-            Color color = (Color)c.stack.Pop();
+            Color color = (Color)c.stack.Pop()*OptionsColor.fixer;
             Geom.ShapeInterface shape = (Geom.ShapeInterface)c.stack.Peek();
             shape.setShapeColor(color);
         }
@@ -1172,7 +1172,7 @@ public class Command
                 d[i][1] = fn[i] + 0.75;
             }
             Geom.Shape s = GeomUtil.rect(d);
-            s.setShapeColor(Color.yellow);
+            s.setShapeColor(Color.yellow * OptionsColor.fixer);
             s.glass();
             c.stack.Push(s);
             fi.finish = fni;

@@ -48,6 +48,9 @@ public class Engine : IMove
     private int[] reg2;
     private double[] reg3;
     private double[] reg4;
+    private double[] reg9;
+    private double[] regA;
+    private double[] regB;
 
     private MainTransform mt;
     private SideTransform st;
@@ -112,9 +115,7 @@ public class Engine : IMove
         for (int i = 0; i < axis.Length; i++) axis[i] = new double[dimSpace];
         initPlayer();
 
-        //if (getSaveType() == IModel.SAVE_ACTION
-        // || getSaveType() == IModel.SAVE_BLOCK
-        // || getSaveType() == IModel.SAVE_SHOOT) ((ActionModel)model).setEngine(this);
+        if (isPlatformer()) ((ActionModel)model).setEngine(this);
 
         sraxis = new double[dimSpace][];
         for (int i = 0; i < sraxis.Length; i++) sraxis[i] = new double[dimSpace];
@@ -150,6 +151,9 @@ public class Engine : IMove
         reg2 = new int[dimSpace];
         reg3 = new double[dimSpace];
         reg4 = new double[dimSpace];
+        reg9 = new double[dimSpace];
+        regA = new double[dimSpace];
+        regB = new double[dimSpace];
 
         mt = new MainTransform(reg3);
         st = new SideTransform(reg3);
@@ -445,9 +449,7 @@ public class Engine : IMove
     public bool canMove(int a, double d)
     {
 
-        if (getSaveType() != IModel.SAVE_ACTION
-         && getSaveType() != IModel.SAVE_BLOCK
-         && getSaveType() != IModel.SAVE_SHOOT)
+        if (!isPlatformer())
         {
             Vec.addScaled(reg3, origin, axis[a], d);
             if (!model.canMove(origin, reg3, reg1, reg4)) return false;
@@ -461,82 +463,97 @@ public class Engine : IMove
         return model.atFinish(origin, reg1, reg2);
     }
 
+    private bool isPlatformer() { 
+        return getSaveType() == IModel.SAVE_ACTION
+            || getSaveType() == IModel.SAVE_BLOCK
+            || getSaveType() == IModel.SAVE_SHOOT; 
+    }
+    const double epsilon = 0.00001;
     public void move(double[] d)
     {
-        //const double epsilon = 0.00001;
-        //if (getSaveType() != IModel.SAVE_ACTION
-        // && getSaveType() != IModel.SAVE_BLOCK
-        // && getSaveType() != IModel.SAVE_SHOOT)
-        Vec.fromAxisCoordinates(reg3, d, axis);
-        Vec.add(origin, origin, reg3);
-        //else
-        //{
-        //    if (a == 1) return;
-        //    Vec.unitVector(reg3, 1);
-        //    double e = Vec.dot(reg3, axis[a]);
-        //    Vec.addScaled(reg3, axis[a], reg3, -e);
-        //    Vec.normalize(reg3, reg3);
-        //    Vec.scale(reg3, reg3, d);
-        //    Vec.add(reg3, origin, reg3);
-        //    if (model.canMove(origin, reg3, reg1, reg4))
-        //    {
-        //        Vec.copy(origin, reg3);
-        //    }
-        //    else
-        //    { // not functioning (climing)
-        //        Clip.Result clipResult = ((ActionModel)model).getResult();
-        //        int ib = clipResult.ib;
-        //        Vec.unitVector(reg3, 1);
-        //        Vec.addScaled(reg3, origin, reg3, (d > 0) ? d : -d);
-        //        if ((Clip.clip(origin, reg3, ((GeomModel)model).retrieveShapes()[ib], clipResult) & Clip.KEEP_B) != 0)
-        //        {
-        //            Vec.unitVector(reg3, 1);
-        //            Vec.addScaled(origin, origin, reg3, fall * clipResult.b + epsilon);
-        //        }
-        //    }
-        //}
+        if (!isPlatformer()) {
+            Vec.fromAxisCoordinates(reg3, d, axis);
+            Vec.add(origin, origin, reg3);
+        }
+        else {
+            d[1] = 0;
+            Vec.fromAxisCoordinates(reg3, d, axis);
+            Vec.unitVector(reg4, 1);
+            Vec.rotate(d,reg3,axis[1],reg4,regA,regB);
+            Vec.add(reg3, origin, d);
+            if (model.canMove(origin, reg3, reg1, reg4))
+            {
+                Vec.copy(origin, reg3);
+            }
+            else
+            { // not functioning (climing)
+                Clip.Result clipResult = ((ActionModel)model).getResult();
+                int ib = clipResult.ib;
+                Vec.unitVector(reg3, 1);
+                Vec.addScaled(reg3, origin, reg3, Vec.norm(d));
+                if ((Clip.clip(origin, reg3, ((GeomModel)model).retrieveShapes()[ib], clipResult) & Clip.KEEP_B) != 0)
+                {
+                    Vec.unitVector(reg3, 1);
+                    Vec.addScaled(origin, origin, reg3, fall * clipResult.b + epsilon);
+                }
+            }
+        }
     }
 
     public void rotateAngle(double[] from, double[] to)
     {
-        //if (getSaveType() != IModel.SAVE_ACTION
-        // && getSaveType() != IModel.SAVE_BLOCK
-        // && getSaveType() != IModel.SAVE_SHOOT)
-        Vec.fromAxisCoordinates(reg3, from, axis);
-        Vec.fromAxisCoordinates(reg4, to, axis);
-        Vec.normalize(reg3, reg3);
-        Vec.normalize(reg4, reg4);
-        for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i], axis[i], reg3, reg4, from, to);
-        //else
-        //{
-        //    const double epsilon = 0.000001;
-        //    int dim = origin.Length;
-        //    if (a2 == 1)
-        //    {
-        //        if (a1 != dim - 1) return;
-        //        Vec.copy(reg3, axis[a1]);
-        //        Vec.copy(reg4, axis[a2]);
-        //        Vec.rotateAngle(axis[a1], axis[a2], axis[a1], axis[a2], theta);
-        //        if (axis[a2][1] < epsilon)
-        //        {
-        //            Vec.copy(axis[a1], reg3);
-        //            Vec.copy(axis[a2], reg4);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        double asin = Math.Asin(axis[a1][1]) * 180 / Math.PI;
-        //        if (a1 == dim - 1)
-        //        {
-        //            Vec.rotateAngle(axis[1], axis[a1], axis[1], axis[a1], asin);
-        //        }
-        //        Vec.rotateAngle(axis[a1], axis[a2], axis[a1], axis[a2], theta);
-        //        if (a1 == dim - 1)
-        //        {
-        //            Vec.rotateAngle(axis[a1], axis[1], axis[a1], axis[1], asin);
-        //        }
-        //    }
-        //}
+        if (!isPlatformer()) {
+            Vec.fromAxisCoordinates(reg3, from, axis);
+            Vec.fromAxisCoordinates(reg4, to, axis);
+            Vec.normalize(reg3, reg3);
+            Vec.normalize(reg4, reg4);
+            for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i], axis[i], reg3, reg4, from, to);
+        }
+        else
+        {
+            const double epsilon = 0.000001;
+            if (from[3] > 0)
+            {
+                // w-y rotation
+                Vec.zero(reg3);
+                reg3[1] = to[1];
+                reg3[3] = Math.Sqrt(1-reg3[1]*reg3[1]);
+                Vec.fromAxisCoordinates(reg4, reg3, axis);
+                Vec.copy(reg3,axis[1]);
+                Vec.normalize(reg4, reg4);
+                Vec.rotate(axis[1],axis[1],axis[3],reg4,regA,regB);
+                if (axis[1][1] < epsilon) Vec.copy(axis[1],reg3);
+                else {
+                    Vec.rotate(axis[3],axis[3],axis[3],reg4,regA,regB);
+                    Vec.normalize(axis[1], axis[1]);
+                    Vec.normalize(axis[3], axis[3]);
+                }
+                // w-x&z rotation
+                Vec.copy(reg3,to);
+                reg3[1] = 0;
+                reg3[3] = Math.Sqrt(1-reg3[0]*reg3[0]-reg3[2]*reg3[2]);
+                Vec.fromAxisCoordinates(reg4, reg3, axis);
+                Vec.unitVector(reg3, 1);
+                Vec.normalize(reg3, reg3);
+                Vec.rotate(reg4,reg4,axis[1],reg3,regA,regB); // to
+                Vec.rotate(reg9,axis[3],axis[1],reg3,regA,regB); // from
+                Vec.normalize(reg4, reg4);
+                Vec.normalize(reg9, reg9);
+                for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i],axis[i],reg9,reg4,regA,regB);
+            }
+            else
+            {
+                // x-z rotation (already restricted by control())
+                Vec.fromAxisCoordinates(reg3, from, axis);
+                Vec.fromAxisCoordinates(reg4, to, axis);
+                Vec.unitVector(reg9, 1);
+                Vec.rotate(reg3,reg3,axis[1],reg9,regA,regB);
+                Vec.rotate(reg4,reg4,axis[1],reg9,regA,regB);
+                Vec.normalize(reg3, reg3);
+                Vec.normalize(reg4, reg4);
+                for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i],axis[i],reg3,reg4,regA,regB);
+            }
+        }
     }
 
     public Align align()
@@ -580,38 +597,39 @@ public class Engine : IMove
         Vec.copyMatrix(axis, saveAxis);
     }
 
-    //public void jump()
-    //{
-    //    const double epsilon = 0.001;
-    //    Vec.unitVector(reg3, 1);
-    //    Vec.addScaled(reg3, origin, reg3, -epsilon);
-    //    if (!model.canMove(origin, reg3, reg1, reg4) || reg3[1] < 0) fall = height;
-    //}
+    public void jump()
+    {
+        const double epsilon = 0.001;
+        Vec.unitVector(reg3, 1);
+        Vec.addScaled(reg3, origin, reg3, -epsilon);
+        if (!model.canMove(origin, reg3, reg1, reg4) || reg3[1] < 0) fall = hdef;
+    }
 
-    //public void Fall()
-    //{
-    //    const double epsilon = 0.00001;
-    //    fall -= gravity;
-    //    Vec.unitVector(reg3, 1);
-    //    Vec.addScaled(reg3, origin, reg3, fall);
-    //    if (reg3[1] < epsilon)
-    //    {
-    //        fall = 0;
-    //        origin[1] = epsilon;
-    //    }
-    //    else if (model.canMove(origin, reg3, reg1, reg4))
-    //    {
-    //        Vec.copy(origin, reg3);
-    //    }
-    //    else
-    //    {
-    //        clipResult = ((ActionModel)model).getResult();
-    //        Vec.unitVector(reg3, 1);
-    //        Vec.addScaled(origin, origin, reg3, fall * clipResult.a + ((fall > 0) ? -epsilon : epsilon));
-    //        fall = 0;
-    //    }
-    //    if (atFinish()) win = true;
-    //}
+    public void Fall(double delta)
+    {
+        const double epsilon = 0.00001;
+        Vec.unitVector(reg3, 1);
+        double d = fall*delta - gdef*delta*delta/2;
+        Vec.addScaled(reg3, origin, reg3, d);
+        fall -= gdef*delta;
+        if (reg3[1] < epsilon)
+        {
+            fall = 0;
+            origin[1] = epsilon;
+        }
+        else if (model.canMove(origin, reg3, reg1, reg4))
+        {
+            Vec.copy(origin, reg3);
+        }
+        else
+        {
+            clipResult = ((ActionModel)model).getResult();
+            Vec.unitVector(reg3, 1);
+            Vec.addScaled(origin, origin, reg3, d * clipResult.a + ((fall > 0) ? -epsilon : epsilon));
+            fall = 0;
+        }
+        if (atFinish()) win = true;
+    }
 
     // --- rendering ---
 

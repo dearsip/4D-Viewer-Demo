@@ -50,7 +50,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected double[] reg1;
     protected double[] reg2;
     protected Clip.Result clipResult;
-    private IDraw currentDraw;
+    protected IDraw currentDraw;
 
     private List<NamedObject<Color>> availableColors;
     private List<NamedObject<Geom.Shape>> availableShapes;
@@ -409,7 +409,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public void scramble(bool alignMode, double[] origin)
+    public virtual void scramble(bool alignMode, double[] origin)
     {
 
         if (selectedShape != null) return;
@@ -428,7 +428,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clearAllSeparators();
     }
 
-    public void toggleSeparation()
+    public virtual void toggleSeparation()
     {
         useSeparation = !useSeparation;
     }
@@ -523,7 +523,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         return shape;
     }
 
-    public bool canAddShapes()
+    public virtual bool canAddShapes()
     {
         return (selectedShape == null && availableShapes.Count > 0 && availableColors.Count > 0);
         // no real reason for checking selectedShape,
@@ -531,7 +531,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         // have to check available colors in case user picks random color.
     }
 
-    public void addShapes(int quantity, bool alignMode, double[] origin, double[] viewAxis)
+    public virtual void addShapes(int quantity, bool alignMode, double[] origin, double[] viewAxis)
     {
         // caller must check canAddShapes
 
@@ -563,7 +563,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         Scramble.scramble(todo, done, alignMode, origin, gjk);
     }
 
-    public void removeShape(double[] origin, double[] viewAxis)
+    public virtual void removeShape(double[] origin, double[] viewAxis)
     {
 
         // find the target shape (very similar to click)
@@ -588,23 +588,23 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clearSeparators(i);
     }
 
-    public void toggleNormals()
+    public virtual void toggleNormals()
     {
         invertNormals = !invertNormals;
     }
 
-    public void toggleHideSel()
+    public virtual void toggleHideSel()
     {
         hideSel = !hideSel;
     }
 
-    public bool canPaint()
+    public virtual bool canPaint()
     {
         return (availableColors.Count > 0); // in case the color is random.
                                             // allow painting when a shape is selected, that's a natural action.
     }
 
-    public void paint(double[] origin, double[] viewAxis)
+    public virtual void paint(double[] origin, double[] viewAxis)
     {
         // caller must check canPaint
 
@@ -632,7 +632,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public void jump()
+    public virtual void jump()
     {
     }
 
@@ -827,7 +827,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public bool getAlignMode(bool defaultAlignMode)
+    public virtual bool getAlignMode(bool defaultAlignMode)
     { // not in IModel, but like initPlayer
         if (viewInfo != null)
         {
@@ -1202,6 +1202,15 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     }
 
     private void drawLine(double[] p1, double[] p2, Color color)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Vec.clip(p1, p2, axisClip[i].n, axisClip[i].getThreshold(), 1)) return;
+        }
+        currentDraw.drawLine(p1, p2, color, origin);
+    }
+
+    protected void drawLine(double[] p1, double[] p2, Color color, double[] origin)
     {
         for (int i = 0; i < clip.Length; i++)
         {

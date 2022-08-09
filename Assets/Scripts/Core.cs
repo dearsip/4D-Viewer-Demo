@@ -220,6 +220,7 @@ public class Core : MonoBehaviour
         {
             command = click;
         }
+        else { command = jump; }
     }
 
     private void OnDestroy()
@@ -460,8 +461,13 @@ public class Core : MonoBehaviour
         //dAlignMove = 1 / (double)nAlignMove;
         //dAlignRotate = 90 / (double)nAlignRotate;
 
-        dMove = delta / timeMove;
-        dRotate = 90 * delta / timeRotate;
+        if (!isPlatformer()) {
+            dMove = delta / timeMove;
+            dRotate = 90 * delta / timeRotate;
+        } else {
+            dMove = delta * 2;
+            dRotate = 90 * delta * 2;
+        }
         dAlignMove = delta / timeAlignMove;
         dAlignRotate = 90 * delta / timeAlignRotate;
 
@@ -471,7 +477,7 @@ public class Core : MonoBehaviour
         else
         {
             // left hand
-            if (!alignMode && opt.oo.inputTypeLeftAndRight == OptionsControl.INPUTTYPE_DRAG) {
+            if (!alignMode && isDrag(TYPE_LEFTANDRIGHT)) {
                 for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
                 Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
             }
@@ -480,7 +486,7 @@ public class Core : MonoBehaviour
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
             }
             Array.Copy(reg2, reg3, 3);
-            if (!alignMode && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG) {
+            if (!alignMode && isDrag(TYPE_FORWARD)) {
                 relarot = dlRotLeft;
                 reg3[3] = -Math.Asin(relarot.z) * Math.Sign(relarot.w);
                 reg3[3] /= maxAng * Math.PI / 180 * dMove;
@@ -540,6 +546,7 @@ public class Core : MonoBehaviour
                     relarot = dfRotRight;
                     for (int i = 0; i < 3; i++) reg0[i] = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
                     if (opt.oo.limit3D) { reg0[0] = 0; reg0[1] = 0; }
+                    if (isPlatformer()) { reg0[0] = 0; reg0[2] = 0; }
                     if (opt.oo.invertRoll) reg0 = -reg0;
                     if (!rightMove) reg0 = Vector3.zero;
                     keyControl(KEYMODE_SPIN);
@@ -560,7 +567,7 @@ public class Core : MonoBehaviour
             {
                 Vec.unitVector(reg3, 3);
                 double t;
-                if (opt.oo.inputTypeYawAndPitch == OptionsControl.INPUTTYPE_DRAG) {
+                if (isDrag(TYPE_YAWANDPITCH)) {
                     for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
                     t = Vec.norm(reg2);
                     if (t>0) Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max / t);
@@ -585,7 +592,7 @@ public class Core : MonoBehaviour
                 }
 
                 float f;
-                if (opt.oo.inputTypeRoll == OptionsControl.INPUTTYPE_DRAG) {
+                if (isDrag(TYPE_ROLL)) {
                     relarot = dlRotRight;
                 }
                 else {
@@ -595,6 +602,7 @@ public class Core : MonoBehaviour
                     relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
                 }
                 if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
+                if (isPlatformer()) { relarot[0] = 0; relarot[2] = 0; }
                 if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                 if (!rightMove) relarot = Quaternion.identity;
                 keyControl(KEYMODE_SPIN2);
@@ -649,6 +657,29 @@ public class Core : MonoBehaviour
         }
     }
 
+    private const int TYPE_LEFTANDRIGHT = 0;
+    private const int TYPE_FORWARD = 1;
+    private const int TYPE_YAWANDPITCH = 2;
+    private const int TYPE_ROLL = 3;
+    private bool isPlatformer() { 
+        return engine.getSaveType() == IModel.SAVE_ACTION
+            || engine.getSaveType() == IModel.SAVE_BLOCK
+            || engine.getSaveType() == IModel.SAVE_SHOOT; 
+    }
+    private bool isDrag(int type) {
+        switch(type) {
+            case TYPE_LEFTANDRIGHT:
+                return !isPlatformer() && opt.oo.inputTypeLeftAndRight == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_FORWARD:
+                return !isPlatformer() && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_YAWANDPITCH:
+                return opt.oo.inputTypeYawAndPitch == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_ROLL:
+                return opt.oo.inputTypeRoll == OptionsControl.INPUTTYPE_DRAG;
+        }
+        return false;
+    }
+
     private void alignMove()
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
@@ -688,9 +719,7 @@ public class Core : MonoBehaviour
 
     public void align()
     {
-        if (engine.getSaveType() == IModel.SAVE_ACTION
-         || engine.getSaveType() == IModel.SAVE_BLOCK
-         || engine.getSaveType() == IModel.SAVE_SHOOT)
+        if (isPlatformer())
         {
             command = null;
             return;
@@ -717,6 +746,11 @@ public class Core : MonoBehaviour
             target = engine;
             alignMode = engineAlignMode; // restore
         }
+        command = null;
+    }
+
+    public void jump() {
+        engine.jump();
         command = null;
     }
 
@@ -1143,10 +1177,10 @@ public class Core : MonoBehaviour
         if (track != null) scenery.Add(track); // add last so it draws over other scenery
 
         GeomModel model;
-        //if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
+        if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
         //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
         //else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
-        /*else */model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
+        else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
         :
         model = new GeomModel(dtemp, shapes, drawInfo, viewInfo);
         model.addAllScenery(scenery);

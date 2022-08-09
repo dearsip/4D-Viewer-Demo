@@ -182,9 +182,9 @@ public class DefaultContext
       //c.dict.Add("WALK",        new Double(Enemy.WALK       ));
       //c.dict.Add("WALK_SHOOT",  new Double(Enemy.WALK_SHOOT ));
 
-      //c.dict.Add("FOOT",         new Double(Struct.FOOT        ));
-      //c.dict.Add("COMPASS",      new Double(Struct.COMPASS     ));
-      //c.dict.Add("FOOT_COMPASS", new Double(Struct.FOOT_COMPASS));
+      c.dict.Add("FOOT",         (double)Struct.FOOT        );
+      c.dict.Add("COMPASS",      (double)Struct.COMPASS     );
+      c.dict.Add("FOOT_COMPASS", (double)Struct.FOOT_COMPASS);
 
       // have to be a little careful because these are 4D,
       // but they'll work in the situations I use them in.
