@@ -18,6 +18,7 @@ public class RenderAbsolute
     private int dim;
     private Map map;
     private IColorize colorizer;
+    public bool usePolygon;
     public bool useEdgeColor;
 
     private int depthMax;
@@ -144,19 +145,21 @@ public class RenderAbsolute
 
     private void addPolygon(double[][] vertex, Color color)
     {
-        Polygon poly = buf.getNext();
+        if (usePolygon) {
+            Polygon poly = buf.getNext();
 
-        for (int i = 0; i < vertex.Length; i++) Vec.sub(vertex[i], vertex[i], origin);
-        poly.vertex = vertex;
-        poly.color = color;
-        poly.color.a = (float)transparency;
+            for (int i = 0; i < vertex.Length; i++) Vec.sub(vertex[i], vertex[i], origin);
+            poly.vertex = vertex;
+            poly.color = color;
+            poly.color.a = (float)transparency;
 
-        for (int i = 0; i < OptionsView.DEPTH_MAX; i++)
-        {
-            if (useClip[i] && Clip.clip(poly, boundary[i]))
-            { // fully clipped?
-                buf.unget();
-                return;
+            for (int i = 0; i < OptionsView.DEPTH_MAX; i++)
+            {
+                if (useClip[i] && Clip.clip(poly, boundary[i]))
+                { // fully clipped?
+                    buf.unget();
+                    return;
+                }
             }
         }
     }

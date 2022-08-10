@@ -30,7 +30,7 @@ public class Menu : MonoBehaviour
         dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField,
         transparencyField, borderField, baseTransparencyField, sliceTransparencyField, frameRateField, timeMoveField, timeRotateField, 
         timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
-    public Toggle allowLoopsCurrent, allowLoopsNext, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
+    public Toggle allowLoopsCurrent, allowLoopsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
@@ -125,6 +125,7 @@ public class Menu : MonoBehaviour
         put(scaleField, scaleSlider, oa.opt.ov4.scale);
 
         put(transparencyField, transparencySlider, oa.opt.od.transparency);
+        put(usePolygon, oa.opt.od.usePolygon);
         put(borderField, borderSlider, oa.opt.od.border);
         put(useEdgeColor, oa.opt.od.useEdgeColor);
         put(hideSel, oa.opt.od.hidesel);
@@ -178,6 +179,7 @@ public class Menu : MonoBehaviour
         getDouble(ref oa.opt.ov4.scale, scaleField, OptionsView.SCALE_MIN, OptionsView.SCALE_MAX, false);
 
         getDouble(ref oa.opt.od.transparency, transparencyField, OptionsDisplay.TRANSPARENCY_MIN, OptionsDisplay.TRANSPARENCY_MAX, true);
+        oa.opt.od.usePolygon = getBool(usePolygon);
         getDouble(ref oa.opt.od.border, borderField, OptionsDisplay.BORDER_MIN, OptionsDisplay.BORDER_MAX, true);
         oa.opt.od.useEdgeColor = getBool(useEdgeColor);
         oa.opt.od.hidesel = getBool(hideSel);

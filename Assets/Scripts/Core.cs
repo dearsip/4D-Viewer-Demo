@@ -1104,6 +1104,7 @@ public class Core : MonoBehaviour
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
+        alignMode = model.getAlignMode(alignMode);
     }
 
     public static GeomModel buildModel(Context c) //throws Exception

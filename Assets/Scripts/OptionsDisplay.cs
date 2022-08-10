@@ -7,7 +7,7 @@ public class OptionsDisplay// : IValidate
     
     public double transparency;
     public double border;
-    public bool useEdgeColor, hidesel, invertNormals, separate, map;
+    public bool usePolygon, useEdgeColor, hidesel, invertNormals, separate, map;
     public int trainSpeed;
 
     // --- construction ---
@@ -21,6 +21,7 @@ public class OptionsDisplay// : IValidate
     public static void copy(OptionsDisplay dest, OptionsDisplay src)
     {
         dest.transparency = src.transparency;
+        dest.usePolygon = src.usePolygon;
         dest.border = src.border;
         dest.useEdgeColor = src.useEdgeColor;
         dest.hidesel = src.hidesel;

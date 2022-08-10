@@ -31,6 +31,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected Clip.Draw[] clipUnits;
     private bool[][] inFront;
     private Geom.Separator[][] separators;
+    protected bool usePolygon;
     protected bool useEdgeColor;
     protected Geom.Shape selectedShape;
     protected int hitShape, drawing;
@@ -883,6 +884,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     {
         setTexture(texture);
         setTransparency(od.transparency);
+        usePolygon = od.usePolygon;
         useEdgeColor = od.useEdgeColor;
         hideSel = od.hidesel;
         invertNormals = od.invertNormals;
@@ -1141,13 +1143,13 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         return hitShape == drawing ? color.Equals(COLOR_SELECTED) ? COLOR_SELECTED_ALTERNATE : COLOR_SELECTED : color;
     }
 
-    private static Color COLOR_SELECTED = Color.yellow;
-    private static Color COLOR_SELECTED_ALTERNATE = Color.red;
+    private static Color COLOR_SELECTED = Color.yellow * OptionsColor.fixer;
+    private static Color COLOR_SELECTED_ALTERNATE = Color.red * OptionsColor.fixer;
 
     private void drawEdgeColor(Geom.Shape shape, Geom.Cell cell, double scale)
     {
         Polygon poly = new Polygon();
-        for (int i = 0; i < cell.ifa.Length; i++)
+        if (usePolygon) for (int i = 0; i < cell.ifa.Length; i++)
         {
             Geom.Face face = shape.face[cell.ifa[i]];
             poly.vertex = new double[face.iv.Length][];
@@ -1172,7 +1174,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private void drawTexture(Geom.Shape shape, Geom.Cell cell, Color color, double scale)
     {
         Polygon poly = new Polygon();
-        for (int i = 0; i < cell.ifa.Length; i++)
+        if (usePolygon) for (int i = 0; i < cell.ifa.Length; i++)
         {
             Geom.Face face = shape.face[cell.ifa[i]];
             poly.vertex = new double[face.iv.Length][];

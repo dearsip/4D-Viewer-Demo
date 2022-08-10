@@ -115,7 +115,9 @@ public class MapModel : IModel
         renderAbsolute.setDepth(depth);
         renderAbsolute.setTexture(texture);
         renderAbsolute.setTransparency(od.transparency);
+        renderAbsolute.setTransparency(od.transparency);
         renderAbsolute.useEdgeColor = od.useEdgeColor;
+        renderAbsolute.usePolygon = od.usePolygon;
         geomModel.setOptions(oc, seed, depth, texture, od);
         showMap = od.map;
     }
