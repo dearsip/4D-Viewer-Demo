@@ -19,6 +19,7 @@ public class Engine : IMove
     private double[] origin;
     private double[][] axis;
     private bool win;
+    private bool keepUpAndDown;
 
     private Clip.Result clipResult;
     private double fall;
@@ -356,6 +357,20 @@ public class Engine : IMove
         //renderAbsolute(); // not always necessary, but who cares, it's fast enough
     }
 
+    public void setKeepUpAndDown(bool b) {
+        keepUpAndDown = b;
+        if (keepUpAndDown) {
+            if (axis[1][1] < 0) {
+                for (int i = 0; i < axis.Length; i++) Vec.scale(axis[i],axis[i],-1);
+            }
+            else if (!(axis[1][1] > 0)) {
+                Vec.copy(reg3,axis[1]);
+                Vec.unitVector(reg4,1);
+                for (int i = 0; i < axis.Length; i++) Vec.rotate(axis[i],axis[i],reg3,reg4,regA,regB);
+            }
+        }
+    }
+
     //public void setEdge(int edge)
     //{
     //    edgeCache = edge;
@@ -502,7 +517,7 @@ public class Engine : IMove
 
     public void rotateAngle(double[] from, double[] to)
     {
-        if (!isPlatformer()) {
+        if (!isPlatformer() && !keepUpAndDown) {
             Vec.fromAxisCoordinates(reg3, from, axis);
             Vec.fromAxisCoordinates(reg4, to, axis);
             Vec.normalize(reg3, reg3);

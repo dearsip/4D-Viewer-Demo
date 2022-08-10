@@ -44,6 +44,7 @@ public class Core : MonoBehaviour
     private int ad0, ad1;
     private double tActive;
     private Align alignActive;
+    public bool keepUpAndDown;
 
     private int interval;
 
@@ -280,6 +281,7 @@ public class Core : MonoBehaviour
 
         IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov(), null);
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+        setKeepUpAndDown();
 
         updateOptions();
         setOptions();
@@ -633,7 +635,7 @@ public class Core : MonoBehaviour
                     relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
                 }
                 if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
-                if (isPlatformer()) { relarot[0] = 0; relarot[2] = 0; }
+                if (isPlatformer() || keepUpAndDown) { relarot[0] = 0; relarot[2] = 0; }
                 if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                 if (!rightMove) relarot = Quaternion.identity;
                 keyControl(KEYMODE_SPIN2);
@@ -921,6 +923,12 @@ public class Core : MonoBehaviour
         setFrameRate(oa.opt.ot4.frameRate);
     }
 
+    private void setKeepUpAndDown() {
+        keepUpAndDown = opt.oo.keepUpAndDown;
+        if (keepUpAndDown) alignMode = false;
+        engine.setKeepUpAndDown(keepUpAndDown);
+    }
+
     public void closeMenu()
     {
         SteamVR_Actions.control.Activate(left);
@@ -1047,6 +1055,7 @@ public class Core : MonoBehaviour
 
         IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov(),store);
         engine.newGame(dim,model,ov(),/*oa.opt.os,*/ot(),false);
+        setKeepUpAndDown();
 
         updateOptions();
         setOptions();
@@ -1100,6 +1109,7 @@ public class Core : MonoBehaviour
 
         // model already constructed
         engine.newGame(dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+        setKeepUpAndDown();
 
         updateOptions();
         setOptions();

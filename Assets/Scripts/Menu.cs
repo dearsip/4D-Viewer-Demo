@@ -34,7 +34,7 @@ public class Menu : MonoBehaviour
         transparencyField, borderField, baseTransparencyField, sliceTransparencyField, frameRateField, timeMoveField, timeRotateField, 
         timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
-        invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, fisheye, custom, rainbow;
+        invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
 
@@ -104,6 +104,7 @@ public class Menu : MonoBehaviour
         }
         else {
             GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            GetComponent<RectTransform>().sizeDelta = new Vector2(970,600);
             transform.localPosition = defaultPosition;
             transform.localRotation = defaultRotation;
             transform.localScale = defaultScale;
@@ -162,6 +163,7 @@ public class Menu : MonoBehaviour
         put(baseTransparencyField, baseTransparencySlider, oa.opt.oo.baseTransparency);
         put(sliceTransparencyField, sliceTransparencySlider, oa.opt.oo.sliceTransparency);
         put(limit3D, oa.opt.oo.limit3D);
+        put(keepUpAndDown, oa.opt.oo.keepUpAndDown);
 
         put(frameRateField, frameRateSlider, oa.opt.ot4.frameRate);
         put(timeMoveField, timeMoveSlider, oa.opt.ot4.timeMove);
@@ -215,6 +217,7 @@ public class Menu : MonoBehaviour
         getFloat(ref oa.opt.oo.baseTransparency, baseTransparencyField, true);
         getFloat(ref oa.opt.oo.sliceTransparency, sliceTransparencyField, true);
         oa.opt.oo.limit3D = getBool(limit3D);
+        oa.opt.oo.keepUpAndDown = getBool(keepUpAndDown);
 
         OptionsFisheye ofTemp = new OptionsFisheye();
         ofTemp.fisheye = getBool(fisheye);
@@ -299,14 +302,14 @@ public class Menu : MonoBehaviour
         int n = core.getSaveType();
         if (n == IModel.SAVE_MAZE || n == IModel.SAVE_GEOM || n == IModel.SAVE_NONE)
         {
-            core.alignMode = alignMode.isOn;
+            core.alignMode = core.keepUpAndDown ? false : alignMode.isOn;
             if (alignMode.isOn) core.command = core.align;
         }
     }
 
     public void doAlign()
     {
-        core.command = core.align;
+        if (!core.keepUpAndDown) core.command = core.align;
     }
 
     public void doNewGame()
