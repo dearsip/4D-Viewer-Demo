@@ -336,6 +336,11 @@ public class Menu : MonoBehaviour
         inputField.text = Vec.ToString(value);
     }
 
+    private void put(InputField inputField, int value)
+    {
+        inputField.text = value.ToString();
+    }
+
     private void put(InputField inputField, float value)
     {
         inputField.text = value.ToString();

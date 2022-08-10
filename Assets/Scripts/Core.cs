@@ -9,7 +9,7 @@ using SimpleFileBrowser;
 using static FourDDemo;
 using WebSocketSharp;
 using System.Threading.Tasks;
-using System.Linq;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -261,6 +261,12 @@ public class Core : MonoBehaviour
         SteamVR_Actions.control.Deactivate(left);
         SteamVR_Actions.control.Deactivate(right);
         menuPanel.Activate(oa);
+    }
+
+    public Slider size;
+    public void changeSize() {
+        float f = Mathf.Pow(2,size.value-1)/2;
+        transform.localScale = new Vector3(f,f,f);
     }
 
     public void newGame()
