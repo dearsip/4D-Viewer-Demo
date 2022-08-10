@@ -646,7 +646,7 @@ public class Track : SceneryBase, IDimension
 			this.track = track;
     }
 
-    public void draw(out double[][] texture, out Color[] textureColor, Geom.Cell cell, double[] origin)
+    public override void draw(out double[][] texture, out Color[] textureColor, Geom.Cell cell, double[] origin)
     {
 			track.tList.Clear();
 			track.cList.Clear();
@@ -888,12 +888,6 @@ public class Track : SceneryBase, IDimension
       Vec.copy(reg1, reg2);
     }
   }
-	
-	protected void drawLine(double[] p1, double[] p2, Color color) {
-		reg = new double[p1.Length]; Vec.copy(reg, p1); tList.Add(reg);
-		reg = new double[p1.Length]; Vec.copy(reg, p2); tList.Add(reg);
-		cList.Add(color);
-	}
 
   // --- helper structures ---
 

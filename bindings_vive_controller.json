@@ -313,16 +313,6 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/application_menu"
-            },
-            {
-               "inputs" : {},
-               "mode" : "trackpad",
-               "path" : "/user/hand/left/input/trackpad"
-            },
-            {
-               "inputs" : {},
-               "mode" : "trackpad",
-               "path" : "/user/hand/right/input/trackpad"
             }
          ]
       },

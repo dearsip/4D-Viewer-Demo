@@ -1,5 +1,7 @@
 {
-   "app_key" : "application.generated.unity.steamvr.exe",
+   "action_manifest_version" : 0,
+   "alias_info" : {},
+   "app_key" : "application.generated.unity.4dviewerdemo.exe",
    "bindings" : {
       "/actions/buggy" : {
          "sources" : [
@@ -92,6 +94,100 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/b"
+            }
+         ]
+      },
+      "/actions/control" : {
+         "poses" : [
+            {
+               "output" : "none",
+               "path" : "/user/hand/left/pose/openxr_aim"
+            },
+            {
+               "output" : "none",
+               "path" : "/user/hand/right/pose/openxr_aim"
+            },
+            {
+               "output" : "/actions/control/in/pose",
+               "path" : "/user/hand/left/pose/handgrip"
+            },
+            {
+               "output" : "/actions/control/in/pose",
+               "path" : "/user/hand/right/pose/handgrip"
+            }
+         ],
+         "sources" : [
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/trigger"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/trigger"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/control/in/trackpad"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/left/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/control/in/trackpad"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/right/input/joystick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/move"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/x"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/move"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/x"
             }
          ]
       },
@@ -236,6 +332,24 @@
                },
                "mode" : "trigger",
                "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/system"
             }
          ]
       },
@@ -268,7 +382,10 @@
          ]
       }
    },
+   "category" : "steamvr_input",
    "controller_type" : "oculus_touch",
    "description" : "",
-   "name" : "oculus_touch"
+   "name" : "oculus_touch",
+   "options" : {},
+   "simulated_actions" : []
 }

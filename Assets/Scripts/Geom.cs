@@ -1078,7 +1078,7 @@ public class Geom
             }
         }
 
-        public void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin)
+        public virtual void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin)
         {
             texture = new double[edge.Length*2][];
             textureColor = new Color[edge.Length];

@@ -15,7 +15,7 @@ public class PropertyFile
                 return sr.Read() == '#';
             }
         }
-        catch (Exception t)
+        catch (Exception)
         {
           return false;
         }
