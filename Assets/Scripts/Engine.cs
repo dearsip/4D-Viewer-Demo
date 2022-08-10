@@ -142,7 +142,7 @@ public class Engine : IMove
             objRetina = objRetina3;
             objCross = objCross3;
             objWin = objWin3;
-            //objDead = objDead3;
+            objDead = objDead3;
         }
 
         //setDisplay(dimSpace, ov.scale, /*os,*/ true);
@@ -754,7 +754,7 @@ public class Engine : IMove
             renderPolygon(bufRelative, objWinSlice, 4, oo.sliceDir);
             renderObject(bufRelative, objWin);
         }
-        //if (model.dead()) renderObject(bufRelative, objDead, Color.red);
+        if (model.dead()) renderObject(bufRelative, objDead, Color.red);
 
         if (getSaveType() == IModel.SAVE_MAZE  && ((MapModel)model).showMap)
         {
@@ -1158,10 +1158,10 @@ public class Engine : IMove
     //   new double[] {-1,-1}, new double[] { 1, 1}, new double[] { 1,-1}, new double[] {-1, 1}
     //};
 
-    // private static readonly double[][] objDead3 = new double[][] {
-    //   new double[] {-1,-1,-1}, new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1,-1},
-    //     new double[] {-1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1,-1,-1}, new double[] {-1, 1, 1}
-    //};
+     private static readonly double[][] objDead3 = new double[][] {
+       new double[] {-1,-1,-1}, new double[] { 1, 1, 1}, new double[] {-1,-1, 1}, new double[] { 1, 1,-1},
+         new double[] {-1, 1,-1}, new double[] { 1,-1, 1}, new double[] { 1,-1,-1}, new double[] {-1, 1, 1}
+    };
 
 }
 

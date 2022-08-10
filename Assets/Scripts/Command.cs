@@ -1199,15 +1199,15 @@ public class Command
         }
     }
 
-    //public class NewEnemy : ICommand
-    //{
-    //    public void exec(Context c) //throws Exception
-    //    {
-    //        int enemyType = toInt(c.stack.Pop());
-    //        Geom.Shape shape = (Geom.Shape)c.stack.Pop();
-    //        Enemy e = Enemy.createEnemy(shape, enemyType);
-    //        c.stack.Push(e);
-    //    }
-    //}
+    public class NewEnemy : ICommand
+    {
+        public void exec(Context c) //throws Exception
+        {
+            int enemyType = toInt(c.stack.Pop());
+            Geom.Shape shape = (Geom.Shape)c.stack.Pop();
+            Enemy e = Enemy.createEnemy(shape, enemyType);
+            c.stack.Push(e);
+        }
+    }
 }
 

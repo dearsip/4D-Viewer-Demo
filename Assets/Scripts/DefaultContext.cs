@@ -177,10 +177,10 @@ public class DefaultContext
       c.dict.Add("w+",6.0);
       c.dict.Add("w-",7.0);
 
-      //c.dict.Add("STAND",       new Double(Enemy.STAND      ));
-      //c.dict.Add("STAND_SHOOT", new Double(Enemy.STAND_SHOOT));
-      //c.dict.Add("WALK",        new Double(Enemy.WALK       ));
-      //c.dict.Add("WALK_SHOOT",  new Double(Enemy.WALK_SHOOT ));
+      c.dict.Add("STAND",       (double)Enemy.STAND      );
+      c.dict.Add("STAND_SHOOT", (double)Enemy.STAND_SHOOT);
+      c.dict.Add("WALK",        (double)Enemy.WALK       );
+      c.dict.Add("WALK_SHOOT",  (double)Enemy.WALK_SHOOT );
 
       c.dict.Add("FOOT",         (double)Struct.FOOT        );
       c.dict.Add("COMPASS",      (double)Struct.COMPASS     );
@@ -213,7 +213,7 @@ public class DefaultContext
       c.dict.Add("footinfo",new Command.FootInfo());
       c.dict.Add("blockinfo",new Command.BlockInfo());
 
-      //c.dict.Add("enemy",new Command.NewEnemy());
+      c.dict.Add("enemy",new Command.NewEnemy());
 
       return c;
    }

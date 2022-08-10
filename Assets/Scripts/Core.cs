@@ -1114,7 +1114,7 @@ public class Core : MonoBehaviour
         List<Train> tlist = new List<Train>();
         List<IScenery> scenery = new List<IScenery>();
         List<Geom.ShapeInterface> slist = new List<Geom.ShapeInterface>();
-        //LinkedList elist = new LinkedList();
+        List<Enemy> elist = new List<Enemy>();
         Struct.ViewInfo viewInfo = null;
         Struct.DrawInfo drawInfo = null;
 
@@ -1181,10 +1181,10 @@ public class Core : MonoBehaviour
             {
                 blockInfo = (Struct.BlockInfo)o;
             }
-            //else if (o is Enemy)
-            //{
-            //    elist.add(o);
-            //}
+            else if (o is Enemy)
+            {
+                elist.Add((Enemy)o);
+            }
             else
             {
                 throw new Exception("Unused object on stack (" + o.GetType().Name + ").");
@@ -1206,6 +1206,8 @@ public class Core : MonoBehaviour
         Train[] trains = new Train[tlist.Count];
         for (int i = 0; i < tlist.Count; i++) trains[i] = tlist[i];
         //Enemy[] enemies = (Enemy[])elist.toArray(new Enemy[elist.size()]);
+        Enemy[] enemies = new Enemy[elist.Count];
+        for (int i = 0; i < elist.Count; i++) enemies[i] = elist[i];
 
         if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
 
@@ -1214,7 +1216,7 @@ public class Core : MonoBehaviour
 
         GeomModel model;
         if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
-        //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
+        else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
         else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
         else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
         :

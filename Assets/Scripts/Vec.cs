@@ -510,14 +510,14 @@ public class Vec
 
     // --- random ---
 
-    /*    public static void randomNormalized(double[] dest, Random random)
+        public static void randomNormalized(double[] dest, System.Random random)
         {
             for (int i = 0; i < dest.Length; i++)
             {
-                dest[i] = 2 * random.nextDouble() - 1;
+                dest[i] = 2 * random.NextDouble() - 1;
             }
             if (!normalizeTry(dest, dest)) unitVector(dest, 0);
-        }*/
+        }
 
     // srcをnormalが定義する平面で反転させる。
     // normalは正規化されている必要がある。
