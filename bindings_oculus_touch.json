@@ -4,6 +4,10 @@
    "app_key" : "application.generated.unity.4dviewerdemo.exe",
    "bindings" : {
       "/actions/buggy" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
          "sources" : [
             {
                "inputs" : {
@@ -98,15 +102,9 @@
          ]
       },
       "/actions/control" : {
+         "chords" : [],
+         "haptics" : [],
          "poses" : [
-            {
-               "output" : "none",
-               "path" : "/user/hand/left/pose/openxr_aim"
-            },
-            {
-               "output" : "none",
-               "path" : "/user/hand/right/pose/openxr_aim"
-            },
             {
                "output" : "/actions/control/in/pose",
                "path" : "/user/hand/left/pose/handgrip"
@@ -116,6 +114,7 @@
                "path" : "/user/hand/right/pose/handgrip"
             }
          ],
+         "skeleton" : [],
          "sources" : [
             {
                "inputs" : {
@@ -188,6 +187,24 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/x"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/grab"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/grab"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/grip"
             }
          ]
       },
@@ -354,6 +371,10 @@
          ]
       },
       "/actions/platformer" : {
+         "chords" : [],
+         "haptics" : [],
+         "poses" : [],
+         "skeleton" : [],
          "sources" : [
             {
                "inputs" : {

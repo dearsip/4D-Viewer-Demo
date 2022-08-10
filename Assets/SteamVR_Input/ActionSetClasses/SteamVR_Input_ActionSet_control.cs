@@ -56,5 +56,13 @@ namespace Valve.VR
                 return SteamVR_Actions.control_TrackPad;
             }
         }
+        
+        public virtual SteamVR_Action_Boolean Grab
+        {
+            get
+            {
+                return SteamVR_Actions.control_Grab;
+            }
+        }
     }
 }

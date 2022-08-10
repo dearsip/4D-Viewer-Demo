@@ -100,6 +100,10 @@
     {
       "name": "/actions/control/in/TrackPad",
       "type": "vector2"
+    },
+    {
+      "name": "/actions/control/in/Grab",
+      "type": "boolean"
     }
   ],
   "action_sets": [

@@ -45,19 +45,20 @@ public class Core : MonoBehaviour
     private double tActive;
     private Align alignActive;
     public bool keepUpAndDown;
+    private bool disableLeftAndRight;
 
     private int interval;
 
     public Command command;
     public Command menuCommand;
-    public SteamVR_Action_Boolean trigger, move, menu;
+    public SteamVR_Action_Boolean trigger, move, menu, grip;
     public SteamVR_Action_Pose pose;
     public SteamVR_Action_Vector2 trackPad;
     public SteamVR_Input_Sources left, right;
     private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight, dlPosLeft, dfPosLeft, dlPosRight, dfPosRight;
     private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, dlRotLeft, dfRotLeft, dlRotRight, dfRotRight, relarot;
     private bool leftTrigger, rightTrigger, lastLeftTrigger, lastRightTrigger, leftTriggerPressed, rightTriggerPressed,
-        leftMove, rightMove;
+        leftMove, rightMove, leftGrip, rightGrip, lastLeftGrip, lastRightGrip;
     public Menu menuPanel;
 
     private Vector3 reg0, reg1;
@@ -196,6 +197,7 @@ public class Core : MonoBehaviour
         menu.AddOnStateUpListener(OpenMenu_, left);
         menu.AddOnStateUpListener(OpenMenu_, right);
         trigger.AddOnStateDownListener(RightClick, right);
+        grip.AddOnStateDownListener(LeftGrip, left);
     }
 
     private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -223,6 +225,11 @@ public class Core : MonoBehaviour
             command = click;
         }
         else { command = jump; }
+    }
+
+    private void LeftGrip(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        disableLeftAndRight = !disableLeftAndRight;
     }
 
     private void OnDestroy()
@@ -459,8 +466,10 @@ public class Core : MonoBehaviour
         dlRotRight = relarot * rotRight * Quaternion.Inverse(relarot * lastRotRight);
         dfRotLeft = lRel * rotLeft * Quaternion.Inverse(lRel * fromRotLeft);
         dfRotRight = relarot * rotRight * Quaternion.Inverse(relarot * fromRotRight);
-        lastLeftTrigger = leftTrigger; lastRightTrigger = rightTrigger;
-        leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
+        lastLeftTrigger = leftTrigger; leftTrigger = trigger.GetState(left); 
+        lastRightTrigger = rightTrigger; rightTrigger = trigger.GetState(right);
+        lastLeftGrip = leftGrip; leftGrip = grip.GetState(left);
+        lastRightGrip = rightGrip; rightGrip = grip.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
         reg1 = relarot * 
@@ -537,6 +546,7 @@ public class Core : MonoBehaviour
             }
 
             if (opt.oo.limit3D) reg3[2] = 0;
+            if (disableLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = 0;
             if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
             if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
             if (!leftMove) Vec.zero(reg3);
@@ -667,10 +677,10 @@ public class Core : MonoBehaviour
             {
                 opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
             }
-            if (rightTrigger)
-            {
+            //if (rightTrigger)
+            //{
 
-            }
+            //}
         }
 
         // update state

@@ -63,6 +63,8 @@ namespace Valve.VR
         
         private static SteamVR_Action_Vector2 p_control_TrackPad;
         
+        private static SteamVR_Action_Boolean p_control_Grab;
+        
         public static SteamVR_Action_Boolean default_InteractUI
         {
             get
@@ -247,6 +249,14 @@ namespace Valve.VR
             }
         }
         
+        public static SteamVR_Action_Boolean control_Grab
+        {
+            get
+            {
+                return SteamVR_Actions.p_control_Grab.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
         private static void InitializeActionArrays()
         {
             Valve.VR.SteamVR_Input.actions = new Valve.VR.SteamVR_Action[] {
@@ -272,7 +282,8 @@ namespace Valve.VR
                     SteamVR_Actions.control_Trigger,
                     SteamVR_Actions.control_Move,
                     SteamVR_Actions.control_Pose,
-                    SteamVR_Actions.control_TrackPad};
+                    SteamVR_Actions.control_TrackPad,
+                    SteamVR_Actions.control_Grab};
             Valve.VR.SteamVR_Input.actionsIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_InteractUI,
                     SteamVR_Actions.default_Teleport,
@@ -295,7 +306,8 @@ namespace Valve.VR
                     SteamVR_Actions.control_Trigger,
                     SteamVR_Actions.control_Move,
                     SteamVR_Actions.control_Pose,
-                    SteamVR_Actions.control_TrackPad};
+                    SteamVR_Actions.control_TrackPad,
+                    SteamVR_Actions.control_Grab};
             Valve.VR.SteamVR_Input.actionsOut = new Valve.VR.ISteamVR_Action_Out[] {
                     SteamVR_Actions.default_Haptic};
             Valve.VR.SteamVR_Input.actionsVibration = new Valve.VR.SteamVR_Action_Vibration[] {
@@ -316,7 +328,8 @@ namespace Valve.VR
                     SteamVR_Actions.buggy_Reset,
                     SteamVR_Actions.control_Menu,
                     SteamVR_Actions.control_Trigger,
-                    SteamVR_Actions.control_Move};
+                    SteamVR_Actions.control_Move,
+                    SteamVR_Actions.control_Grab};
             Valve.VR.SteamVR_Input.actionsSingle = new Valve.VR.SteamVR_Action_Single[] {
                     SteamVR_Actions.default_Squeeze,
                     SteamVR_Actions.buggy_Throttle};
@@ -345,7 +358,8 @@ namespace Valve.VR
                     SteamVR_Actions.control_Menu,
                     SteamVR_Actions.control_Trigger,
                     SteamVR_Actions.control_Move,
-                    SteamVR_Actions.control_TrackPad};
+                    SteamVR_Actions.control_TrackPad,
+                    SteamVR_Actions.control_Grab};
         }
         
         private static void PreInitActions()
@@ -373,6 +387,7 @@ namespace Valve.VR
             SteamVR_Actions.p_control_Move = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/control/in/Move")));
             SteamVR_Actions.p_control_Pose = ((SteamVR_Action_Pose)(SteamVR_Action.Create<SteamVR_Action_Pose>("/actions/control/in/Pose")));
             SteamVR_Actions.p_control_TrackPad = ((SteamVR_Action_Vector2)(SteamVR_Action.Create<SteamVR_Action_Vector2>("/actions/control/in/TrackPad")));
+            SteamVR_Actions.p_control_Grab = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/control/in/Grab")));
         }
     }
 }

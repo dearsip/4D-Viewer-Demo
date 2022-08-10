@@ -12,12 +12,12 @@ public class InputViewer : MonoBehaviour
     private int[] triangles;
     private Color[] colors;
     public SteamVR_Input_Sources hand;
-    public SteamVR_Action_Boolean move;
+    public SteamVR_Action_Boolean move, grip;
     public Transform pose, screen;
     private Vector3 fromPos, fromForward, dPos, origin, reg;
     private Quaternion fromRot, dRot;
     public bool isMover;
-    private bool limit3D;
+    private bool limit3D, disableLeftAndRight;
     public Toggle toggleLimit3D;
 
     private const float threshold = 0.1f;
@@ -43,6 +43,13 @@ public class InputViewer : MonoBehaviour
             triangles[arrowTriangles.Length+i] = ringTriangles[i]+arrowVector.Length;
         for (int i = 0; i < colors.Length; i++) colors[i] = color;
         GetComponent<MeshFilter>().sharedMesh = mesh;
+
+        grip.AddOnStateDownListener(LeftGrip, hand);
+    }
+
+    private void LeftGrip(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (isMover) disableLeftAndRight = !disableLeftAndRight;
     }
 
     // Update is called once per frame
@@ -79,14 +86,17 @@ public class InputViewer : MonoBehaviour
     }
 
     private void DrawVector() {
-        float f = dPos.magnitude;
-        for (int i = 0; i < arrowVector.Length; i++) {
-            vertices[i]    = arrowVector[i] * f;
-            vertices[i].x *= threshold / Mathf.Max(threshold,f);
-            vertices[i].y *= threshold / Mathf.Max(threshold,f);
-            vertices[i]    = Quaternion.FromToRotation(Vector3.forward, dPos.normalized) * vertices[i];
-            vertices[i]   += origin;
-            //colors  [i]    = color;
+        if (disableLeftAndRight && isMover) for (int i = 0; i < arrowVector.Length; i++) vertices[i] =Vector3.zero;
+        else {
+            float f = dPos.magnitude;
+            for (int i = 0; i < arrowVector.Length; i++) {
+                vertices[i]    = arrowVector[i] * f;
+                vertices[i].x *= threshold / Mathf.Max(threshold,f);
+                vertices[i].y *= threshold / Mathf.Max(threshold,f);
+                vertices[i]    = Quaternion.FromToRotation(Vector3.forward, dPos.normalized) * vertices[i];
+                vertices[i]   += origin;
+                //colors  [i]    = color;
+            }
         }
     }
 
