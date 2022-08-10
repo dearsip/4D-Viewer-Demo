@@ -30,8 +30,8 @@ public class CameraControl : MonoBehaviour
             transform.Translate(deltaMousePosition / 200);
         transform.Translate(0,0,Input.mouseScrollDelta.y / 10);
         if (Input.GetKeyDown(KeyCode.Return)) {
-            transform.position = center.TransformPoint(defaultPosition);
-            transform.rotation = center.rotation*defaultRotation;
+            transform.localPosition = defaultPosition;
+            transform.localRotation = defaultRotation;
         }
         
     }

@@ -20,6 +20,9 @@ public class Menu : MonoBehaviour
 
     public Transform parent;
     public Transform head;
+    private Vector3 defaultPosition;
+    private Quaternion defaultRotation;
+    private Vector3 defaultScale;
 
     public Slider dimSlider, sizeSlider, densitySlider, twistProbabilitySlider, branchProbabilitySlider, loopCrossProbabilitySlider,
         dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider,
@@ -44,6 +47,9 @@ public class Menu : MonoBehaviour
         interactUI.AddOnStateDownListener(RightActivate, right);
         menu.AddOnStateUpListener(CloseMenu, left);
         menu.AddOnStateUpListener(CloseMenu, right);
+        defaultPosition = transform.localPosition;
+        defaultRotation = transform.localRotation;
+        defaultScale = transform.localScale;
     }
 
     private void LeftActivate(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -93,8 +99,17 @@ public class Menu : MonoBehaviour
         rightLaser.SetActive(true);
         rightHand.useRaycastHover = true;
 
-        parent.LookAt(head);
-        parent.LookAt(new Vector3(parent.forward.x, 0, parent.forward.z) + parent.position);
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+        }
+        else {
+            GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            transform.localPosition = defaultPosition;
+            transform.localRotation = defaultRotation;
+            transform.localScale = defaultScale;
+            parent.LookAt(head);
+            parent.LookAt(new Vector3(parent.forward.x, 0, parent.forward.z) + parent.position);
+        }
 
         put(dimCurrent, oa.omCurrent.dimMap);
         put(dimNext, dimSlider, oa.opt.om4.dimMap);

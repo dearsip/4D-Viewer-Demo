@@ -429,6 +429,11 @@ public class Core : MonoBehaviour
             swipeDir = 1;
             swipeTime = swipeTimeTor;
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (menuPanel.gameObject.activeSelf == false) openMenu();
+            else menuPanel.doCancel();
+        }
     }
 
 
