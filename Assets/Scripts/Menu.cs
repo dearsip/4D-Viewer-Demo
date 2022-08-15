@@ -37,6 +37,9 @@ public class Menu : MonoBehaviour
         invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
+    public Material defaultMat, alternativeMat;
+    public GameObject environment;
+    public Toggle skyboxToggle;
 
     private void Start()
     {
@@ -316,6 +319,19 @@ public class Menu : MonoBehaviour
     {
         doOK();
         core.menuCommand = core.newGame;
+    }
+
+    public void doToggleSkybox()
+    {
+        if (skyboxToggle.isOn) {
+            environment.SetActive(false);
+            RenderSettings.skybox = alternativeMat;
+        }
+
+        else {
+            environment.SetActive(true);
+            RenderSettings.skybox = defaultMat;
+        }
     }
 
     private void put(InputField inputField, Slider slider, float value)
