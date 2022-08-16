@@ -5,7 +5,7 @@ public class OptionsDisplay// : IValidate
 
     // --- fields ---
     
-    public double transparency;
+    public double transparency, lineThickness;
     public double border;
     public bool usePolygon, useEdgeColor, hidesel, invertNormals, separate, map;
     public int trainSpeed;
@@ -21,6 +21,7 @@ public class OptionsDisplay// : IValidate
     public static void copy(OptionsDisplay dest, OptionsDisplay src)
     {
         dest.transparency = src.transparency;
+        dest.lineThickness = src.lineThickness;
         dest.usePolygon = src.usePolygon;
         dest.border = src.border;
         dest.useEdgeColor = src.useEdgeColor;
@@ -33,6 +34,8 @@ public class OptionsDisplay// : IValidate
 
     public const double TRANSPARENCY_MIN = 0;
     public const double TRANSPARENCY_MAX = 1;
+    public const double LINETHICKNESS_MIN = 0.001;
+    public const double LINETHICKNESS_MAX = 0.01;
     public const double BORDER_MIN = -1;
     public const double BORDER_MAX = 1;
     public const int TRAINSPEED_MIN = -5;

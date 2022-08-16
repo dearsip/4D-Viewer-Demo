@@ -26,13 +26,13 @@ public class Menu : MonoBehaviour
 
     public Slider dimSlider, sizeSlider, densitySlider, twistProbabilitySlider, branchProbabilitySlider, loopCrossProbabilitySlider,
         dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider,
-        transparencySlider, borderSlider, baseTransparencySlider, sliceTransparencySlider, frameRateSlider, timeMoveSlider, timeRotateSlider,
-        timeAlignMoveSlider, timeAlignRotateSlider;
+        transparencySlider, lineThicknessSlider, borderSlider, baseTransparencySlider, sliceTransparencySlider, 
+        frameRateSlider, timeMoveSlider, timeRotateSlider, timeAlignMoveSlider, timeAlignRotateSlider;
     public InputField dimCurrent, dimNext, sizeCurrent, sizeNext, densityCurrent, densityNext, twistPobabilityCurrent, twistProbabilityNext,
         branchProbabilityCurrent, branchProbabilityNext, loopCrossProbabilityCurrent, loopCrossProbabilityNext, dimSameParallelField,
         dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField,
-        transparencyField, borderField, baseTransparencyField, sliceTransparencyField, frameRateField, timeMoveField, timeRotateField, 
-        timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
+        transparencyField, lineThicknessField, borderField, baseTransparencyField, sliceTransparencyField, 
+        frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
@@ -144,6 +144,7 @@ public class Menu : MonoBehaviour
         put(scaleField, scaleSlider, oa.opt.ov4.scale);
 
         put(transparencyField, transparencySlider, oa.opt.od.transparency);
+        put(lineThicknessField, lineThicknessSlider, oa.opt.od.lineThickness);
         put(usePolygon, oa.opt.od.usePolygon);
         put(borderField, borderSlider, oa.opt.od.border);
         put(useEdgeColor, oa.opt.od.useEdgeColor);
@@ -199,6 +200,7 @@ public class Menu : MonoBehaviour
         getDouble(ref oa.opt.ov4.scale, scaleField, OptionsView.SCALE_MIN, OptionsView.SCALE_MAX, false);
 
         getDouble(ref oa.opt.od.transparency, transparencyField, OptionsDisplay.TRANSPARENCY_MIN, OptionsDisplay.TRANSPARENCY_MAX, true);
+        getDouble(ref oa.opt.od.lineThickness, lineThicknessField, OptionsDisplay.LINETHICKNESS_MIN, OptionsDisplay.LINETHICKNESS_MAX, true);
         oa.opt.od.usePolygon = getBool(usePolygon);
         getDouble(ref oa.opt.od.border, borderField, OptionsDisplay.BORDER_MIN, OptionsDisplay.BORDER_MAX, true);
         oa.opt.od.useEdgeColor = getBool(useEdgeColor);

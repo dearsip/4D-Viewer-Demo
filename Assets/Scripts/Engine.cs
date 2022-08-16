@@ -1,8 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Threading;
 
 /**
  * The game graphics engine.
@@ -23,8 +21,8 @@ public class Engine : IMove
 
     private Clip.Result clipResult;
     private double fall;
-    private double height;
-    private double gravity;
+    //private double height;
+    //private double gravity;
     private const double gdef = 18;
     private const double hdef = 7.5;
 
@@ -169,8 +167,8 @@ public class Engine : IMove
         cols = new List<Color>();
 
         fall = 0;
-        gravity = gdef / ot.frameRate / ot.frameRate;
-        height = hdef / ot.frameRate;
+        //gravity = gdef / ot.frameRate / ot.frameRate;
+        //height = hdef / ot.frameRate;
 
         //if (render) renderAbsolute();
         // else we are loading a saved game, and will render later
@@ -351,10 +349,11 @@ public class Engine : IMove
 
         //setDisplay(dimSpaceCache, ov.scale, /*os,*/ false);
 
-        gravity = gdef / ot.frameRate / ot.frameRate;
-        height = hdef / ot.frameRate;
+        //gravity = gdef / ot.frameRate / ot.frameRate;
+        //height = hdef / ot.frameRate;
 
         //renderAbsolute(); // not always necessary, but who cares, it's fast enough
+        width = od.lineThickness;
     }
 
     public void setKeepUpAndDown(bool b) {
@@ -1152,6 +1151,48 @@ public class Engine : IMove
          new double[] { 0.4,-0.4,-1}, new double[] { 0.4, 0.4,-1},
          new double[] { 0.4, 0.4,-1}, new double[] { 0.8,-0.4,-1},
          new double[] { 0.8,-0.4,-1}, new double[] { 0.8, 0.4,-1},
+
+
+         new double[] {-1, 0.4, 0.8}, new double[] {-1,-0.4, 0.8},
+         new double[] {-1,-0.4, 0.8}, new double[] {-1, 0,   0.6},
+         new double[] {-1, 0,   0.6}, new double[] {-1,-0.4, 0.4},
+         new double[] {-1,-0.4, 0.4}, new double[] {-1, 0.4, 0.4},
+
+         new double[] {-1, 0.4, 0.1}, new double[] {-1, 0.4,-0.1},
+         new double[] {-1, 0.4, 0  }, new double[] {-1,-0.4, 0  },
+         new double[] {-1,-0.4, 0.1}, new double[] {-1,-0.4,-0.1},
+
+         new double[] {-1,-0.4,-0.4}, new double[] {-1, 0.4,-0.4},
+         new double[] {-1, 0.4,-0.4}, new double[] {-1,-0.4,-0.8},
+         new double[] {-1,-0.4,-0.8}, new double[] {-1, 0.4,-0.8},
+
+
+         new double[] { 0.8, 0.4, 1}, new double[] { 0.8,-0.4, 1},
+         new double[] { 0.8,-0.4, 1}, new double[] { 0.6, 0,   1},
+         new double[] { 0.6, 0,   1}, new double[] { 0.4,-0.4, 1},
+         new double[] { 0.4,-0.4, 1}, new double[] { 0.4, 0.4, 1},
+ 
+         new double[] { 0.1, 0.4, 1}, new double[] {-0.1, 0.4, 1},
+         new double[] { 0,   0.4, 1}, new double[] { 0,  -0.4, 1},
+         new double[] { 0.1,-0.4, 1}, new double[] {-0.1,-0.4, 1},
+
+         new double[] {-0.4,-0.4, 1}, new double[] {-0.4, 0.4, 1},
+         new double[] {-0.4, 0.4, 1}, new double[] {-0.8,-0.4, 1},
+         new double[] {-0.8,-0.4, 1}, new double[] {-0.8, 0.4, 1},
+
+
+         new double[] { 1, 0.4,-0.8}, new double[] { 1,-0.4,-0.8},
+         new double[] { 1,-0.4,-0.8}, new double[] { 1, 0,  -0.6},
+         new double[] { 1, 0,  -0.6}, new double[] { 1,-0.4,-0.4},
+         new double[] { 1,-0.4,-0.4}, new double[] { 1, 0.4,-0.4},
+
+         new double[] { 1, 0.4,-0.1}, new double[] { 1, 0.4, 0.1},
+         new double[] { 1, 0.4, 0  }, new double[] { 1,-0.4, 0  },
+         new double[] { 1,-0.4,-0.1}, new double[] { 1,-0.4, 0.1},
+
+         new double[] { 1,-0.4, 0.4}, new double[] { 1, 0.4, 0.4},
+         new double[] { 1, 0.4, 0.4}, new double[] { 1,-0.4, 0.8},
+         new double[] { 1,-0.4, 0.8}, new double[] { 1, 0.4, 0.8},
    };
 
     private static readonly double[][] objWinSlice = new double[][] {
