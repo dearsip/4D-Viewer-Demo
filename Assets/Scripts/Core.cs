@@ -813,31 +813,32 @@ public class Core : MonoBehaviour
         command = null;
     }
 
-    private KeyCode KEY_SLIDELEFT  = KeyCode.S;
-    private KeyCode KEY_SLIDERIGHT = KeyCode.F;
-    private KeyCode KEY_SLIDEUP    = KeyCode.A;
-    private KeyCode KEY_SLIDEDOWN  = KeyCode.Z;
-    private KeyCode KEY_SLIDEIN    = KeyCode.W;
-    private KeyCode KEY_SLIDEOUT   = KeyCode.R;
-    private KeyCode KEY_FORWARD    = KeyCode.E;
-    private KeyCode KEY_BACK       = KeyCode.D;
-    private KeyCode KEY_TURNLEFT   = KeyCode.J;
-    private KeyCode KEY_TURNRIGHT  = KeyCode.L;
-    private KeyCode KEY_TURNUP     = KeyCode.I;
-    private KeyCode KEY_TURNDOWN   = KeyCode.K;
-    private KeyCode KEY_TURNIN     = KeyCode.U;
-    private KeyCode KEY_TURNOUT    = KeyCode.O;
-    private KeyCode KEY_SPINLEFT   = KeyCode.J;
-    private KeyCode KEY_SPINRIGHT  = KeyCode.L;
-    private KeyCode KEY_SPINUP     = KeyCode.I;
-    private KeyCode KEY_SPINDOWN   = KeyCode.K;
-    private KeyCode KEY_SPININ     = KeyCode.U;
-    private KeyCode KEY_SPINOUT    = KeyCode.O;
+    public const KeyCode KEY_SLIDELEFT  = KeyCode.S;
+    public const KeyCode KEY_SLIDERIGHT = KeyCode.F;
+    public const KeyCode KEY_SLIDEUP    = KeyCode.A;
+    public const KeyCode KEY_SLIDEDOWN  = KeyCode.Z;
+    public const KeyCode KEY_SLIDEIN    = KeyCode.W;
+    public const KeyCode KEY_SLIDEOUT   = KeyCode.R;
+    public const KeyCode KEY_FORWARD    = KeyCode.E;
+    public const KeyCode KEY_BACK       = KeyCode.D;
+    public const KeyCode KEY_TURNLEFT   = KeyCode.J;
+    public const KeyCode KEY_TURNRIGHT  = KeyCode.L;
+    public const KeyCode KEY_TURNUP     = KeyCode.I;
+    public const KeyCode KEY_TURNDOWN   = KeyCode.K;
+    public const KeyCode KEY_TURNIN     = KeyCode.U;
+    public const KeyCode KEY_TURNOUT    = KeyCode.O;
+    public const KeyCode KEY_SPINLEFT   = KeyCode.J;
+    public const KeyCode KEY_SPINRIGHT  = KeyCode.L;
+    public const KeyCode KEY_SPINUP     = KeyCode.I;
+    public const KeyCode KEY_SPINDOWN   = KeyCode.K;
+    public const KeyCode KEY_SPININ     = KeyCode.U;
+    public const KeyCode KEY_SPINOUT    = KeyCode.O;
     private const int KEYMODE_SLIDE = 0;
     private const int KEYMODE_TURN = 1;
     private const int KEYMODE_SPIN = 2;
     private const int KEYMODE_SPIN2 = 3;
     private void keyControl(int keyMode) {
+        if (Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt)) return;
         if (keyMode == KEYMODE_SLIDE) {
             if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
             if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;

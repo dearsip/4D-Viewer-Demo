@@ -19,6 +19,9 @@ public class InputViewer : MonoBehaviour
     public bool isMover;
     private bool limit3D, disableLeftAndRight;
     public Toggle toggleLimit3D;
+    private enum State { INACTIVE, HANDISACTIVE, KEYISACTIVE }
+    private State state = State.INACTIVE;
+    private bool activate;
 
     private const float threshold = 0.1f;
     private const float dist = 0.06f;
@@ -56,21 +59,27 @@ public class InputViewer : MonoBehaviour
     void Update()
     {
         if (move.GetStateDown(hand)) {
+            activate = true;
+            state = State.HANDISACTIVE;
+        } else if (KeyStateDown()) { // we do not consider conflicts
+            activate = true;
+            state = State.KEYISACTIVE;
+        }
+        if (activate) {
             fromPos = pose.position;
             fromRot = pose.rotation;
             fromForward = pose.forward;
             origin = fromPos + fromForward * dist;
+            dPos = Vector3.zero;
+            dRot = Quaternion.identity;
+            activate = false;
         }
         
-        if (move.GetState(hand)) {
-            dPos = pose.position - fromPos;
-            dRot = pose.rotation * Quaternion.Inverse(fromRot);
-            if (isMover) RotationProject(ref dRot, fromForward);
-            if (limit3D) {
-                reg = Vector3.Dot(dPos, screen.transform.forward) * screen.transform.forward;
-                dPos = dPos - reg;
-                if (!isMover) RotationProject(ref dRot, screen.transform.forward);
-            }
+        switch (state) {
+            case State.HANDISACTIVE: CalcHand(); break;
+            case State.KEYISACTIVE: CalcKey(); break;
+        }
+        if (state!=State.INACTIVE) {
             DrawVector();
             DrawQuaternion();
 
@@ -80,13 +89,25 @@ public class InputViewer : MonoBehaviour
             mesh.RecalculateNormals();
         }
         
-        if (move.GetStateUp(hand)) {
+        if (move.GetStateUp(hand) || KeyStateUp()) {
             mesh.Clear();
+            state = State.INACTIVE;
         }
     }
 
+    private void CalcHand() {
+            dPos = pose.position - fromPos;
+            dRot = pose.rotation * Quaternion.Inverse(fromRot);
+            if (isMover) RotationProject(ref dRot, fromForward);
+            if (limit3D) {
+                reg = Vector3.Dot(dPos, screen.transform.forward) * screen.transform.forward;
+                dPos = dPos - reg;
+                if (!isMover) RotationProject(ref dRot, screen.transform.forward);
+            }
+    }
+
     private void DrawVector() {
-        if (disableLeftAndRight && isMover) for (int i = 0; i < arrowVector.Length; i++) vertices[i] =Vector3.zero;
+        if (disableLeftAndRight && isMover) for (int i = 0; i < arrowVector.Length; i++) vertices[i] = Vector3.zero;
         else {
             float f = dPos.magnitude;
             for (int i = 0; i < arrowVector.Length; i++) {
@@ -107,7 +128,7 @@ public class InputViewer : MonoBehaviour
             vertices[arrowVector.Length+i]  = Vector3.zero;
         else for (int i = 0; i < ringVector.Length; i++) {
             vertices[arrowVector.Length+i]  = Quaternion.FromToRotation(Vector3.forward, axis) * 
-                                              Quaternion.AngleAxis(f * Mathf.PI, Vector3.forward) *
+                                              Quaternion.AngleAxis(f * 1800, Vector3.forward) *
                                               ringVector[i] * f;
             vertices[arrowVector.Length+i] += origin;
             //colors  [arrowVector.Length+i]    = color;
@@ -119,6 +140,72 @@ public class InputViewer : MonoBehaviour
         reg = Vector3.Dot(reg, d) * d;
         q.x = reg.x; q.y = reg.y; q.z = reg.z; 
         q.w = Mathf.Sqrt(1-Mathf.Pow(q.x,2)-Mathf.Pow(q.y,2)-Mathf.Pow(q.z,2)) * Mathf.Sign(q.w);
+    }
+
+    private bool KeyStateDown() {
+        if (!Input.GetKey(KeyCode.LeftAlt)&&!Input.GetKey(KeyCode.RightAlt)) return false;
+        if (isMover)
+            return Input.GetKeyDown(Core.KEY_SLIDELEFT )||
+                   Input.GetKeyDown(Core.KEY_SLIDERIGHT)||
+                   Input.GetKeyDown(Core.KEY_SLIDEUP   )||
+                   Input.GetKeyDown(Core.KEY_SLIDEDOWN )||
+                   Input.GetKeyDown(Core.KEY_SLIDEIN   )||
+                   Input.GetKeyDown(Core.KEY_SLIDEOUT  )||
+                   Input.GetKeyDown(Core.KEY_FORWARD   )||
+                   Input.GetKeyDown(Core.KEY_BACK      );
+        else
+            return Input.GetKeyDown(Core.KEY_TURNLEFT )||
+                   Input.GetKeyDown(Core.KEY_TURNRIGHT)||
+                   Input.GetKeyDown(Core.KEY_TURNUP   )||
+                   Input.GetKeyDown(Core.KEY_TURNDOWN )||
+                   Input.GetKeyDown(Core.KEY_TURNIN   )||
+                   Input.GetKeyDown(Core.KEY_TURNOUT  );
+    }
+
+    private void CalcKey() {
+        if (isMover) {
+            if (Input.GetKey(Core.KEY_SLIDELEFT )) dPos[0] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SLIDERIGHT)) dPos[0] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SLIDEUP   )) dPos[1] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SLIDEDOWN )) dPos[1] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SLIDEIN   )) dPos[2] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SLIDEOUT  )) dPos[2] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_FORWARD   )) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, fromForward);
+            if (Input.GetKey(Core.KEY_BACK      )) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, fromForward);
+        } else {
+            if (Input.GetKey(Core.KEY_TURNLEFT ) && !Input.GetKey(KeyCode.LeftShift)) dPos[0] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_TURNRIGHT) && !Input.GetKey(KeyCode.LeftShift)) dPos[0] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_TURNUP   ) && !Input.GetKey(KeyCode.LeftShift)) dPos[1] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_TURNDOWN ) && !Input.GetKey(KeyCode.LeftShift)) dPos[1] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_TURNIN   ) && !Input.GetKey(KeyCode.LeftShift)) dPos[2] +=  Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_TURNOUT  ) && !Input.GetKey(KeyCode.LeftShift)) dPos[2] += -Time.deltaTime*0.2f;
+            if (Input.GetKey(Core.KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.right);
+            if (Input.GetKey(Core.KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.right);
+            if (Input.GetKey(Core.KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.up);
+            if (Input.GetKey(Core.KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.up);
+            if (Input.GetKey(Core.KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.forward);
+            if (Input.GetKey(Core.KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.forward);
+        }
+    }
+
+    private bool KeyStateUp() {
+        if (Input.GetKeyUp(KeyCode.LeftAlt)||Input.GetKeyUp(KeyCode.RightAlt)) return true;
+        if (isMover)
+            return Input.GetKeyUp(Core.KEY_SLIDELEFT )||
+                   Input.GetKeyUp(Core.KEY_SLIDERIGHT)||
+                   Input.GetKeyUp(Core.KEY_SLIDEUP   )||
+                   Input.GetKeyUp(Core.KEY_SLIDEDOWN )||
+                   Input.GetKeyUp(Core.KEY_SLIDEIN   )||
+                   Input.GetKeyUp(Core.KEY_SLIDEOUT  )||
+                   Input.GetKeyUp(Core.KEY_FORWARD   )||
+                   Input.GetKeyUp(Core.KEY_BACK      );
+        else
+            return Input.GetKeyUp(Core.KEY_TURNLEFT )||
+                   Input.GetKeyUp(Core.KEY_TURNRIGHT)||
+                   Input.GetKeyUp(Core.KEY_TURNUP   )||
+                   Input.GetKeyUp(Core.KEY_TURNDOWN )||
+                   Input.GetKeyUp(Core.KEY_TURNIN   )||
+                   Input.GetKeyUp(Core.KEY_TURNOUT  );
     }
 
     private readonly Vector3[] arrowVector = {
