@@ -5,7 +5,7 @@ public class OptionsDisplay// : IValidate
 
     // --- fields ---
     
-    public double transparency, lineThickness;
+    public double transparency, lineThickness, cameraDistance;
     public double border;
     public bool usePolygon, useEdgeColor, hidesel, invertNormals, separate, map;
     public int trainSpeed;
@@ -29,6 +29,7 @@ public class OptionsDisplay// : IValidate
         dest.invertNormals = src.invertNormals;
         dest.separate = src.separate;
         dest.map = src.map;
+        dest.cameraDistance = src.cameraDistance;
         dest.trainSpeed = src.trainSpeed;
     }
 
@@ -38,6 +39,8 @@ public class OptionsDisplay// : IValidate
     public const double LINETHICKNESS_MAX = 0.01;
     public const double BORDER_MIN = -1;
     public const double BORDER_MAX = 1;
+    public const int CAMERADISTANCE_MIN = 0;
+    public const int CAMERADISTANCE_MAX = 1;
     public const int TRAINSPEED_MIN = -5;
     public const int TRAINSPEED_MAX = 5;
 }

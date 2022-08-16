@@ -90,6 +90,7 @@ public class ActionModel : GeomModel {
    public override void render(double[] origin, double[][] axis) {
       Vec.unitVector(reg1,1);
       Vec.addScaled(reg3,origin,reg1,0.5);
+      Vec.addScaled(reg3,reg3,axis[dim-1],-cameraDistance);
       renderer(reg3, axis);
 
         currentDraw = buf;

@@ -68,6 +68,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected int shapeNumber; // extra result from canMove
 
     private double transparency;
+    protected double cameraDistance;
 
     // --- construction ---
 
@@ -889,6 +890,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         hideSel = od.hidesel;
         invertNormals = od.invertNormals;
         useSeparation = od.separate;
+        cameraDistance = od.cameraDistance;
     }
 
     private double retina;

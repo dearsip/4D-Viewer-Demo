@@ -25,12 +25,12 @@ public class Menu : MonoBehaviour
     private Vector3 defaultScale;
 
     public Slider dimSlider, sizeSlider, densitySlider, twistProbabilitySlider, branchProbabilitySlider, loopCrossProbabilitySlider,
-        dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider,
+        dimSameParallelSlider, dimSamePerpendicularSlider, depthSlider, retinaSlider, scaleSlider, trainSpeedSlider, cameraDistanceSlider,
         transparencySlider, lineThicknessSlider, borderSlider, baseTransparencySlider, sliceTransparencySlider, 
         frameRateSlider, timeMoveSlider, timeRotateSlider, timeAlignMoveSlider, timeAlignRotateSlider;
     public InputField dimCurrent, dimNext, sizeCurrent, sizeNext, densityCurrent, densityNext, twistPobabilityCurrent, twistProbabilityNext,
         branchProbabilityCurrent, branchProbabilityNext, loopCrossProbabilityCurrent, loopCrossProbabilityNext, dimSameParallelField,
-        dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField,
+        dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField, cameraDistanceField,
         transparencyField, lineThicknessField, borderField, baseTransparencyField, sliceTransparencyField, 
         frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
@@ -152,6 +152,7 @@ public class Menu : MonoBehaviour
         put(invertNormals, oa.opt.od.invertNormals);
         put(separate, oa.opt.od.separate);
         put(map, oa.opt.od.map);
+        put(cameraDistanceField, cameraDistanceSlider, oa.opt.od.cameraDistance);
         put(trainSpeedField, trainSpeedSlider, oa.opt.od.trainSpeed);
 
         put(inputTypeLeftAndRight, oa.opt.oo.inputTypeLeftAndRight);
@@ -208,6 +209,7 @@ public class Menu : MonoBehaviour
         oa.opt.od.invertNormals = getBool(invertNormals);
         oa.opt.od.separate = getBool(separate);
         oa.opt.od.map = getBool(map);
+        getDouble(ref oa.opt.od.cameraDistance, cameraDistanceField, OptionsDisplay.CAMERADISTANCE_MIN, OptionsDisplay.CAMERADISTANCE_MAX, true);
         getInt(ref oa.opt.od.trainSpeed, trainSpeedField, OptionsDisplay.TRAINSPEED_MIN, OptionsDisplay.TRAINSPEED_MAX);
 
         oa.opt.oo.inputTypeLeftAndRight = getInt(inputTypeLeftAndRight);
