@@ -5,11 +5,12 @@
 /**
  * An interface for scenery objects to draw themselves.
  */
+using UnityEngine;
 
 public interface IScenery
 {
 
-    void draw(IDraw currentDraw, double[] origin);
+    void draw(out double[][] texture, out Color[] textureColor, double[] origin);
 
 }
 

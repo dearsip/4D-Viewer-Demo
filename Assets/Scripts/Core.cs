@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
 using System;
@@ -9,6 +8,8 @@ using System.IO;
 using SimpleFileBrowser;
 using static FourDDemo;
 using WebSocketSharp;
+using System.Threading.Tasks;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
@@ -31,39 +32,40 @@ public class Core : MonoBehaviour
     private bool engineAlignMode;
     private bool active, excluded;
     private int[] param;
-    private int nMove;
-    private int nRotate;
-    private int nAlignMove; // these two only used inside setOptions
-    private int nAlignRotate;
-    private double dMove;
-    private double dRotate;
-    private double dAlignMove;
-    private double dAlignRotate;
+    private double delta;
+    private double timeMove, timeRotate, timeAlignMove, timeAlignRotate;
+    private int nMove, nRotate, nAlignMove, nAlignRotate;
+    private double dMove, dRotate, dAlignMove, dAlignRotate;
     private bool alwaysRun;
     private IMove target;
     private double[] saveOrigin;
     private double[][] saveAxis;
     public bool alignMode;
     private int ad0, ad1;
-    private int nActive;
+    private double tActive;
     private Align alignActive;
+    public bool keepUpAndDown;
+    private bool disableLeftAndRight;
 
     private int interval;
 
     public Command command;
     public Command menuCommand;
-    public SteamVR_Action_Boolean trigger, move, menu;
+    public SteamVR_Action_Boolean trigger, move, menu, grip, button1, button2;
     public SteamVR_Action_Pose pose;
+    public SteamVR_Action_Vector2 trackPad;
     public SteamVR_Input_Sources left, right;
-    private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight;
-    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, relarot;
+    private Vector3 posLeft, lastPosLeft, fromPosLeft, posRight, lastPosRight, fromPosRight, dlPosLeft, dfPosLeft, dlPosRight, dfPosRight;
+    private Quaternion rotLeft, lastRotLeft, fromRotLeft, rotRight, lastRotRight, fromRotRight, dlRotLeft, dfRotLeft, dlRotRight, dfRotRight, relarot;
     private bool leftTrigger, rightTrigger, lastLeftTrigger, lastRightTrigger, leftTriggerPressed, rightTriggerPressed,
-        leftMove, rightMove;
+        leftMove, rightMove, leftGrip, rightGrip, lastLeftGrip, lastRightGrip;
     public Menu menuPanel;
 
     private Vector3 reg0, reg1;
     private double[] reg2, reg3, reg4, reg5, reg6;
     public Player player;
+    public Camera fixedCamera;
+    public SteamVR_Action_Boolean headsetOnHead = SteamVR_Input.GetBooleanAction("HeadsetOnHead");
     private double[] eyeVector;
     private double[] cursor;
     private double[][] cursorAxis;
@@ -132,11 +134,25 @@ public class Core : MonoBehaviour
         return engine.getSaveType();
     }
 
-    // Start is called before the first frame update
+    public void saveMaze(IStore store) {
+
+      store.putString(KEY_CHECK,VALUE_CHECK);
+
+      store.putInteger(KEY_DIM,dim);
+      store.putObject(KEY_OPTIONS_MAP,oa.omCurrent);
+      store.putObject(KEY_OPTIONS_COLOR,oc()); // ocCurrent may be null
+      store.putObject(KEY_OPTIONS_VIEW,ov());  // ditto
+      store.putObject(KEY_OPTIONS_SEED,oa.oeCurrent);
+      store.putBool(KEY_ALIGN_MODE,alignMode);
+
+      engine.save(store,om());
+   }
+
+   // Start is called before the first frame update
     void Start() // ルーチン開始
     {
-        SteamVR_Actions.controll.Activate(left);
-        SteamVR_Actions.controll.Activate(right);
+        SteamVR_Actions.control.Activate(left);
+        SteamVR_Actions.control.Activate(right);
 
         addEvevts();
 
@@ -146,7 +162,7 @@ public class Core : MonoBehaviour
         optDefault = ScriptableObject.CreateInstance<Options>();
         opt = ScriptableObject.CreateInstance<Options>();
         // ロード
-        load();
+        doInit();
         // dim and rest of oa are initialized when new game started
 
         oa = new OptionsAll();
@@ -156,6 +172,7 @@ public class Core : MonoBehaviour
 
         eyeVector = new double[3];
         mesh = new Mesh();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
         engine = new Engine(mesh);
 
         //initHaptics();
@@ -171,7 +188,6 @@ public class Core : MonoBehaviour
 
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
-        StartCoroutine(tick());
     }
 
     private void addEvevts()
@@ -181,16 +197,19 @@ public class Core : MonoBehaviour
         menu.AddOnStateUpListener(OpenMenu_, left);
         menu.AddOnStateUpListener(OpenMenu_, right);
         trigger.AddOnStateDownListener(RightClick, right);
+        grip.AddOnStateDownListener(LeftGrip, left);
     }
 
     private void LeftDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
-        fromPosLeft = pose.GetLocalPosition(left); fromRotLeft = pose.GetLocalRotation(left);
+        posLeft = fromPosLeft = pose.GetLocalPosition(left);
+        rotLeft = fromRotLeft = pose.GetLocalRotation(left);
     }
 
     private void RightDown(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
-        fromPosRight = pose.GetLocalPosition(right); fromRotRight = pose.GetLocalRotation(right);
+        posRight = fromPosRight = pose.GetLocalPosition(right);
+        rotRight = fromRotRight = pose.GetLocalRotation(right);
     }
 
     private void OpenMenu_(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
@@ -203,8 +222,24 @@ public class Core : MonoBehaviour
         if (engine.getSaveType() == IModel.SAVE_GEOM
          || engine.getSaveType() == IModel.SAVE_NONE)
         {
-            command = click;
+            if (command == null) command = click;
         }
+        else { if (command == null) command = jump; }
+    }
+
+    private void LeftGrip(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        disableLeftAndRight = !disableLeftAndRight;
+    }
+
+    private void RightButton1(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (command == null) command = addShapes;
+    }
+
+    private void RightButton2(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (command == null) command = removeShape;
     }
 
     private void OnDestroy()
@@ -226,7 +261,7 @@ public class Core : MonoBehaviour
         for (int i = 0; i < hNum3; i++) if (!cut[i]) haptics[i] = 0;
         cutting = new bool[hNum3];
         for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
-        output = new float[outputNum.Length];
+        output = new float[outputPlc.Length];
         if (!error)
         {
             ws = new WebSocket(adrr);
@@ -240,9 +275,15 @@ public class Core : MonoBehaviour
 
     private void openMenu()
     {
-        SteamVR_Actions.controll.Deactivate(left);
-        SteamVR_Actions.controll.Deactivate(right);
+        SteamVR_Actions.control.Deactivate(left);
+        SteamVR_Actions.control.Deactivate(right);
         menuPanel.Activate(oa);
+    }
+
+    public Slider size;
+    public void changeSize() {
+        float f = Mathf.Pow(2,size.value-1)/2;
+        transform.localScale = new Vector3(f,f,f);
     }
 
     public void newGame()
@@ -261,80 +302,66 @@ public class Core : MonoBehaviour
         oa.oeCurrent.forceSpecified();
         oa.oeNext = new OptionsSeed();
 
-        IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov());
+        IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov(), null);
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+        controllerReset();
+    }
+
+    private void controllerReset() {
+        setKeepUpAndDown();
 
         updateOptions();
         setOptions();
 
         target = engine;
+        command = null;
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
+
     }
 
-    IEnumerator tick()
+    public void resetWin() {
+        engine.resetWin();
+    }
+
+    public void restartGame() {
+        engine.restartGame();
+        controllerReset();
+    }
+
+    Task renderTask = Task.CompletedTask;
+    float now = 0;
+    float last = 0;
+    float lastOneSec = 0;
+    float dOneSec = 0;
+    float fps;
+    bool nextFrame = true;
+    int frameCount = 0;
+    void Update()
     {
-        int base_ = Environment.TickCount;
-        while (true)
-        {
+        calcInputFrame();
+        if (renderTask.IsCompleted) {
+            frameCount++;
+            now = Time.realtimeSinceStartup;
+            delta = Mathf.Clamp(now-last, 0.01f, 0.5f);
+            last = now;
+            dOneSec = now - lastOneSec;
+            if (dOneSec >= 1) {
+                fps = frameCount / dOneSec;
+                frameCount = 0;
+                lastOneSec = now;
+                //Debug.Log(fps);
+            }
+
+            engine.ApplyMesh();
+            nextFrame = false;
             calcInput();
             menuCommand?.Invoke();
             menuCommand = null;
-            controll();
-            engine.renderAbsolute(eyeVector, opt.oo.sliceMode);
+            control();
+            renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo, delta));
             //doHaptics();
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-
-            int now = Environment.TickCount;
-            int next = base_ + interval; // unsynchronized use of interval is OK
-
-            if (now < next)
-            { // we have time, sleep a bit
-
-                int t = next - now;
-
-                // I don't understand this at all, but sometimes the current time
-                // jumps back by 4-6 minutes for no reason.  does it drift forward
-                // and then get corrected?  does it jump forward and then back?
-                // no idea.  in any case, if we don't detect and stop it, the game
-                // will lock up for that many minutes.
-                //
-                if (t > 1000)
-                {
-                    t = interval; // standard interval is best guess for sleep time
-                    next = now + interval;
-                }
-
-                yield return new WaitForSeconds(t * 0.001f);
-                base_ = next; // same equation as below would work, but this is clearer
-
-            }
-            else
-            { // no time left, tick again immediately
-                yield return null;
-                base_ = Math.Max(next, now - 3 * interval); // see note below
-            }
-
-            // on my system, the actual sleep duration is granular,
-            // with each grain being approximately 55 ms.
-            // so, if you ask to sleep for 100 ms, you usually sleep for 110.
-
-            // the code above is designed to compensate for this.
-            // as long as we are producing frames sufficiently quickly,
-            // base will advance by the exact interval,
-            // so oversleeping will lead to requesting shorter wait times.
-
-            // if we are not producing frames quickly enough,
-            // there's no sense accumulating a large sleep debt,
-            // just go ahead and reset the base.
-            // actually, it would be nice to be able to recover from a few slow frames,
-            // so do let debt accumulate, but limit it to a fixed number of multiples
-            //else
-            //{
-            //    yield return new WaitForSeconds(0.1f);
-
-            //}
         }
     }
 
@@ -342,14 +369,14 @@ public class Core : MonoBehaviour
     {
         if (hapActive) calcHaptics(cursor, cursorAxis);
         else Vec.zero(haptics);
-        for (int i = 0; i < output.Length; i++) output[i] = (haptics[outputNum[i]] == 0) ? 0 : Mathf.Min((float)(0.4 + haptics[outputNum[i]] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
+        for (int i = 0; i < output.Length; i++) output[i] = (haptics[i] == 0) ? 0 : Mathf.Min((float)(0.4 + haptics[i] / 1.7 /*実測したおよその最大値*/ * 0.6 /* ある程度の電圧がないと振動しない */ ) , 1f);
         if (!error && (opf = ++opf % opFrame) == 0)
         {
             try {
                 ws.Send(Vec.ToString(output));
             } catch (InvalidOperationException e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
                 error = true;
             }
         }
@@ -376,7 +403,7 @@ public class Core : MonoBehaviour
             reg2[2] = reg2[2] - 0.12 / opt.ov4.scale;
             Vec.fromAxisCoordinates(reg5, reg2, cursorAxis); // 向きを変更
             for (int j = 0; j < 3; j++) reg4[j] = reg5[j]; // reg4[3] (= 0) は編集されない
-            if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
+            //if (i == 0) Debug.Log("corner: " + Vec.ToString(reg4));
             Vec.add(reg4, cursor, reg4);
             //verts.Add(new Vector3((float)reg4[0], (float)reg4[1], (float)reg4[2]));
             //verts.Add(new Vector3((float)reg4[0]+0.03f, (float)reg4[1], (float)reg4[2]));
@@ -420,17 +447,58 @@ public class Core : MonoBehaviour
         //Debug.Log(max_);
     }
 
+    private float swipeTime = 0;
+    private float swipeTimeTor = 0.1f;
+    private int swipeDir = 0;
+    private float tSwipe = 0.3f;
+    private bool swipeLeft;
+    private bool swipeRight;
+    private void calcInputFrame() {
+        if (swipeTime > 0) swipeTime -= Time.deltaTime;
+        if (swipeTime < 0) swipeDir = 0;
+        Vector2 v = trackPad.GetAxis(right);
+        if (v == Vector2.zero) swipeDir = 0;
+        if (v.x < -tSwipe) {
+            if (swipeDir == 1 && command == null) command = removeShape;
+            swipeDir = -1;
+            swipeTime = swipeTimeTor;
+        }
+        if (v.x > tSwipe) {
+            if (swipeDir == -1 && command == null) command = addShapes;
+            swipeDir = 1;
+            swipeTime = swipeTimeTor;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (menuPanel.gameObject.activeSelf == false) openMenu();
+            else menuPanel.doCancel();
+        }
+    }
+
+
     private void calcInput()
     {
+        relarot = Quaternion.Inverse(transform.rotation);
         lastPosLeft = posLeft; lastPosRight = posRight;
         lastRotLeft = rotLeft; lastRotRight = rotRight;
-        posLeft = pose.GetLocalPosition(left); rotLeft = pose.GetLocalRotation(left);
-        posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
-        lastLeftTrigger = leftTrigger; lastRightTrigger = rightTrigger;
-        leftTrigger = trigger.GetState(left); rightTrigger = trigger.GetState(right);
+        posLeft = pose.GetLocalPosition(left); posRight = pose.GetLocalPosition(right);
+        rotLeft = pose.GetLocalRotation(left); rotRight = pose.GetLocalRotation(right);
+        dlPosLeft = relarot * (posLeft - lastPosLeft); dlPosRight = relarot * (posRight - lastPosRight);
+        dfPosLeft = relarot * (posLeft - fromPosLeft); dfPosRight = relarot * (posRight - fromPosRight);
+        Quaternion lRel = Quaternion.Inverse(fromRotLeft);
+        dlRotLeft = lRel * rotLeft * Quaternion.Inverse(lRel * lastRotLeft);
+        dlRotRight = relarot * rotRight * Quaternion.Inverse(relarot * lastRotRight);
+        dfRotLeft = lRel * rotLeft * Quaternion.Inverse(lRel * fromRotLeft);
+        dfRotRight = relarot * rotRight * Quaternion.Inverse(relarot * fromRotRight);
+        lastLeftTrigger = leftTrigger; leftTrigger = trigger.GetState(left); 
+        lastRightTrigger = rightTrigger; rightTrigger = trigger.GetState(right);
+        lastLeftGrip = leftGrip; leftGrip = grip.GetState(left);
+        lastRightGrip = rightGrip; rightGrip = grip.GetState(right);
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
-        reg1 = transform.position - player.hmdTransform.position;
+        reg1 = relarot * 
+               (transform.position - ((headsetOnHead.GetState(SteamVR_Input_Sources.Head)) ? 
+                player.hmdTransform.position : fixedCamera.transform.position));
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
 
@@ -443,99 +511,175 @@ public class Core : MonoBehaviour
         //reg1 = pose.GetLocalRotation(right)*Vector3.forward;
         //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
-    private double limitAng = 30;
 
-    private double limit = 0.1;
-    private void controll()
+    private double tAlign = 0.5;
+    private double limitAng = 30;
+    private double limitAngRoll = 30;
+    private double limitAngForward = 30;
+    private double maxAng = 60;
+    private double limit = 0.1; // controler Transform Unit
+    private double limitLR = 0.3; // LR Drag Unit
+    private double max = 0.2; // YP Drag Unit
+    private const double epsilon = 0.000001;
+    private void control()
     {
-        // save state
+        //nMove = (int)Math.Ceiling(fps * timeMove + epsilon);
+        //nRotate = (int)Math.Ceiling(fps * timeRotate + epsilon);
+        //nAlignMove = (int)Math.Ceiling(fps * timeAlignMove + epsilon);
+        //nAlignRotate = (int)Math.Ceiling(fps * timeAlignRotate + epsilon);
+
+        //dMove = 1 / (double)nMove;
+        //dRotate = 90 / (double)nRotate;
+        //dAlignMove = 1 / (double)nAlignMove;
+        //dAlignRotate = 90 / (double)nAlignRotate;
+
+        if (!isPlatformer()) {
+            dMove = delta / timeMove;
+            dRotate = 90 * delta / timeRotate;
+        } else {
+            dMove = delta * 2;
+            dRotate = 90 * delta * 2;
+        }
+        dAlignMove = delta / timeAlignMove;
+        dAlignRotate = 90 * delta / timeAlignRotate;
 
         IMove saveTarget = target;
         target.save(saveOrigin, saveAxis);
         if (command != null) command();
         else
         {
-            if (leftMove)
-            {
-                for (int i = 0; i < 3; i++) reg2[i] = posLeft[i] - fromPosLeft[i];
-                if (opt.oo.limit3D) reg2[2] = 0;
+            // left hand
+            if (!alignMode && isDrag(TYPE_LEFTANDRIGHT)) {
+                for (int i = 0; i < 3; i++) reg2[i] = dlPosLeft[i];
+                Vec.scale(reg2, reg2, 1.0 / limitLR / dMove);
+            }
+            else {
+                for (int i = 0; i < 3; i++) reg2[i] = dfPosLeft[i];
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
-                Array.Copy(reg2, reg3, 3);
-                relarot = rotLeft * Quaternion.Inverse(fromRotLeft);
-                reg3[3] = Math.Asin(relarot.y) * Math.Sign(relarot.w);
-                reg3[3] /= Math.Max(limitAng * Math.PI / 180, reg3[3]);
-                if (alignMode)
+            }
+            Array.Copy(reg2, reg3, 3);
+            if (!alignMode && isDrag(TYPE_FORWARD)) {
+                relarot = dlRotLeft;
+                reg3[3] = -Math.Asin(relarot.z) * Math.Sign(relarot.w);
+                reg3[3] /= maxAng * Math.PI / 180 * dMove;
+            }
+            else {
+                relarot = dfRotLeft;
+                reg3[3] = -Math.Asin(relarot.z) * Math.Sign(relarot.w);
+                reg3[3] /= Math.Max(limitAngForward * Math.PI / 180, Math.Abs(reg3[3]));
+            }
+
+            if (opt.oo.limit3D) reg3[2] = 0;
+            if (disableLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = 0;
+            if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
+            if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
+            if (!leftMove) Vec.zero(reg3);
+            keyControl(KEYMODE_SLIDE);
+
+            if (alignMode)
+            {
+                for (int i = 0; i < reg3.Length; i++)
                 {
-                    for (int i = 0; i < reg3.Length; i++)
+                    if (Math.Abs(reg3[i]) > tAlign)
                     {
-                        if (Math.Abs(reg3[i]) > 0.8)
-                        {
-                            nActive = nMove;
-                            ad0 = Dir.forAxis(i, reg3[i] < 0);
-                            if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
-                        }
+                        tActive = timeMove;
+                        ad0 = Dir.forAxis(i, reg3[i] < 0);
+                        if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
                     }
                 }
-                else
-                {
-                    Vec.scale(reg3, reg3, dMove);
-                    target.move(reg3);
-                }
             }
-            if (rightMove)
+            else
             {
-                if (alignMode)
+                Vec.scale(reg3, reg3, dMove);
+                target.move(reg3);
+            }
+
+            // right hand
+            if (alignMode)
+            {
+                for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
+                Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
+                if (opt.oo.limit3D) reg2[2] = 0;
+                if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
+                if (!rightMove) Vec.zero(reg2);
+                keyControl(KEYMODE_TURN);
+                for (int i = 0; i < reg2.Length; i++)
                 {
-                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
-                    if (opt.oo.limit3D) reg2[2] = 0;
-                    Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
-                    for (int i = 0; i < reg2.Length; i++)
+                    if (Math.Abs(reg2[i]) > tAlign)
                     {
-                        if (Math.Abs(reg2[i]) > 0.8)
+                        tActive = timeRotate;
+                        ad0 = Dir.forAxis(dim - 1);
+                        ad1 = Dir.forAxis(i, reg2[i] < 0);
+                        command = alignRotate;
+                        break;
+                    }
+                }
+                if (command == null)
+                {
+                    relarot = dfRotRight;
+                    for (int i = 0; i < 3; i++) reg0[i] = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
+                    if (opt.oo.limit3D) { reg0[0] = 0; reg0[1] = 0; }
+                    if (isPlatformer()) { reg0[0] = 0; reg0[2] = 0; }
+                    if (opt.oo.invertRoll) reg0 = -reg0;
+                    if (!rightMove) reg0 = Vector3.zero;
+                    keyControl(KEYMODE_SPIN);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (Mathf.Abs(reg0[i]) > tAlign)
                         {
-                            nActive = nRotate;
-                            ad0 = Dir.forAxis(dim - 1);
-                            ad1 = Dir.forAxis(i, reg2[i] < 0);
+                            tActive = timeRotate;
+                            ad0 = Dir.forAxis((i + 1) % 3);
+                            ad1 = Dir.forAxis((i + 2) % 3, reg0[i] < 0);
                             command = alignRotate;
                             break;
                         }
                     }
-                    if (command == null)
-                    {
-                        relarot = rotRight * Quaternion.Inverse(fromRotRight);
-                        if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
-                        for (int i = 0; i < 3; i++)
-                        {
-                            float f = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
-                            if (Mathf.Abs(f) > 0.8)
-                            {
-                                nActive = nRotate;
-                                ad0 = Dir.forAxis((i + 1) % 3);
-                                ad1 = Dir.forAxis((i + 2) % 3, f < 0);
-                                command = alignRotate;
-                                break;
-                            }
-                        }
-                    }
                 }
-                else
+            }
+            else
+            {
+                Vec.unitVector(reg3, 3);
+                double t;
+                if (isDrag(TYPE_YAWANDPITCH)) {
+                    for (int i = 0; i < 3; i++) reg2[i] = dlPosRight[i];
+                    t = Vec.norm(reg2);
+                    if (t>0) Vec.scale(reg2, reg2, 90 / dRotate * Math.Min(max, t) / max / t);
+                }
+                else {
+                    for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
+                    t = Vec.norm(reg2);
+                    if (t>0) Vec.scale(reg2, reg2, Math.Min(limit, t) / limit / t);
+                }
+                if (opt.oo.limit3D) reg2[2] = 0;
+                if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
+                if (!rightMove) Vec.zero(reg2);
+                keyControl(KEYMODE_TURN);
+                t = Vec.norm(reg2);
+                if (t != 0)
                 {
-                    Vec.unitVector(reg3, 3);
-                    for (int i = 0; i < 3; i++) reg2[i] = posRight[i] - fromPosRight[i];
-                    if (opt.oo.limit3D) reg2[2] = 0;
-                    double t = Vec.norm(reg2);
-                    if (t != 0)
-                    {
-                        t = dRotate * Math.PI / 180 * Math.Min(limit, t) / limit;
-                        Vec.normalize(reg2, reg2);
-                        for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
-                        reg4[3] = Math.Cos(t);
-                        target.rotateAngle(reg3, reg4);
-                    }
+                    t *= dRotate * Math.PI / 180;
+                    Vec.normalize(reg2, reg2);
+                    for (int i = 0; i < 3; i++) reg4[i] = reg2[i] * Math.Sin(t);
+                    reg4[3] = Math.Cos(t);
+                    target.rotateAngle(reg3, reg4);
+                }
 
-                    relarot = rotRight * Quaternion.Inverse(lastRotRight);
-                    if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
-                    float f;
+                float f;
+                if (isDrag(TYPE_ROLL)) {
+                    relarot = dlRotRight;
+                }
+                else {
+                    relarot = dfRotRight;
+                    f = Mathf.Acos(relarot.w);
+                    if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
+                    relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
+                }
+                if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
+                if (isPlatformer() || keepUpAndDown) { relarot[0] = 0; relarot[2] = 0; }
+                if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
+                if (!rightMove) relarot = Quaternion.identity;
+                keyControl(KEYMODE_SPIN2);
+                if (relarot.w < 1f) {
                     relarot.ToAngleAxis(out f, out reg0);
                     //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);
                     reg1.Set(1, 0, 0);
@@ -552,14 +696,15 @@ public class Core : MonoBehaviour
                     target.rotateAngle(reg4, reg3);
                 }
             }
-            if (leftTrigger)
-            {
 
-            }
-            if (rightTrigger)
+            if (leftTrigger && ! lastLeftTrigger)
             {
-
+                opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
             }
+            //if (rightTrigger)
+            //{
+
+            //}
         }
 
         // update state
@@ -585,13 +730,42 @@ public class Core : MonoBehaviour
         }
     }
 
+    private const int TYPE_LEFTANDRIGHT = 0;
+    private const int TYPE_FORWARD = 1;
+    private const int TYPE_YAWANDPITCH = 2;
+    private const int TYPE_ROLL = 3;
+    private bool isPlatformer() { 
+        return engine.getSaveType() == IModel.SAVE_ACTION
+            || engine.getSaveType() == IModel.SAVE_BLOCK
+            || engine.getSaveType() == IModel.SAVE_SHOOT; 
+    }
+    private bool isDrag(int type) {
+        switch(type) {
+            case TYPE_LEFTANDRIGHT:
+                return !isPlatformer() && opt.oo.inputTypeLeftAndRight == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_FORWARD:
+                return !isPlatformer() && opt.oo.inputTypeForward == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_YAWANDPITCH:
+                return opt.oo.inputTypeYawAndPitch == OptionsControl.INPUTTYPE_DRAG;
+            case TYPE_ROLL:
+                return opt.oo.inputTypeRoll == OptionsControl.INPUTTYPE_DRAG;
+        }
+        return false;
+    }
+
     private void alignMove()
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
-        Vec.scale(reg3, reg3, Dir.getSign(ad0) * dMove);
-        target.move(reg3);
-        if (--nActive <= 0)
-        {
+        double d;
+        if ((d = tActive - delta) > 0) {
+            tActive = d;
+            Vec.scale(reg3, reg3, Dir.getSign(ad0) * dMove);
+            target.move(reg3);
+        }
+        else {
+            d = tActive / timeMove;
+            Vec.scale(reg3, reg3, Dir.getSign(ad0) * d);
+            target.move(reg3);
             target.align().snap();
             command = null;
         }
@@ -601,10 +775,16 @@ public class Core : MonoBehaviour
     {
         Vec.unitVector(reg3, Dir.getAxis(ad0));
         Vec.scale(reg3, reg3, Dir.getSign(ad0));
-        Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dRotate);
-        target.rotateAngle(reg3, reg4);
-        if (--nActive <= 0)
-        {
+        double d;
+        if ((d = tActive - delta) > 0) {
+            tActive = d;
+            Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, dRotate);
+            target.rotateAngle(reg3, reg4);
+        }
+        else {
+            d = 90 * tActive / timeRotate;
+            Vec.rotateAbsoluteAngleDir(reg4, reg3, ad0, ad1, d);
+            target.rotateAngle(reg3, reg4);
             target.align().snap();
             command = null;
         }
@@ -612,9 +792,7 @@ public class Core : MonoBehaviour
 
     public void align()
     {
-        if (engine.getSaveType() == IModel.SAVE_ACTION
-         || engine.getSaveType() == IModel.SAVE_BLOCK
-         || engine.getSaveType() == IModel.SAVE_SHOOT)
+        if (isPlatformer())
         {
             command = null;
             return;
@@ -629,7 +807,8 @@ public class Core : MonoBehaviour
 
     public void click()
     {
-        target = ((GeomModel)engine.retrieveModel()).click(engine.getOrigin(), engine.getViewAxis(), engine.getAxisArray());
+        try {target = ((GeomModel)engine.retrieveModel()).click(engine.getOrigin(), engine.getViewAxis(), engine.getAxisArray());}
+        catch (InvalidCastException){ return; }
         if (target != null)
         {
             engineAlignMode = alignMode; // save
@@ -641,6 +820,85 @@ public class Core : MonoBehaviour
             alignMode = engineAlignMode; // restore
         }
         command = null;
+    }
+
+    public void jump() {
+        engine.jump();
+        command = null;
+    }
+
+    public void addShapes() {
+        engine.addShapes(alignMode);
+        command = null;
+    }
+
+    public void removeShape() {
+        engine.removeShape();
+        command = null;
+    }
+
+    public const KeyCode KEY_SLIDELEFT  = KeyCode.S;
+    public const KeyCode KEY_SLIDERIGHT = KeyCode.F;
+    public const KeyCode KEY_SLIDEUP    = KeyCode.A;
+    public const KeyCode KEY_SLIDEDOWN  = KeyCode.Z;
+    public const KeyCode KEY_SLIDEIN    = KeyCode.W;
+    public const KeyCode KEY_SLIDEOUT   = KeyCode.R;
+    public const KeyCode KEY_FORWARD    = KeyCode.E;
+    public const KeyCode KEY_BACK       = KeyCode.D;
+    public const KeyCode KEY_TURNLEFT   = KeyCode.J;
+    public const KeyCode KEY_TURNRIGHT  = KeyCode.L;
+    public const KeyCode KEY_TURNUP     = KeyCode.I;
+    public const KeyCode KEY_TURNDOWN   = KeyCode.K;
+    public const KeyCode KEY_TURNIN     = KeyCode.U;
+    public const KeyCode KEY_TURNOUT    = KeyCode.O;
+    public const KeyCode KEY_SPINLEFT   = KeyCode.J;
+    public const KeyCode KEY_SPINRIGHT  = KeyCode.L;
+    public const KeyCode KEY_SPINUP     = KeyCode.I;
+    public const KeyCode KEY_SPINDOWN   = KeyCode.K;
+    public const KeyCode KEY_SPININ     = KeyCode.U;
+    public const KeyCode KEY_SPINOUT    = KeyCode.O;
+    private const int KEYMODE_SLIDE = 0;
+    private const int KEYMODE_TURN = 1;
+    private const int KEYMODE_SPIN = 2;
+    private const int KEYMODE_SPIN2 = 3;
+    private void keyControl(int keyMode) {
+        if (Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt)) return;
+        if (keyMode == KEYMODE_SLIDE) {
+            if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
+            if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
+            if (Input.GetKey(KEY_SLIDEUP   )) reg3[1] =  1;
+            if (Input.GetKey(KEY_SLIDEDOWN )) reg3[1] = -1;
+            if (Input.GetKey(KEY_SLIDEIN   )) reg3[2] =  1;
+            if (Input.GetKey(KEY_SLIDEOUT  )) reg3[2] = -1;
+            if (Input.GetKey(KEY_FORWARD   )) reg3[3] =  1;
+            if (Input.GetKey(KEY_BACK      )) reg3[3] = -1;
+        }
+        if (keyMode == KEYMODE_TURN) {
+            if (Input.GetKey(KEY_TURNLEFT ) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] = -1;
+            if (Input.GetKey(KEY_TURNRIGHT) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] =  1;
+            if (Input.GetKey(KEY_TURNUP   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] =  1;
+            if (Input.GetKey(KEY_TURNDOWN ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] = -1;
+            if (Input.GetKey(KEY_TURNIN   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] =  1;
+            if (Input.GetKey(KEY_TURNOUT  ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] = -1;
+        }
+        if (keyMode == KEYMODE_SPIN) {
+            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] = -1;
+            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] =  1;
+            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] =  1;
+            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] = -1;
+            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] =  1;
+            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] = -1;
+        }
+        if (keyMode == KEYMODE_SPIN2) {
+            Quaternion q = Quaternion.identity;
+            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(-(float)dRotate,0,0);
+            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler( (float)dRotate,0,0);
+            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0, (float)dRotate,0);
+            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,-(float)dRotate,0);
+            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0, (float)dRotate);
+            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0,-(float)dRotate);
+            if (q != Quaternion.identity) relarot = q;
+        }
     }
 
     public OptionsAll getOptionsAll()
@@ -674,20 +932,25 @@ public class Core : MonoBehaviour
         //    nAlignRotate = (int)Math.Ceiling(ot.frameRate * 0.5);
         //}
         //else
-        {
-            nMove = (int)Math.Ceiling(ot.frameRate * ot.timeMove);
-            nRotate = (int)Math.Ceiling(ot.frameRate * ot.timeRotate);
-            nAlignMove = (int)Math.Ceiling(ot.frameRate * ot.timeAlignMove);
-            nAlignRotate = (int)Math.Ceiling(ot.frameRate * ot.timeAlignRotate);
-        }
+        //{
+            //nMove = (int)Math.Ceiling(ot.frameRate * ot.timeMove);
+            //nRotate = (int)Math.Ceiling(ot.frameRate * ot.timeRotate);
+            //nAlignMove = (int)Math.Ceiling(ot.frameRate * ot.timeAlignMove);
+            //nAlignRotate = (int)Math.Ceiling(ot.frameRate * ot.timeAlignRotate);
+        //}
 
         // ... therefore, the distances will never exceed 1,
         // and the angles will never exceed 90 degrees
 
-        dMove = 1 / (double)nMove;
-        dRotate = 90 / (double)nRotate;
-        dAlignMove = 1 / (double)nAlignMove;
-        dAlignRotate = 90 / (double)nAlignRotate;
+        //dMove = 1 / (double)nMove;
+        //dRotate = 90 / (double)nRotate;
+        //dAlignMove = 1 / (double)nAlignMove;
+        //dAlignRotate = 90 / (double)nAlignRotate;
+
+        timeMove =  ot.timeMove;
+        timeRotate =  ot.timeRotate;
+        timeAlignMove =  ot.timeAlignMove;
+        timeAlignRotate =  ot.timeAlignRotate;
     }
 
     public void updateOptions()
@@ -701,10 +964,16 @@ public class Core : MonoBehaviour
         setFrameRate(oa.opt.ot4.frameRate);
     }
 
+    private void setKeepUpAndDown() {
+        keepUpAndDown = opt.oo.keepUpAndDown;
+        if (keepUpAndDown) alignMode = false;
+        engine.setKeepUpAndDown(keepUpAndDown);
+    }
+
     public void closeMenu()
     {
-        SteamVR_Actions.controll.Activate(left);
-        SteamVR_Actions.controll.Activate(right);
+        SteamVR_Actions.control.Activate(left);
+        SteamVR_Actions.control.Activate(right);
         menuPanel.gameObject.SetActive(false);
         lastLeftTrigger = true;
         lastRightTrigger = true;
@@ -712,6 +981,11 @@ public class Core : MonoBehaviour
 
     public void doQuit()
     {
+        try {
+            PropertyFile.save(fileCurrent,save);
+        } catch (Exception e) {
+            Debug.LogException(e);
+        }
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #elif UNITY_STANDALONE
@@ -724,20 +998,32 @@ public class Core : MonoBehaviour
         StartCoroutine(ShowLoadDialogCoroutine());
     }
 
+    private bool opened;
     IEnumerator ShowLoadDialogCoroutine()
     {
-        yield return FileBrowser.WaitForLoadDialog(false, null, "Load File", "Load");
+        yield return FileBrowser.WaitForLoadDialog(false, opened ? null : Directory.GetCurrentDirectory(), "Load File", "Load");
+        opened = true;
 
-        Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
+        Debug.Log("LoadFile " + (FileBrowser.Success ? "successful" : "failed") + ": " + Path.GetFileName(FileBrowser.Result));
 
-        if (FileBrowser.Success) menuCommand = doLoadGeom;
+        if (FileBrowser.Success) {
+            reloadFile = FileBrowser.Result;
+            Debug.Log("Load: " + Path.GetFileName(reloadFile));
+            if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
+            else menuCommand = doLoadGeom;
+        }
+    }
+
+    private void doLoadMaze()
+    {
+        PropertyFile.load(reloadFile, loadMaze);
     }
 
     private void doLoadGeom()
     {
         try
         {
-            loadGeom(FileBrowser.Result);
+            loadGeom(reloadFile);
         }
         catch (Exception t)
         {
@@ -746,13 +1032,73 @@ public class Core : MonoBehaviour
             {
                 LanguageException e = (LanguageException)t;
                 //t = e.getCause();
-                s = e.getFile() + "\n" + e.getDetail() + "\n";
-                Debug.Log(s);
+                s = Path.GetFileName(e.getFile()) + "\n" + e.getDetail();
+                Debug.LogException(new Exception(s));
             }
-                Debug.Log(t);
+            else Debug.LogException(t);
             //t.printStackTrace();
             //JOptionPane.showMessageDialog(this, s + t.getClass().getName() + "\n" + t.getMessage(), App.getString("Maze.s25"), JOptionPane.ERROR_MESSAGE);
         }
+    }
+   private static readonly string VALUE_CHECK       = "Maze";
+
+   private static readonly string KEY_CHECK         = "game";
+   private static readonly string KEY_DIM           = "dim";
+   private static readonly string KEY_OPTIONS_MAP   = "om";
+   private static readonly string KEY_OPTIONS_COLOR = "oc";
+   private static readonly string KEY_OPTIONS_VIEW  = "ov";
+   private static readonly string KEY_OPTIONS_SEED  = "oe";
+   private static readonly string KEY_OPTIONS_DISPLAY = "od";
+   private static readonly string KEY_OPTIONS_CONTROL = "oo";
+   private static readonly string KEY_ALIGN_MODE    = "align";
+
+    public void loadMaze(IStore store){
+        try {
+            if ( ! store.getString(KEY_CHECK).Equals(VALUE_CHECK) ) throw new Exception("getEmpty");//App.getEmptyException();
+        } catch (Exception e) {
+            throw e;//App.getException("Core.e1");
+        }
+
+    // read file, but don't modify existing objects until we're sure of success
+
+        int dimLoad = store.getInteger(KEY_DIM);
+        if ( ! (dimLoad == 3 || dimLoad == 4) ) throw new Exception("dimError");//App.getException("Core.e2");
+
+        OptionsMap omLoad = new OptionsMap(dimLoad);
+        OptionsColor ocLoad = new OptionsColor();
+        OptionsView ovLoad = new OptionsView();
+        OptionsSeed oeLoad = new OptionsSeed();
+
+        store.getObject(KEY_OPTIONS_MAP,omLoad);
+        store.getObject(KEY_OPTIONS_COLOR,ocLoad);
+        store.getObject(KEY_OPTIONS_VIEW,ovLoad);
+        store.getObject(KEY_OPTIONS_SEED,oeLoad);
+        if ( ! oeLoad.isSpecified() ) throw new Exception("seedError");//App.getException("Core.e3");
+        bool alignModeLoad = store.getBool(KEY_ALIGN_MODE);
+
+    // ok, we know enough ... even if the engine parameters turn out to be invalid,
+    // we can still start a new game
+
+        // and, we need to initialize the engine before it can validate its parameters
+
+        dim = dimLoad;
+
+        oa.omCurrent = omLoad; // may as well transfer as copy
+        oa.ocCurrent = ocLoad;
+        oa.ovCurrent = ovLoad;
+        oa.oeCurrent = oeLoad;
+
+        oa.opt.om4 = omLoad;
+        oa.opt.oc4 = ocLoad;
+        oa.opt.ov4 = ovLoad;
+        oa.oeCurrent = oeLoad;
+        // oeNext is not modified by loading a game
+
+        IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov(),store);
+        engine.newGame(dim,model,ov(),/*oa.opt.os,*/ot(),false);
+        controllerReset();
+
+        engine.load(store,alignModeLoad);
     }
 
     public void loadGeom(string file) //throws Exception
@@ -765,13 +1111,13 @@ public class Core : MonoBehaviour
         Language.include(c, file);
 
         // build the model
-        Debug.Log("try");
+        //Debug.Log("try");
         GeomModel model = buildModel(c);
         // run this before changing anything since it can fail
-        Debug.Log("complete");
+        //Debug.Log("complete");
         // switch to geom
 
-        dim = model.getDimension();
+        if (model.getDimension() == 3) throw new Exception("The system does not support 3D scene");
 
         // no need to modify omCurrent, just leave it with previous maze values
         oa.ocCurrent = null;
@@ -795,35 +1141,26 @@ public class Core : MonoBehaviour
 
         // model already constructed
         engine.newGame(dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+        controllerReset();
 
-        updateOptions();
-        setOptions();
-        //controller.setOptions(oa.opt.okc, ot());
-        //controller.setKeysNew(model);
-        //controller.setAlwaysRun(model.isAnimated());
-        //clock.setFrameRate(ot().frameRate);
-
-        //keyMapper().releaseAll(); // sync up key mapper, which may have changed with dim
-
-        //controller.reset(dim, model.getAlignMode(/* defaultAlignMode = */ ok().startAlignMode));
-        // clock will stop when controller reports idle
+        alignMode = model.getAlignMode(alignMode);
     }
 
     public static GeomModel buildModel(Context c) //throws Exception
     {
 
         DimensionAccumulator da = new DimensionAccumulator();
-        //Track track = null;
-        //LinkedList tlist = new LinkedList();
+        Track track = null;
+        List<Train> tlist = new List<Train>();
         List<IScenery> scenery = new List<IScenery>();
         List<Geom.ShapeInterface> slist = new List<Geom.ShapeInterface>();
-        //LinkedList elist = new LinkedList();
+        List<Enemy> elist = new List<Enemy>();
         Struct.ViewInfo viewInfo = null;
         Struct.DrawInfo drawInfo = null;
 
         Struct.FinishInfo finishInfo = null;
         Struct.FootInfo footInfo = null;
-        //Struct.BlockInfo blockInfo = null;
+        Struct.BlockInfo blockInfo = null;
 
         // scan for items
         foreach (object o in c.stack)
@@ -843,12 +1180,12 @@ public class Core : MonoBehaviour
             {
                 throw new Exception("Unused null object on stack.");
             }
-            //else if (o is Track) {
-            //    if (track != null) throw new Exception("Only one track object allowed (but it can have disjoint loops).");
-            //    track = (Track)o;
-            //} else if (o is Train) {
-            //    tlist.add(o);
-            //} 
+            else if (o is Track) {
+                if (track != null) throw new Exception("Only one track object allowed (but it can have disjoint loops).");
+                track = (Track)o;
+            } else if (o is Train) {
+                tlist.Add((Train)o);
+            } 
             else if (o is IScenery)
             {
                 scenery.Add((IScenery)o);
@@ -880,14 +1217,14 @@ public class Core : MonoBehaviour
             {
                 footInfo = (Struct.FootInfo)o;
             }
-            //else if (o is Struct.BlockInfo)
-            //{
-            //    blockInfo = (Struct.BlockInfo)o;
-            //}
-            //else if (o is Enemy)
-            //{
-            //    elist.add(o);
-            //}
+            else if (o is Struct.BlockInfo)
+            {
+                blockInfo = (Struct.BlockInfo)o;
+            }
+            else if (o is Enemy)
+            {
+                elist.Add((Enemy)o);
+            }
             else
             {
                 throw new Exception("Unused object on stack (" + o.GetType().Name + ").");
@@ -906,67 +1243,68 @@ public class Core : MonoBehaviour
         Geom.Shape[] shapes = new Geom.Shape[slist.Count];
         for (int i = 0; i < slist.Count; i++) shapes[i] = (Geom.Shape)slist[i];
         //Train[] trains = (Train[])tlist.toArray(new Train[tlist.size()]);
+        Train[] trains = new Train[tlist.Count];
+        for (int i = 0; i < tlist.Count; i++) trains[i] = tlist[i];
         //Enemy[] enemies = (Enemy[])elist.toArray(new Enemy[elist.size()]);
+        Enemy[] enemies = new Enemy[elist.Count];
+        for (int i = 0; i < elist.Count; i++) enemies[i] = elist[i];
 
-        //if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
+        if (track != null) TrainModel.init(track, trains); // kluge needed for track scale
 
         if (scenery.Count == 0) scenery.Add((dtemp == 3) ? new Mat.Mat3() : (IScenery)new Mat.Mat4());
-        //if (track != null) scenery.add(track); // add last so it draws over other scenery
+        if (track != null) scenery.Add(track); // add last so it draws over other scenery
 
         GeomModel model;
-        //if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
-        //else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
-        //else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
-        //else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
-        /*:*/
+        if (finishInfo != null) model = new ActionModel(dtemp, shapes, drawInfo, viewInfo, footInfo, finishInfo);
+        else if (enemies.Length > 0) model = new ShootModel(dtemp, shapes, drawInfo, viewInfo, footInfo, enemies);
+        else if (blockInfo != null) model = new BlockModel(dtemp, shapes, drawInfo, viewInfo, footInfo);
+        else model = (track != null) ? new TrainModel(dtemp, shapes, drawInfo, viewInfo, track, trains)
+        :
         model = new GeomModel(dtemp, shapes, drawInfo, viewInfo);
         model.addAllScenery(scenery);
 
         // gather dictionary info
 
-        List<Color> availableColors = new List<Color>();
-        List<Shapes> availableShapes = new List<Shapes>();
+        List<NamedObject<Color>> availableColors = new List<NamedObject<Color>>();
+        List<NamedObject<Geom.Shape>> availableShapes = new List<NamedObject<Geom.Shape>>();
         Dictionary<string, Color> colorNames = new Dictionary<string, Color>();
         Dictionary<string, Geom.Shape> idealNames = new Dictionary<string, Geom.Shape>();
 
-        //foreach (KeyValuePair<string, object> entry in c.dict)
-        //{
-        //    object o = entry.Value;
-        //    if (o is Color)
-        //    {
+        foreach (KeyValuePair<string, object> entry in c.dict)
+        {
+            object o = entry.Value;
+            if (o is Color)
+            {
+                Color color = (Color)o;
+                string name = entry.Key;
+                availableColors.Add(new NamedObject<Color>(name,color));
+                if (!c.topLevelDef.Contains(name))
+                {
+                    colorNames.Add(name, color);
+                }
 
-        //        availableColors.Add(entry);
+            }
+            else if (o is Geom.Shape)
+            { // not ShapeInterface, at least for now
+                Geom.Shape shape = (Geom.Shape)o;
+                if (shape.getDimension() == dtemp)
+                {
+                    string name = entry.Key;
+                    availableShapes.Add(new NamedObject<Geom.Shape>(name,shape));
+                    if (!c.topLevelDef.Contains(name))
+                    {
+                        idealNames.Add(name, shape.ideal);
+                    }
+                }
+            }
+            // else it's not something we're interested in
+        }
 
-        //        String name = (String)entry.getKey();
-        //        if (!c.topLevelDef.contains(name))
-        //        {
-        //            colorNames.Add(name, (Color)o);
-        //        }
+        availableColors.Sort();
+        availableShapes.Sort();
 
-        //    }
-        //    else if (o is Geom.Shape)
-        //    { // not ShapeInterface, at least for now
-        //        Geom.Shape shape = (Geom.Shape)o;
-        //        if (shape.getDimension() == dtemp)
-        //        {
-
-        //            availableShapes.add(new NamedObject(entry));
-
-        //            String name = (String)entry.getKey();
-        //            if (!c.topLevelDef.contains(name))
-        //            {
-        //                idealNames.put(shape.ideal, name);
-        //            }
-        //        }
-        //    }
-        //    // else it's not something we're interested in
-        //}
-
-        //Collections.sort(availableColors);
-        //Collections.sort(availableShapes);
-
-        //model.setAvailableColors(availableColors);
-        //model.setAvailableShapes(availableShapes);
+        model.setAvailableColors(availableColors);
+        model.setAvailableShapes(availableShapes);
 
         model.setSaveInfo(c.topLevelInclude, colorNames, idealNames);
 
@@ -975,280 +1313,90 @@ public class Core : MonoBehaviour
         return model;
     }
 
-    private void load()
-    {
-        //opt.oc3.colorMode = 0;
-        //opt.oc3.dimSameParallel = 2;
-        //opt.oc3.dimSamePerpendicular = 0;
-        //opt.oc3.enable[0] = true;
-        //opt.oc3.enable[1] = true;
-        //opt.oc3.enable[2] = true;
-        //opt.oc3.enable[3] = true;
-        //opt.oc3.enable[4] = true;
-        //opt.oc3.enable[5] = true;
-        //opt.oc3.enable[6] = true;
-        //opt.oc3.enable[7] = false;
-        //opt.oc3.enable[8] = false;
-        //opt.oc3.enable[9] = false;
-        //opt.oc3.enable[10] = true;
-        //opt.oc3.enable[11] = false;
+    public void doReload(int delta) {
+        if (reloadFile == null) return;
 
-        opt.oc4.colorMode = 1;
-        opt.oc4.dimSameParallel = 0;
-        opt.oc4.dimSamePerpendicular = 0;
-        opt.oc4.enable[0] = true;
-        opt.oc4.enable[1] = true;
-        opt.oc4.enable[2] = false;
-        opt.oc4.enable[3] = true;
-        opt.oc4.enable[4] = true;
-        opt.oc4.enable[5] = true;
-        opt.oc4.enable[6] = true;
-        opt.oc4.enable[7] = true;
-        opt.oc4.enable[8] = false;
-        opt.oc4.enable[9] = false;
-        opt.oc4.enable[10] = true;
-        opt.oc4.enable[11] = false;
+        if (delta != 0) {
+            string[] f = Array.ConvertAll<FileInfo, string>(Directory.GetParent(reloadFile).GetFiles(), s => s.ToString());
+            Array.Sort(f);
 
-        //opt.oi.background = 0;
-        //opt.oi.invertColors = false;
-        //opt.oi.convertColors = 0;
-        //opt.oi.lineWidth = 1;
-        //opt.oi.oneInch = 1;
+            // results of listFiles have same parent directory so names are sufficient
+            // (and probably faster for sorting)
 
-        //opt.ok3.key[0].code = 69;
-        //opt.ok3.key[1].code = 68;
-        //opt.ok3.key[2].code = 74;
-        //opt.ok3.key[3].code = 76;
-        //opt.ok3.key[4].code = 73;
-        //opt.ok3.key[5].code = 75;
-        //opt.ok3.key[6].code = 0;
-        //opt.ok3.key[7].code = 0;
-        //opt.ok3.key[8].code = 74;
-        //opt.ok3.key[9].code = 76;
-        //opt.ok3.key[10].code = 73;
-        //opt.ok3.key[11].code = 75;
-        //opt.ok3.key[12].code = 0;
-        //opt.ok3.key[13].code = 0;
-        //opt.ok3.key[14].code = 85;
-        //opt.ok3.key[15].code = 79;
-        //opt.ok3.key[16].code = 0;
-        //opt.ok3.key[17].code = 0;
-        //opt.ok3.key[18].code = 0;
-        //opt.ok3.key[19].code = 0;
-        //opt.ok3.key[20].code = 10;
-        //opt.ok3.key[21].code = 10;
-        //opt.ok3.key[0].modifiers = 0;
-        //opt.ok3.key[1].modifiers = 0;
-        //opt.ok3.key[2].modifiers = 0;
-        //opt.ok3.key[3].modifiers = 0;
-        //opt.ok3.key[4].modifiers = 0;
-        //opt.ok3.key[5].modifiers = 0;
-        //opt.ok3.key[6].modifiers = 0;
-        //opt.ok3.key[7].modifiers = 0;
-        //opt.ok3.key[8].modifiers = 8;
-        //opt.ok3.key[9].modifiers = 8;
-        //opt.ok3.key[10].modifiers = 8;
-        //opt.ok3.key[11].modifiers = 8;
-        //opt.ok3.key[12].modifiers = 0;
-        //opt.ok3.key[13].modifiers = 0;
-        //opt.ok3.key[14].modifiers = 0;
-        //opt.ok3.key[15].modifiers = 0;
-        //opt.ok3.key[16].modifiers = 0;
-        //opt.ok3.key[17].modifiers = 0;
-        //opt.ok3.key[18].modifiers = 0;
-        //opt.ok3.key[19].modifiers = 0;
-        //opt.ok3.key[20].modifiers = 0;
-        //opt.ok3.key[21].modifiers = 1;
-        //opt.ok3.startAlignMode = true;
+            int i = Array.IndexOf(f,reloadFile);
+            if (i != -1) {
+                i += delta;
+                if (i >= 0 && i < f.Length) reloadFile = f[i];
+                else return; // we're at the end, don't do a reload
+            }
+            // else not found, fall through and report that error
+        }
+        Debug.Log("Load: " + Path.GetFileName(reloadFile));
 
-        //opt.ok4.key[0].code = 69;
-        //opt.ok4.key[1].code = 68;
-        //opt.ok4.key[2].code = 74;
-        //opt.ok4.key[3].code = 76;
-        //opt.ok4.key[4].code = 73;
-        //opt.ok4.key[5].code = 75;
-        //opt.ok4.key[6].code = 85;
-        //opt.ok4.key[7].code = 79;
-        //opt.ok4.key[8].code = 74;
-        //opt.ok4.key[9].code = 76;
-        //opt.ok4.key[10].code = 73;
-        //opt.ok4.key[11].code = 75;
-        //opt.ok4.key[12].code = 85;
-        //opt.ok4.key[13].code = 79;
-        //opt.ok4.key[14].code = 85;
-        //opt.ok4.key[15].code = 79;
-        //opt.ok4.key[16].code = 74;
-        //opt.ok4.key[17].code = 76;
-        //opt.ok4.key[18].code = 73;
-        //opt.ok4.key[19].code = 75;
-        //opt.ok4.key[20].code = 10;
-        //opt.ok4.key[21].code = 10;
-        //opt.ok4.key[0].modifiers = 0;
-        //opt.ok4.key[1].modifiers = 0;
-        //opt.ok4.key[2].modifiers = 0;
-        //opt.ok4.key[3].modifiers = 0;
-        //opt.ok4.key[4].modifiers = 0;
-        //opt.ok4.key[5].modifiers = 0;
-        //opt.ok4.key[6].modifiers = 0;
-        //opt.ok4.key[7].modifiers = 0;
-        //opt.ok4.key[8].modifiers = 8;
-        //opt.ok4.key[9].modifiers = 8;
-        //opt.ok4.key[10].modifiers = 8;
-        //opt.ok4.key[11].modifiers = 8;
-        //opt.ok4.key[12].modifiers = 8;
-        //opt.ok4.key[13].modifiers = 8;
-        //opt.ok4.key[14].modifiers = 1;
-        //opt.ok4.key[15].modifiers = 1;
-        //opt.ok4.key[16].modifiers = 1;
-        //opt.ok4.key[17].modifiers = 1;
-        //opt.ok4.key[18].modifiers = 1;
-        //opt.ok4.key[19].modifiers = 1;
-        //opt.ok4.key[20].modifiers = 0;
-        //opt.ok4.key[21].modifiers = 1;
-        //opt.ok4.startAlignMode = true;
-
-        //opt.okc.key[0].code = 113;
-        //opt.okc.key[1].code = 48;
-        //opt.okc.key[2].code = 49;
-        //opt.okc.key[3].code = 50;
-        //opt.okc.key[4].code = 51;
-        //opt.okc.key[5].code = 52;
-        //opt.okc.key[6].code = 53;
-        //opt.okc.key[7].code = 54;
-        //opt.okc.key[8].code = 55;
-        //opt.okc.key[9].code = 56;
-        //opt.okc.key[10].code = 57;
-        //opt.okc.key[11].code = 45;
-        //opt.okc.key[12].code = 91;
-        //opt.okc.key[13].code = 44;
-        //opt.okc.key[14].code = 40;
-        //opt.okc.key[15].code = 37;
-        //opt.okc.key[16].code = 0;
-        //opt.okc.key[17].code = 61;
-        //opt.okc.key[18].code = 93;
-        //opt.okc.key[19].code = 46;
-        //opt.okc.key[20].code = 38;
-        //opt.okc.key[21].code = 39;
-        //opt.okc.key[22].code = 0;
-        //opt.okc.key[23].code = 27;
-        //opt.okc.key[24].code = 115;
-        //opt.okc.key[0].modifiers = 0;
-        //opt.okc.key[1].modifiers = 0;
-        //opt.okc.key[2].modifiers = 0;
-        //opt.okc.key[3].modifiers = 0;
-        //opt.okc.key[4].modifiers = 0;
-        //opt.okc.key[5].modifiers = 0;
-        //opt.okc.key[6].modifiers = 0;
-        //opt.okc.key[7].modifiers = 0;
-        //opt.okc.key[8].modifiers = 0;
-        //opt.okc.key[9].modifiers = 0;
-        //opt.okc.key[10].modifiers = 0;
-        //opt.okc.key[11].modifiers = 0;
-        //opt.okc.key[12].modifiers = 0;
-        //opt.okc.key[13].modifiers = 0;
-        //opt.okc.key[14].modifiers = 0;
-        //opt.okc.key[15].modifiers = 0;
-        //opt.okc.key[16].modifiers = 0;
-        //opt.okc.key[17].modifiers = 0;
-        //opt.okc.key[18].modifiers = 0;
-        //opt.okc.key[19].modifiers = 0;
-        //opt.okc.key[20].modifiers = 0;
-        //opt.okc.key[21].modifiers = 0;
-        //opt.okc.key[22].modifiers = 0;
-        //opt.okc.key[23].modifiers = 0;
-        //opt.okc.key[24].modifiers = 8;
-        //opt.okc.param[0] = 2;
-        //opt.okc.param[1] = 1;
-        //opt.okc.param[2] = 4;
-        //opt.okc.param[3] = 8;
-        //opt.okc.param[4] = 9;
-        //opt.okc.param[5] = 0;
-
-        //opt.om3.dimMap = 3;
-        //opt.om3.size[0] = 10;
-        //opt.om3.size[1] = 10;
-        //opt.om3.size[2] = 10;
-        //opt.om3.density = 0.1;
-        //opt.om3.twistProbability = 0.2;
-        //opt.om3.branchProbability = 0.2;
-        //opt.om3.allowLoops = true;
-        //opt.om3.loopCrossProbability = 0.7;
-
-        opt.om4.dimMap = 4;
-        opt.om4.size[0] = 3;
-        opt.om4.size[1] = 3;
-        opt.om4.size[2] = 3;
-        opt.om4.size[3] = 3;
-        opt.om4.density = 1;
-        opt.om4.twistProbability = 0.4;
-        opt.om4.branchProbability = 0.2;
-        opt.om4.allowLoops = false;
-        opt.om4.loopCrossProbability = 0.7;
-
-        //opt.os.enable = true;
-        //opt.os.screenWidth = 12;
-        //opt.os.screenDistance = 30;
-        //opt.os.eyeSpacing = 3;
-        //opt.os.cross = true;
-        //opt.os.tiltVertical = -15;
-        //opt.os.tiltHorizontal = 30;
-
-        //opt.ot3.frameRate = 30;
-        //opt.ot3.timeMove = 0.8;
-        //opt.ot3.timeRotate = 0.8;
-        //opt.ot3.timeAlignMove = 2;
-        //opt.ot3.timeAlignRotate = 2;
-
-        opt.ot4.frameRate = 20;
-        opt.ot4.timeMove = 1;
-        opt.ot4.timeRotate = 0.7;
-        opt.ot4.timeAlignMove = 2;
-        opt.ot4.timeAlignRotate = 2;
-
-        //opt.ov3.depth = 6;
-        //opt.ov3.texture[0] = false;
-        //opt.ov3.texture[1] = true;
-        //opt.ov3.texture[2] = false;
-        //opt.ov3.texture[3] = true;
-        //opt.ov3.texture[4] = false;
-        //opt.ov3.texture[5] = true;
-        //opt.ov3.texture[6] = false;
-        //opt.ov3.texture[7] = true;
-        //opt.ov3.texture[8] = false;
-        //opt.ov3.texture[9] = true;
-        //opt.ov3.retina = 1.45;
-        //opt.ov3.scale = 0.95;
-
-        opt.ov4.depth = 5;
-        opt.ov4.texture[0] = false;
-        opt.ov4.texture[1] = false;
-        opt.ov4.texture[2] = false;
-        opt.ov4.texture[3] = false;
-        opt.ov4.texture[4] = false;
-        opt.ov4.texture[5] = false;
-        opt.ov4.texture[6] = false;
-        opt.ov4.texture[7] = false;
-        opt.ov4.texture[8] = false;
-        opt.ov4.texture[9] = true;
-        opt.ov4.retina = 1.8;
-        opt.ov4.scale = 0.6;
-
-        opt.od.transparency = 0.1;
-        opt.od.border = 1;
-        opt.od.useEdgeColor = false;
-        opt.od.hidesel = false;
-        opt.od.invertNormals = false;
-        opt.od.separate = true;
-
-        opt.oo.moveInputType = 0;
-        opt.oo.rotateInputType = 1;
-        opt.oo.invertLeftAndRight = false;
-        opt.oo.invertForward = false;
-
-        dim = 4;
-        gameDirectory = null;
-
-        SaveData.SetClass("optDefault", opt);
-        opt = SaveData.GetClass("opt", opt);
+        if (PropertyFile.test(reloadFile)) menuCommand = doLoadMaze;
+        else menuCommand = doLoadGeom;
     }
+
+    private bool doInit() {
+        try {
+            PropertyFile.load(nameDefault, delegate(IStore store) { loadDefault(store); });
+            if (File.Exists(fileCurrent)) PropertyFile.load(fileCurrent, load);
+        } catch (Exception e) {
+            Debug.LogException(e);
+            return false;
+        }
+        return true;
+    }
+
+   private static string nameDefault = "default.properties";
+   private static string fileCurrent = "current.properties";
+
+   private static readonly String KEY_OPTIONS = "opt";
+   private static readonly String KEY_BOUNDS  = "bounds";
+   private static readonly String KEY_GAME_DIRECTORY  = "dir.game";
+   private static readonly String KEY_IMAGE_DIRECTORY = "dir.image";
+   private static readonly String KEY_VERSION = "version";
+   private static readonly String KEY_FISHEYE = "opt.of"; // not part of opt (yet)
+
+   // here we don't have to be careful about modifying an existing object,
+   // because if any of the load process fails, the program will exit
+
+    public void loadDefault(IStore store) {
+        store.getObject(KEY_OPTIONS,optDefault);
+
+        if (File.Exists(fileCurrent)) return;
+
+        store.getObject(KEY_OPTIONS,opt);
+        dim = 4;
+        gameDirectory  = null;
+    }
+
+    public void load(IStore store) {
+
+        store.getObject(KEY_OPTIONS,opt);
+        dim = store.getInteger(KEY_DIM);
+        //if ( ! (dim == 3 || dim == 4) ) throw App.getException("Maze.e1");
+        //gameDirectory  = store.getString(KEY_GAME_DIRECTORY );
+
+        //int? temp = store.getNullableInteger(KEY_VERSION);
+        //int version = (temp == null) ? 1 : temp.Value;
+
+        //if (version >= 2) {
+            //store.getObject(KEY_FISHEYE,OptionsFisheye.of);
+            //OptionsFisheye.recalculate();
+        //}
+    }
+
+    public void save(IStore store) {
+
+        store.putObject(KEY_OPTIONS,oa.opt);
+        store.putInteger(KEY_DIM,dim);
+        //store.putString(KEY_GAME_DIRECTORY, gameDirectory);
+
+        //store.putInteger(KEY_VERSION,2);
+
+        //// version 2
+        //store.putObject(KEY_FISHEYE,OptionsFisheye.of);
+    }
+
 }

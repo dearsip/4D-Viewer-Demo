@@ -43,5 +43,47 @@ public class Map
         new MapGenerator(this, limits, om, seed).generate();
     }
 
+    public const string KEY_MAP = "map";
+    public const string KEY_START = "start";
+    public const string KEY_FINISH = "finish";
+    public Map(int dimSpace, OptionsMap om, IStore store)
+    {
+
+        int[] limits = DynamicArray.makeLimits(om.size);
+
+        map = new DynamicArray.OfBoolean(dimSpace, limits);
+        // elements start out false, which is correct
+        start = new int[dimSpace];
+        finish = new int[dimSpace];
+
+        bool[][][][] cells = new bool[om.size[0]][][][];
+        for (int i = 0; i < om.size[0]; i++) {
+            cells[i] = new bool[om.size[1]][][];
+            for (int j = 0; j < om.size[1]; j++) {
+                cells[i][j] = new bool[om.size[2]][];
+                for (int k = 0; k < om.size[2]; k++) {
+                    cells[i][j][k] = new bool[om.size[3]];
+                }
+            }
+        }
+        store.getObject(KEY_MAP,cells);
+        int[] p = new int[dimSpace];
+        for (int i = 0; i < om.size[0]; i++) {
+            p[0] = i+1;
+            for (int j = 0; j < om.size[1]; j++) {
+                p[1] = j+1;
+                for (int k = 0; k < om.size[2]; k++) {
+                    p[2] = k+1;
+                    for (int l = 0; l < om.size[2]; l++) {
+                        p[3] = l+1;
+                        setOpen(p, cells[i][j][k][l]);
+                    }
+                }
+            }
+        }
+        store.getObject(KEY_START, start);
+        store.getObject(KEY_FINISH, finish);
+    }
+
 }
 

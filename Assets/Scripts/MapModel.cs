@@ -32,9 +32,10 @@ public class MapModel : IModel
 
     // --- construction ---
 
-    public MapModel(int dimSpace, OptionsMap om, OptionsColor oc, OptionsSeed oe, OptionsView ov)
+    public MapModel(int dimSpace, OptionsMap om, OptionsColor oc, OptionsSeed oe, OptionsView ov, IStore store)
     {
-        map = new Map(dimSpace, om, oe.mapSeed);
+        if (store != null) map = new Map(dimSpace, om, store);
+        else map = new Map(dimSpace, om, oe.mapSeed);
         colorizer = new Colorizer(dimSpace, om.dimMap, om.size, oc, oe.colorSeed);
         renderAbsolute = new RenderAbsolute(dimSpace, map, colorizer, ov, this);
         bufAbsolute = new PolygonBuffer(dimSpace);
@@ -114,7 +115,9 @@ public class MapModel : IModel
         renderAbsolute.setDepth(depth);
         renderAbsolute.setTexture(texture);
         renderAbsolute.setTransparency(od.transparency);
+        renderAbsolute.setTransparency(od.transparency);
         renderAbsolute.useEdgeColor = od.useEdgeColor;
+        renderAbsolute.usePolygon = od.usePolygon;
         geomModel.setOptions(oc, seed, depth, texture, od);
         showMap = od.map;
     }
@@ -175,18 +178,18 @@ public class MapModel : IModel
         renderAbsolute.setBuffer(buf);
     }
 
-    public override void animate()
+    public override void animate(double delta)
     {
     }
 
     private Polygon p;
-    public override void render(double[] origin)
+    public override void render(double[] origin, double[][] axis)
     {
         renderAbsolute.run(origin);
         if (showMap) {
-            Vec.addScaled(reg, origin, axis[3], -distance);
-            geomModel.render(reg);
-            geomRelative.run(axis);
+            Vec.addScaled(reg, origin, this.axis[3], -distance);
+            geomModel.render(reg, axis);
+            geomRelative.run(this.axis, false);
             for (int i = 0; i < bufRelative.getSize(); i++)
             {
                 p = bufRelative.get(i);

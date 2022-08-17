@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 /**
  * A helper class to hold the line-clipping algorithm.
@@ -44,6 +45,7 @@ public class Clip
     {
         int getSize();
         Boundary getBoundary(int i);
+        void sort(double[] from);
     }
 
     public interface Boundary
@@ -141,16 +143,23 @@ public class Clip
     // 出力は複数の凸多角形になるので、list に入れる。
     public static void clip(Polygon polygon, BoundaryList boundaryList, List<Polygon> list)
     {
+        Polygon reg = new Polygon();
+        reg.copy(polygon);
         if (boundaryList.getSize() == 0)
         {
             list.Add(polygon);
             return;
         }
+        boundaryList.sort(polygon.vertex[0]);
         for (int i = 0; i < boundaryList.getSize(); i++)
         {
             Boundary boundary = boundaryList.getBoundary(i);
             polygon = clip(polygon, boundary, list); // 隠れる部分が返されるので、次の boundary を適用する
-            if (polygon == null) break; // 隠れる部分が無ければその時点で終了
+            if (polygon == null) { // 隠れる部分が無ければ、元のpolygonを返す
+                list.Clear();
+                list.Add(reg);
+                break;
+            }
         }
 
     }
@@ -176,7 +185,6 @@ public class Clip
         bool _np;
         for (int i = 1; i < size; i++)
         {
-            if (polygon.vertex[i] == null) Debug.Log(i + " in " + size);
             _np = Vec.dot(polygon.vertex[i], n) - t > epsilon;
             if (np ^ _np) // 変化あり
             {
@@ -278,7 +286,7 @@ public class Clip
     {
 
         public double[] n;
-        private double t;
+        public double t;
 
         public CustomBoundary(double[] n, double t)
         {
@@ -328,6 +336,7 @@ public class Clip
     {
 
         private List<Boundary> boundaries;
+        private double[] center;
 
         public CustomBoundaryList()
         {
@@ -335,9 +344,20 @@ public class Clip
         }
 
         public void addBoundary(Boundary b) { boundaries.Add(b); }
+        public void setCenter(double[] c) { center = new double[c.Length]; Vec.copy(center, c); }
 
         public int getSize() { return boundaries.Count; }
         public Boundary getBoundary(int i) { return boundaries[i]; }
+        public void sort(double[] from) {
+            double[] ns = new double[boundaries.Count];
+            double[] vector = new double[center.Length];
+            Vec.sub(vector, center, from);
+            for (int i = 0; i < boundaries.Count; i++) ns[i] = Vec.dot(boundaries[i].getNormal(), vector);
+            boundaries = boundaries.Select((x, i) => new KeyValuePair<Boundary,int>(x,i))
+                                   .OrderBy(x => ns[x.Value])
+                                   .Select(x => x.Key)
+                                   .ToList();
+        }
     }
 
     public static CustomBoundaryList calcViewBoundaries(double[] origin, Geom.Shape shape)
@@ -345,6 +365,7 @@ public class Clip
 
         CustomBoundaryList list = new CustomBoundaryList();
 
+        list.setCenter(shape.aligncenter);
         // clip by subfaces where one face is visible and the other not
         for (int i = 0; i < shape.subface.Length; i++)
         {
@@ -592,7 +613,8 @@ public class Clip
         // find a separator for a railcar, but railcars haven't animated yet.
         // it's just not worth getting into it.
 
-        return (gjk.separate(s1, s2) != Geom.nullSeparator);
+        //return (gjk.separate(s1, s2) != Geom.nullSeparator);
+        return (staticSeparate(s1,s2,/* any = */ true) != Geom.nullSeparator);
     }
 
     public static bool isSeparated(Geom.Shape shape, List<Geom.Shape> list, GJKTester gjk)

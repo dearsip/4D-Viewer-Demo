@@ -90,14 +90,14 @@ public class Geom
 
     public static Color getColor(Color c1)
     {
-        if (c1.a != 0) return c1;
+        if (c1 != null && c1.a != 0) return c1;
         return Color.green; // the default color
     }
 
     public static Color getColor(Color c1, Color c2)
     {
-        if (c1 != null) return c1;
-        if (c2 != null) return c2;
+        if (c1 != null && c1.a > 0) return c1;
+        if (c2 != null && c2.a > 0) return c2;
         return Color.green; // the default color
     }
 
@@ -381,6 +381,7 @@ public class Geom
 
         public int getSize() { return cell.Length; }
         public Clip.Boundary getBoundary(int i) { return cell[i]; }
+        public void sort(double[] from) {}
 
         public void unglue(List<ShapeInterface> c)
         {
@@ -1000,7 +1001,7 @@ public class Geom
 
     public interface CustomTexture
     {
-        void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency);
+        void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin);
     }
 
     // --- texture ---
@@ -1077,18 +1078,17 @@ public class Geom
             }
         }
 
-        public void draw(Shape shape, Cell cell, IDraw currentDraw, double[] origin, double transparency)
+        public virtual void draw(out double[][] texture, out Color[] textureColor, Cell cell, double[] origin)
         {
-            Polygon poly = new Polygon();
-            poly.vertex = new double[2][];
-            for (int i = 0; i < edge.Length; i++)
-            {
+            texture = new double[edge.Length*2][];
+            textureColor = new Color[edge.Length];
+            for (int i=0; i<edge.Length; i++) {
                 Edge e = edge[i];
-                poly.vertex[0] = vertex[e.iv1];
-                poly.vertex[1] = vertex[e.iv2];
-                poly.color = getColor(e.color, cell.color);
-                poly.color.a = (float)transparency;
-                currentDraw.drawPolygon(poly, origin);
+                texture[i*2  ] = new double[vertex[0].Length];
+                Vec.copy(texture[i*2  ], vertex[e.iv1]);
+                texture[i*2+1] = new double[vertex[0].Length];
+                Vec.copy(texture[i*2+1], vertex[e.iv2]);
+                textureColor[i] = getColor(e.color,cell.color);
             }
         }
 
@@ -1314,6 +1314,11 @@ public class Geom
         public Edge[] toEdgeArray()
         {
             return enew.ToArray();
+        }
+
+        public Face[] toFaceArray()
+        {
+            return (fnew != null) ? fnew.ToArray() : null;
         }
 
         // face functions (that do call edge functions)

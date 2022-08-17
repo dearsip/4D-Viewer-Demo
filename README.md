@@ -1,89 +1,38 @@
-# 4D Viewer Demo
+# 4D Blocks VR
 
-![4D Viewer Demo](https://gyazo.com/d1925f09be7e199be6ecca24a74cb23c.jpg)
+[![Demo video](https://gyazo.com/04e219106b76c30e0f66cf756b11da0f.jpg)](https://www.youtube.com/watch?v=UfiLcmWSnhQ)
+[Other videos](https://youtube.com/playlist?list=PLRQX24s1tXDyZbSLL0KYK_4OtUO6RO2DF)
 
-陰面消去（陰胞消去）を搭載した多胞体表示ソフト。[→動画](https://youtube.com/playlist?list=PLRQX24s1tXDyZbSLL0KYK_4OtUO6RO2DF)
+Port of [4D Action Game](https://github.com/dearsip/4D-Action-Game),
+an extension of [4D Blocks](http://www.urticator.net/blocks/v6/index.html).
 
-[4D Blocks](http://www.urticator.net/blocks/v6/index.html)のソースコードを流用している。
-また、実装には[4dforvive](https://github.com/leo92613/4dforvive)を一部参考にしている。
+## Unimplemented Features & Notes
 
-流用している部分はコメントもそのまま載せている。追加、変更した箇所については日本語でコメントを書いている。
+- Load 3D scene
+- Save
+- Paint
+- Scatter
+- Extended add-shapes (shift-insert)
+- Toggle multi-rail and monorail
+- Fisheyes are only available in Maze
+- Incorrect coloring
+- Some setting items are reflected immediately without pressing the OK button
+- You need to press the Exit button to save settings to current.properties
+- Don't forget to include default.properties and data/lib when building
 
-## 操作方法
+## Key & Mouse Inputs
 
-原則右手のみ。
+- WERASDFZ: Move
+- (Shift+) UIOJKL: Rotate
+- Alt+ Move or Rotate: Show Input Vectors as a guide
+- XCVBNM,.: Show button guides
+- Esc: Open/Close menu on the desktop
+- Left mouse button: Point with orange line as a guide
+- Right mouse button: Rotate the camera
+- Center mouse button & wheel: Move the camera
+- Enter: Reset the camera
+- Space: Toggle camera type
 
-### トラックパッド（位置は自由）
-- 押している間、図形を回転させる。
-- Editモード中、選択した胞の色を変更する。
+## 4D Viewer (legacy)
 
-### トリガー
-- 設定ウィンドウのボタン及びスライダーを操作する。
-
-### 右グリップボタン
-押している間、ディスプレイ及び設定ウィンドウの位置を動かす。
-
-### 左グリップボタン
-操作方法の表示・非表示を切り替える。
-
-## 設定
-### Shape
-表示する図形を変更する。
-
-### Random
-チェックの入った図形からランダムに選択する。
-
-### Color
-図形の配色を変更する。
-
-### Transparency
-胞・面・辺の表示設定を変更する。
-
-### Border
-画面の手前側の胞の不透明度を下げて内部を見やすくする。
-
-### Disable w-rotation
-視線方向の軸を巻き込んだ回転を無効化する。
-
-### Disable z-rotation
-z軸方向の軸を巻き込んだ回転を無効化する。
-
-### Edit
-Editモードに切り替える。Editモード中はコントローラーを胞に重ねながらトリガーを引くことで胞の色を変更できる。
-
-### Slice
-z軸方向に垂直な超平面による切断面を表示する。
-
-### Retina
-視野角を変更する。
-
-### Size
-ディスプレイの大きさを変更する。
-
-### Offset
-表示する胞の大きさを変更する。
-
-### Save
-胞の配色をテキストファイルに出力する。なお、現在テキストファイルから直接配色を読み込む機能は実装されていない。
-
-### Reset
-図形の向きを初期化する。
-
-### Ortho
-視野角をごく小さくする。
-
-### Scene
-4D Blocks VRに切り替える。
-
-## 4D Blocks VR
-4D Blocksの移植。
-
-未実装機能及び追加機能あり。
-### 操作方法
-- 左トラックパッドを押し込みながらコントローラーを水平にひねる: 前進・後退
-- 左トラックパッドを押し込みながらコントローラーを動かす: 平行移動
-- 右トラックパッドを押し込みながらコントローラーを動かす: 回転
-- トリガー: 選択等
-- メニューボタン: メニュー表示
-- 右グリップボタン: ディスプレイ及び設定ウィンドウの位置を動かす
-- 左グリップボタン: 操作方法の表示・非表示を切り替える
+Press the Scene button to switch scenes

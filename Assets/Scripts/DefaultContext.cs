@@ -91,29 +91,29 @@ public class DefaultContext
         c.dict.Add("lift", new Command.Lift());
         c.dict.Add("project", new Command.Project());
 
-      //  c.dict.Add("newtrack", new Command.NewTrack());
-      //  c.dict.Add("newtrack2", new Command.NewTrack2());
-      //  c.dict.Add("platformstyle", new Command.Set(Track.class,"setPlatformStyle"));
-      //c.dict.Add("platformthickness",new Command.Set(Track.class,"setPlatformThickness"));
-      //c.dict.Add("platformwidth",new Command.Set(Track.class,"setPlatformWidth"));
-      //c.dict.Add("platformcolor",new Command.Set(Track.class,"setPlatformColor",Color.class));
-      //c.dict.Add("platformcorner",new Command.Set(Track.class,"setPlatformCorner",Boolean.TYPE));
-      //c.dict.Add("ramptriangle",new Command.Set(Track.class,"setRampTriangle",Boolean.TYPE));
-      //c.dict.Add("pylonwidth",new Command.Set(Track.class,"setPylonWidth"));
-      //c.dict.Add("pylonsides",new Command.Set(Track.class,"setPylonSides"));
-      //c.dict.Add("pylonoffset",new Command.Set(Track.class,"setPylonOffset",Boolean.TYPE));
-      //c.dict.Add("track",new Command.AddTrack());
-      //c.dict.Add("platforms",new Command.AddPlatforms());
-      //c.dict.Add("platform", new Command.AddPlatform(false));
-      //c.dict.Add("rplatform",new Command.AddPlatform(true));
-      //c.dict.Add("roundshape",new Command.RoundShape());
-      //// maybe add thinshape some day
-      //c.dict.Add("ramp",new Command.AddRamp());
-      //c.dict.Add("pylon", new Command.AddPylon(false));
-      //c.dict.Add("bpylon",new Command.AddPylon(true));
-      //c.dict.Add("train",new Command.TrainCtor());
-      //c.dict.Add("car",   new Command.CarCtor(false));
-      //c.dict.Add("lencar",new Command.CarCtor(true));
+        c.dict.Add("newtrack", new Command.NewTrack());
+        c.dict.Add("newtrack2", new Command.NewTrack2());
+        c.dict.Add("platformstyle", new Command.Set(typeof(Track),"setPlatformStyle"));
+      c.dict.Add("platformthickness",new Command.Set(typeof(Track),"setPlatformThickness"));
+      c.dict.Add("platformwidth",new Command.Set(typeof(Track),"setPlatformWidth"));
+      c.dict.Add("platformcolor",new Command.Set(typeof(Track),"setPlatformColor",typeof(Color)));
+      c.dict.Add("platformcorner",new Command.Set(typeof(Track),"setPlatformCorner",typeof(bool)));
+      c.dict.Add("ramptriangle",new Command.Set(typeof(Track),"setRampTriangle",typeof(bool)));
+      c.dict.Add("pylonwidth",new Command.Set(typeof(Track),"setPylonWidth"));
+      c.dict.Add("pylonsides",new Command.Set(typeof(Track),"setPylonSides"));
+      c.dict.Add("pylonoffset",new Command.Set(typeof(Track),"setPylonOffset",typeof(bool)));
+      c.dict.Add("track",new Command.AddTrack());
+      c.dict.Add("platforms",new Command.AddPlatforms());
+      c.dict.Add("platform", new Command.AddPlatform(false));
+      c.dict.Add("rplatform",new Command.AddPlatform(true));
+      c.dict.Add("roundshape",new Command.RoundShape());
+      // maybe add thinshape some day
+      c.dict.Add("ramp",new Command.AddRamp());
+      c.dict.Add("pylon", new Command.AddPylon(false));
+      c.dict.Add("bpylon",new Command.AddPylon(true));
+      c.dict.Add("train",new Command.TrainCtor());
+      c.dict.Add("car",   new Command.CarCtor(false));
+      c.dict.Add("lencar",new Command.CarCtor(true));
 
       c.dict.Add("mat3",new Command.ConstructSetColor(typeof(Mat.Mat3)));
       c.dict.Add("mat4",new Command.ConstructSetColor(typeof(Mat.Mat4)));
@@ -148,15 +148,15 @@ public class DefaultContext
       c.dict.Add("sky",new Command.Sky());
       c.dict.Add("sun",new Command.Sun());
 
-      //c.dict.Add("TM_SQUARE",new Double(Train.TM_SQUARE));
-      //c.dict.Add("TM_ROUND", new Double(Train.TM_ROUND ));
-      //c.dict.Add("TM_ROTATE",new Double(Train.TM_ROTATE));
+      c.dict.Add("TM_SQUARE",(double)Train.TM_SQUARE);
+      c.dict.Add("TM_ROUND", (double)Train.TM_ROUND );
+      c.dict.Add("TM_ROTATE",(double)Train.TM_ROTATE);
 
-      //c.dict.Add("PS_SQUARE",    new Double(Platform.PS_SQUARE    ));
-      //c.dict.Add("PS_ROUND",     new Double(Platform.PS_ROUND     ));
-      //c.dict.Add("PS_ROUND_MORE",new Double(Platform.PS_ROUND_MORE));
-      //c.dict.Add("PS_THIN",      new Double(Platform.PS_THIN      ));
-      //c.dict.Add("PS_THIN_ROUND",new Double(Platform.PS_THIN_ROUND));
+      c.dict.Add("PS_SQUARE",    (double)Platform.PS_SQUARE    );
+      c.dict.Add("PS_ROUND",     (double)Platform.PS_ROUND     );
+      c.dict.Add("PS_ROUND_MORE",(double)Platform.PS_ROUND_MORE);
+      c.dict.Add("PS_THIN",      (double)Platform.PS_THIN      );
+      c.dict.Add("PS_THIN_ROUND",(double)Platform.PS_THIN_ROUND);
 
       c.dict.Add("PROJ_NONE",   (double)Vec.PROJ_NONE   );
       c.dict.Add("PROJ_NORMAL", (double)Vec.PROJ_NORMAL );
@@ -177,14 +177,14 @@ public class DefaultContext
       c.dict.Add("w+",6.0);
       c.dict.Add("w-",7.0);
 
-      //c.dict.Add("STAND",       new Double(Enemy.STAND      ));
-      //c.dict.Add("STAND_SHOOT", new Double(Enemy.STAND_SHOOT));
-      //c.dict.Add("WALK",        new Double(Enemy.WALK       ));
-      //c.dict.Add("WALK_SHOOT",  new Double(Enemy.WALK_SHOOT ));
+      c.dict.Add("STAND",       (double)Enemy.STAND      );
+      c.dict.Add("STAND_SHOOT", (double)Enemy.STAND_SHOOT);
+      c.dict.Add("WALK",        (double)Enemy.WALK       );
+      c.dict.Add("WALK_SHOOT",  (double)Enemy.WALK_SHOOT );
 
-      //c.dict.Add("FOOT",         new Double(Struct.FOOT        ));
-      //c.dict.Add("COMPASS",      new Double(Struct.COMPASS     ));
-      //c.dict.Add("FOOT_COMPASS", new Double(Struct.FOOT_COMPASS));
+      c.dict.Add("FOOT",         (double)Struct.FOOT        );
+      c.dict.Add("COMPASS",      (double)Struct.COMPASS     );
+      c.dict.Add("FOOT_COMPASS", (double)Struct.FOOT_COMPASS);
 
       // have to be a little careful because these are 4D,
       // but they'll work in the situations I use them in.
@@ -211,9 +211,9 @@ public class DefaultContext
 
       c.dict.Add("finishinfo",new Command.FinishInfo());
       c.dict.Add("footinfo",new Command.FootInfo());
-      //c.dict.Add("blockinfo",new Command.BlockInfo());
+      c.dict.Add("blockinfo",new Command.BlockInfo());
 
-      //c.dict.Add("enemy",new Command.NewEnemy());
+      c.dict.Add("enemy",new Command.NewEnemy());
 
       return c;
    }

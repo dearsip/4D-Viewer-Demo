@@ -11,7 +11,7 @@ public class HapticsTester : MonoBehaviour
     private Vector3[] centers;
     private Color[] colors;
     private int[] triangles;
-    private int oNum = FourDDemo.outputNum.Length;
+    private int oNum = FourDDemo.outputPlc.Length;
     private int hNum = FourDDemo.hNum;
     private int hNum2 = FourDDemo.hNum2;
     private int hNum3 = FourDDemo.hNum3;
@@ -19,6 +19,8 @@ public class HapticsTester : MonoBehaviour
     private float[] outputs;
     private float scale = 1.4f;
     private Color sel = Color.cyan;
+    private Color inn = Color.red;
+    private bool[] isInn = FourDDemo.isInn;
     private Color nosel = Color.white;
 
     // Start is called before the first frame update
@@ -26,6 +28,7 @@ public class HapticsTester : MonoBehaviour
     {
         GetComponent<Transform>().localScale *= scale;
         mesh = new Mesh();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
         vertices = new Vector3[oNum * 8];
         colors = new Color[oNum * 8];
         triangles = new int[oNum * 36];
@@ -47,14 +50,14 @@ public class HapticsTester : MonoBehaviour
         };
         for (int i = 0; i < oNum; i++)
         {
-            int num = FourDDemo.outputNum[i];
+            float[] plc = FourDDemo.outputPlc[i];
             centers[i] = new Vector3();
-            centers[i].Set(num % hNum - hNumh, num / hNum % hNum - hNumh, num / hNum2 - hNumh);
+            centers[i].Set(plc[0] - hNumh, plc[1] - hNumh, plc[2] - hNumh);
             centers[i] *= 1 / hNumh * 1.2f;
             for (int j = 0; j < 8; j++)
             {
                 vertices[8 * i + j].Set(centers[i].x, centers[i].y, centers[i].z);
-                colors[8 * i + j] = sel;
+                colors[8 * i + j] = (isInn[i]) ? inn : sel;
             }
             Array.ConstrainedCopy(cubeTriangles, 0, triangles, 36 * i, 36);
             for (int j = 0; j < 36; j++) cubeTriangles[j] += 8;
@@ -84,6 +87,5 @@ public class HapticsTester : MonoBehaviour
         mesh.vertices = vertices;
 
         mesh.RecalculateNormals();
-        GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 }

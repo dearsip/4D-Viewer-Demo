@@ -4,7 +4,6 @@
  * A utility class for manipulating direction numbers.
  * In D dimensions there are 2*D directions, numbered from 0 to 2*D - 1.
  */
- // 恐らく本プログラムでは使用されていないが念のため残してある。
 public class Dir
 {
 // --- constants ---

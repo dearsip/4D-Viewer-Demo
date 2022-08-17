@@ -3,6 +3,7 @@
  */
 
 using UnityEngine;
+using System.Collections.Generic;
 //import java.awt.Color;
 
 /**
@@ -32,8 +33,10 @@ public class Mat
 
         public void setColor(Color color) { FC = color; }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             reg1[1] = 0;
             for (int i = 0; i < FI.Length; i++)
             {
@@ -42,14 +45,16 @@ public class Mat
                 Vec.copy(reg2, reg1);
                 reg1[0] = F1;
                 reg2[0] = F2;
-                currentDraw.drawLine(reg1, reg2, FC, origin);
+                drawLine(reg1, reg2, FC);
 
                 reg1[0] = FI[i];
                 Vec.copy(reg2, reg1);
                 reg1[2] = F1;
                 reg2[2] = F2;
-                currentDraw.drawLine(reg1, reg2, FC, origin);
+                drawLine(reg1, reg2, FC);
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -60,8 +65,10 @@ public class Mat
 
         public void setColor(Color color) { FC = color; }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             reg1[1] = 0;
             for (int i = 0; i < FI.Length; i++)
             {
@@ -73,23 +80,25 @@ public class Mat
                     Vec.copy(reg2, reg1);
                     reg1[0] = F1;
                     reg2[0] = F2;
-                    currentDraw.drawLine(reg1, reg2, FC, origin);
+                    drawLine(reg1, reg2, FC);
 
                     reg1[0] = FI[i];
                     reg1[3] = FI[j];
                     Vec.copy(reg2, reg1);
                     reg1[2] = F1;
                     reg2[2] = F2;
-                    currentDraw.drawLine(reg1, reg2, FC, origin);
+                    drawLine(reg1, reg2, FC);
 
                     reg1[0] = FI[i];
                     reg1[2] = FI[j];
                     Vec.copy(reg2, reg1);
                     reg1[3] = F1;
                     reg2[3] = F2;
-                    currentDraw.drawLine(reg1, reg2, FC, origin);
+                    drawLine(reg1, reg2, FC);
                 }
             }
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
@@ -107,19 +116,19 @@ public class Mat
             reg1[a2] = 0;
             reg2[a1] = 0;
             reg2[a2] = 1;
-            currentDraw.drawLine(reg1, reg2, FC, origin);
+            drawLine(reg1, reg2, FC);
 
             reg1[a1] = 1;
             reg1[a2] = 1;
-            currentDraw.drawLine(reg1, reg2, FC, origin);
+            drawLine(reg1, reg2, FC);
 
             reg2[a1] = 1;
             reg2[a2] = 0;
-            currentDraw.drawLine(reg1, reg2, FC, origin);
+            drawLine(reg1, reg2, FC);
 
             reg1[a1] = 0;
             reg1[a2] = 0;
-            currentDraw.drawLine(reg1, reg2, FC, origin);
+            drawLine(reg1, reg2, FC);
         }
 
         private void squares(int a1, int a2, int a3)
@@ -134,8 +143,10 @@ public class Mat
             square(a1, a2);
         }
 
-        protected override void draw()
+        protected override void draw(out double[][] texture, out Color[] textureColor)
         {
+            tList.Clear();
+            cList.Clear();
             reg1[1] = 0;
             for (int i = 0; i < FIa.Length; i++)
             {
@@ -145,31 +156,37 @@ public class Mat
                 Vec.copy(reg2, reg1);
                 reg1[0] = F1;
                 reg2[0] = F2;
-                currentDraw.drawLine(reg1, reg2, FC, origin);
+                drawLine(reg1, reg2, FC);
 
                 reg1[0] = FIa[i];
                 reg1[3] = FIb[i];
                 Vec.copy(reg2, reg1);
                 reg1[2] = F1;
                 reg2[2] = F2;
-                currentDraw.drawLine(reg1, reg2, FC, origin);
+                drawLine(reg1, reg2, FC);
 
                 reg1[0] = FIa[i];
                 reg1[2] = FIb[i];
                 Vec.copy(reg2, reg1);
                 reg1[3] = F1;
                 reg2[3] = F2;
-                currentDraw.drawLine(reg1, reg2, FC, origin);
+                drawLine(reg1, reg2, FC);
             }
             squares(0, 2, 3);
             squares(3, 0, 2);
             squares(2, 3, 0);
+            texture = tList.ToArray();
+            textureColor = cList.ToArray();
         }
     }
 
     public class NoMat : IScenery
     {
-        public void draw(IDraw currentDraw, double[] origin) { }
+        public void draw(out double[][] texture, out Color[] textureColor, double[] origin) 
+        { 
+            texture = new double[0][];
+            textureColor = new Color[0];
+        }
     }
 
 }

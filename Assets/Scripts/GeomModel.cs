@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 //import java.awt.Color;
 //import java.io.File;
 //import java.io.FileWriter;
@@ -30,13 +31,14 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected Clip.Draw[] clipUnits;
     private bool[][] inFront;
     private Geom.Separator[][] separators;
-    private bool useEdgeColor;
+    protected bool usePolygon;
+    protected bool useEdgeColor;
     protected Geom.Shape selectedShape;
     protected int hitShape, drawing;
     private int[] axisDirection; // direction of each axis, chosen when shape selected
-    private bool useSeparation;
-    private bool invertNormals;
-    private bool hideSel; // hide selection marks
+    protected bool useSeparation;
+    protected bool invertNormals;
+    protected bool hideSel; // hide selection marks
     private Struct.DrawInfo drawInfo;
     private Struct.ViewInfo viewInfo;
     protected Clip.GJKTester gjk;
@@ -49,7 +51,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected double[] reg1;
     protected double[] reg2;
     protected Clip.Result clipResult;
-    private IDraw currentDraw;
+    protected IDraw currentDraw;
 
     private List<NamedObject<Color>> availableColors;
     private List<NamedObject<Geom.Shape>> availableShapes;
@@ -66,6 +68,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected int shapeNumber; // extra result from canMove
 
     private double transparency;
+    protected double cameraDistance;
 
     // --- construction ---
 
@@ -93,7 +96,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         hideSel = false;
         this.drawInfo = drawInfo;
         this.viewInfo = viewInfo;
-        gjk = new Clip.GJKTester(dim);
+        //gjk = new Clip.GJKTester(dim);
+        availableColors = new List<NamedObject<Color>>();
+        availableShapes = new List<NamedObject<Geom.Shape>>();
         //file = new File("../separateLog.txt");
 
         origin = new double[dim];
@@ -104,6 +109,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clipResult = new Clip.Result();
 
         paintColor = Color.red; // annoying to have to set up every time
+
+        clip = new Clip.CustomBoundary[2 * (dim - 1)];
+        axisClip = new Clip.CustomBoundary[2 * (dim - 1)];
+        for (int i = 0; i < axisClip.Length; i++) axisClip[i] = new Clip.CustomBoundary(new double[dim], 0);
     }
 
     public int getDimension() { return dim; }
@@ -201,15 +210,17 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
                     if (isMobile(s1) || isMobile(s2))
                     {
-                        sep = separate(s1, s2, i, j);//Clip.staticSeparate(s1,s2,/* any = */ false);
-                                                     // don't remember the separator
+                        //sep = separate(s1, s2, i, j);
+                        sep = Clip.staticSeparate(s1,s2,/* any = */ false);
+                        // don't remember the separator
                     }
                     else
                     {
                         sep = separators[i][j];
                         if (sep == null)
                         {
-                            sep = separate(s1, s2, i, j);//Clip.staticSeparate(s1,s2,/* any = */ false);
+                            //sep = separate(s1, s2, i, j);
+                            sep = Clip.staticSeparate(s1,s2,/* any = */ false);
                             separators[i][j] = sep;
                         }
                     }
@@ -272,10 +283,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     // --- implementation of IKeysNew ---
 
-    public void adjustSpeed(int dv) { }
-    public void toggleTrack() { }
+    public virtual void adjustSpeed(int dv) { }
+    public virtual void toggleTrack() { }
 
-    public void toggleEdgeColor()
+    public virtual void toggleEdgeColor()
     {
         useEdgeColor = !useEdgeColor;
     }
@@ -330,11 +341,11 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    protected void clickNoShape(double[] origin, double[] viewAxis)
+    protected virtual void clickNoShape(double[] origin, double[] viewAxis)
     {
     }
 
-    protected void clickNoUserMove(Geom.Shape shape, double[] origin, double[] viewAxis)
+    protected virtual void clickNoUserMove(Geom.Shape shape, double[] origin, double[] viewAxis)
     {
     }
 
@@ -402,7 +413,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public void scramble(bool alignMode, double[] origin)
+    public virtual void scramble(bool alignMode, double[] origin)
     {
 
         if (selectedShape != null) return;
@@ -421,7 +432,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clearAllSeparators();
     }
 
-    public void toggleSeparation()
+    public virtual void toggleSeparation()
     {
         useSeparation = !useSeparation;
     }
@@ -516,7 +527,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         return shape;
     }
 
-    public bool canAddShapes()
+    public virtual bool canAddShapes()
     {
         return (selectedShape == null && availableShapes.Count > 0 && availableColors.Count > 0);
         // no real reason for checking selectedShape,
@@ -524,7 +535,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         // have to check available colors in case user picks random color.
     }
 
-    public void addShapes(int quantity, bool alignMode, double[] origin, double[] viewAxis)
+    public virtual void addShapes(int quantity, bool alignMode, double[] origin, double[] viewAxis)
     {
         // caller must check canAddShapes
 
@@ -556,7 +567,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         Scramble.scramble(todo, done, alignMode, origin, gjk);
     }
 
-    public void removeShape(double[] origin, double[] viewAxis)
+    public virtual void removeShape(double[] origin, double[] viewAxis)
     {
 
         // find the target shape (very similar to click)
@@ -581,23 +592,23 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         clearSeparators(i);
     }
 
-    public void toggleNormals()
+    public virtual void toggleNormals()
     {
         invertNormals = !invertNormals;
     }
 
-    public void toggleHideSel()
+    public virtual void toggleHideSel()
     {
         hideSel = !hideSel;
     }
 
-    public bool canPaint()
+    public virtual bool canPaint()
     {
         return (availableColors.Count > 0); // in case the color is random.
                                             // allow painting when a shape is selected, that's a natural action.
     }
 
-    public void paint(double[] origin, double[] viewAxis)
+    public virtual void paint(double[] origin, double[] viewAxis)
     {
         // caller must check canPaint
 
@@ -625,7 +636,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public void jump()
+    public virtual void jump()
     {
     }
 
@@ -721,6 +732,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         //if (a1 >= 2 || a2 >= 2) theta = -theta;
         //selectedShape.rotateFrame(axisDirection[a1], axisDirection[a2], theta, null);
 
+        if (from[3]==0) Vec.swap(from, to, reg1);
         Vec.fromAxisCoordinates(reg1, from, axis);
         Vec.fromAxisCoordinates(reg2, to, axis);
         Vec.normalize(reg1, reg1);
@@ -819,7 +831,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         }
     }
 
-    public bool getAlignMode(bool defaultAlignMode)
+    public virtual bool getAlignMode(bool defaultAlignMode)
     { // not in IModel, but like initPlayer
         if (viewInfo != null)
         {
@@ -873,10 +885,60 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     {
         setTexture(texture);
         setTransparency(od.transparency);
+        usePolygon = od.usePolygon;
         useEdgeColor = od.useEdgeColor;
         hideSel = od.hidesel;
         invertNormals = od.invertNormals;
         useSeparation = od.separate;
+        cameraDistance = od.cameraDistance;
+    }
+
+    private double retina;
+    private Clip.CustomBoundary[] clip, axisClip;
+    private double orthoRetina = 2;
+    public void setRetina(double retina) // almost same as RenderRelative.setRetina
+    {
+        this.retina = retina;
+
+        int next = 0;
+        double[] reg;
+        if (retina > 0)
+        for (int a = 0; a < dim - 1; a++)
+        {
+
+            reg = new double[dim];
+            reg[a] = 1;
+            reg[dim - 1] = retina;
+            Vec.normalize(reg, reg); // for convert
+            clip[next] = new Clip.CustomBoundary(reg, 0);
+            next++;
+
+            reg = new double[dim];
+            reg[a] = -1;
+            reg[dim - 1] = retina;
+            clip[next] = new Clip.CustomBoundary(reg, 0);
+            next++;
+
+            // no need to zero other components,
+            // they never become nonzero
+        }
+        else 
+        for (int a = 0; a < dim - 1; a++)
+        {
+
+            reg = new double[dim];
+            reg[a] = 1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            reg = new double[dim];
+            reg[a] = -1;
+            clip[next] = new Clip.CustomBoundary(reg, -orthoRetina);
+            next++;
+
+            // no need to zero other components,
+            // they never become nonzero
+        }
     }
 
     public override bool isAnimated()
@@ -945,35 +1007,46 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         this.buf = buf;
     }
 
-    public override void animate()
+    public override void animate(double delta)
     {
     }
 
-    public override void render(double[] origin)
+    public override void render(double[] origin, double[][] axis)
     {
-        renderer(origin);
+        renderer(origin, axis);
     }
 
-    protected void renderer(double[] origin)
+    protected void renderer(double[] origin, double[][] axis)
     {
         buf.clear();
         Vec.copy(this.origin, origin);
+        viewBoundaryConvert(axis);
+
+        double[] dist = new double[shapes.Length];
+        for (int i = 0; i < shapes.Length; i++) if (shapes[i] != null) dist[i] = Vec.dist2(shapes[i].aligncenter, origin);
+        int[] s= dist.Select((x, i) => new KeyValuePair<double,int>(x,i))
+                         .OrderBy(x => -x.Key)
+                         .Select(x => x.Value)
+                         .ToArray();
 
         // calcViewBoundaries is expensive, but we always need the boundaries
         // to draw the scenery correctly
         currentDraw = buf;
         for (int i = 0; i < shapes.Length; i++)
         {
-            if (shapes[i] == null) continue;
-            calcVisShape(shapes[i]);
-            clipUnits[i].setBoundaries(Clip.calcViewBoundaries(origin, shapes[i]));
-            currentDraw = clipUnits[i].chain(currentDraw); // set up for floor drawing
+            if (shapes[s[i]] == null) continue;
+            calcVisShape(shapes[s[i]]);
+            clipUnits[s[i]].setBoundaries(Clip.calcViewBoundaries(origin, shapes[s[i]]));
+            currentDraw = clipUnits[s[i]].chain(currentDraw); // set up for floor drawing
         }
 
         // currentDraw includes all objects, scenery must be distant
         for (int i = 0; i < scenery.Count; i++)
         {
-            (scenery[i]).draw(currentDraw, origin);
+            double[][] texture;
+            Color[] textureColor;
+            scenery[i].draw(out texture, out textureColor, origin);
+            for (int j = 0; j < textureColor.Length; j++) drawLine(texture[j*2], texture[j*2+1], textureColor[j]);
         }
 
         calcInFront();
@@ -985,10 +1058,12 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             currentDraw = buf;
             for (int h = 0; h < shapes.Length; h++)
             {
-                if (shapes[h] == null) continue;
-                if (inFront[h][i]) currentDraw = clipUnits[h].chain(currentDraw);
+                if (shapes[s[h]] == null) continue;
+                if (inFront[s[h]][i]) currentDraw = clipUnits[s[h]].chain(currentDraw);
             }
+            int bn = buf.getSize();
             drawShape(shapes[i]);
+            //if (bn == buf.getSize()) for (int j = 0; j < shapes.Length; j++) inFront[i][j] = inFront[j][i] = false;
         }
     }
 
@@ -1012,7 +1087,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             const double epsilon = -1e-9;
 
             Vec.sub(reg1, cell.center, origin); // vector from origin to face center
-            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon);
+            cell.visible = (Vec.dot(reg1, cell.normal) < epsilon) ^ invertNormals;
         }
         else
         {
@@ -1034,7 +1109,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         if (texture[0])
         {
             if (useEdgeColor) drawEdgeColor(shape, cell, 0.999999);
-            else drawTexture(shape, cell, getColor(Color.white), 0.999999);
+            else drawTexture(shape, cell, getColor(Color.white * OptionsColor.fixer), 0.999999);
         }
 
         bool selected = (shape == selectedShape) && !hideSel;
@@ -1042,7 +1117,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
         if (cell.customTexture != null)
         {
-            cell.customTexture.draw(shape, cell, currentDraw, origin, transparency);
+            double[][] texture;
+            Color[] textureColor;
+            cell.customTexture.draw(out texture, out textureColor, cell, origin);
+            for (int i = 0; i < textureColor.Length; i++) drawLine(texture[i*2], texture[i*2+1], textureColor[i]);
         }
         else
         {
@@ -1067,13 +1145,13 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         return hitShape == drawing ? color.Equals(COLOR_SELECTED) ? COLOR_SELECTED_ALTERNATE : COLOR_SELECTED : color;
     }
 
-    private static Color COLOR_SELECTED = Color.yellow;
-    private static Color COLOR_SELECTED_ALTERNATE = Color.red;
+    private static Color COLOR_SELECTED = Color.yellow * OptionsColor.fixer;
+    private static Color COLOR_SELECTED_ALTERNATE = Color.red * OptionsColor.fixer;
 
     private void drawEdgeColor(Geom.Shape shape, Geom.Cell cell, double scale)
     {
         Polygon poly = new Polygon();
-        for (int i = 0; i < cell.ifa.Length; i++)
+        if (usePolygon) for (int i = 0; i < cell.ifa.Length; i++)
         {
             Geom.Face face = shape.face[cell.ifa[i]];
             poly.vertex = new double[face.iv.Length][];
@@ -1084,21 +1162,21 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             }
             poly.color = getColor(Geom.getColor(/*edge.color, */cell.color));
             poly.color.a = (float)transparency;
-            currentDraw.drawPolygon(poly, origin);
+            drawPolygon(poly);
         }
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
             Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
             Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, Geom.getColor(/*edge.color, */cell.color), origin);
+            drawLine(reg1, reg2, Geom.getColor(/*edge.color, */cell.color));
         }
     }
 
     private void drawTexture(Geom.Shape shape, Geom.Cell cell, Color color, double scale)
     {
         Polygon poly = new Polygon();
-        for (int i = 0; i < cell.ifa.Length; i++)
+        if (usePolygon) for (int i = 0; i < cell.ifa.Length; i++)
         {
             Geom.Face face = shape.face[cell.ifa[i]];
             poly.vertex = new double[face.iv.Length][];
@@ -1109,16 +1187,49 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             }
             poly.color = color;
             poly.color.a = (float)transparency;
-            currentDraw.drawPolygon(poly, origin);
+            drawPolygon(poly);
         }
         for (int i = 0; i < cell.ie.Length; i++)
         {
             Geom.Edge edge = shape.edge[cell.ie[i]];
             Vec.mid(reg1, cell.center, shape.vertex[edge.iv1], scale);
             Vec.mid(reg2, cell.center, shape.vertex[edge.iv2], scale);
-            currentDraw.drawLine(reg1, reg2, color, origin);
+            drawLine(reg1, reg2, color);
         }
     }
 
+    private void drawPolygon(Polygon polygon)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Clip.clip(polygon, axisClip[i])) return;
+        }
+        currentDraw.drawPolygon(polygon, origin);
+    }
+
+    private void drawLine(double[] p1, double[] p2, Color color)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Vec.clip(p1, p2, axisClip[i].n, axisClip[i].getThreshold(), 1)) return;
+        }
+        currentDraw.drawLine(p1, p2, color, origin);
+    }
+
+    protected void drawLine(double[] p1, double[] p2, Color color, double[] origin)
+    {
+        for (int i = 0; i < clip.Length; i++)
+        {
+            if (Vec.clip(p1, p2, axisClip[i].n, axisClip[i].getThreshold(), 1)) return;
+        }
+        currentDraw.drawLine(p1, p2, color, origin);
+    }
+
+    private void viewBoundaryConvert(double[][] axis) {
+        for (int i = 0; i < clip.Length; i++) {
+            Vec.fromAxisCoordinates(axisClip[i].n, clip[i].n, axis);
+            axisClip[i].t = Vec.dot(origin, axisClip[i].n);
+        }
+    }
 }
 

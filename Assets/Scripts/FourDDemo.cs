@@ -63,7 +63,45 @@ public class FourDDemo
     public double size = 1.4;
     private double[] haptics;
     public static bool[] cut;
-    public static int[] outputNum = { 587, 517, 578, 582, 344, 427, 415, 500, 263, 337, 253, 329, 182, 174, 181, 166, 516, 606, 255, 355, 102, 272, 39, 210, 366, 186, 222, 114, 141, 51, };
+    public static float[][] outputPlc = new float[30][] {
+        new float[3] {2.6f, 1.3f, 6.5f,},
+        new float[3] {3.8f, 1.8f, 6.3f,},
+        new float[3] {2.5f, 0.2f, 7.0f,},
+        new float[3] {5.5f, 1.6f, 6.5f,},
+
+        new float[3] {1.5f, 2.0f, 4.0f,},
+        new float[3] {3.5f, 1.5f, 4.7f,},
+        new float[3] {1.2f, 1.0f, 4.2f,},
+        new float[3] {4.6f, 0.5f, 5.1f,},
+
+        new float[3] {2.5f, 2.0f, 3.0f,},
+        new float[3] {3.7f, 1.3f, 3.6f,},
+        new float[3] {1.3f, 1.3f, 3.1f,},
+        new float[3] {4.0f, 0.0f, 4.0f,},
+        
+        new float[3] {2.4f, 2.2f, 2.0f,},
+        new float[3] {3.3f, 1.2f, 2.4f,},
+        new float[3] {1.9f, 1.6f, 2.0f,},
+        new float[3] {3.5f, 0.0f, 2.4f,},
+
+        new float[3] {1.7f, 2.7f, 4.9f,},
+        new float[3] {1.0f, 2.7f, 5.7f,},
+
+        new float[3] {3.5f, 1.8f, 2.8f,},
+        new float[3] {3.1f, 2.8f, 4.6f,},
+        new float[3] {3.1f, 2.9f, 2.2f,},
+        new float[3] {2.7f, 3.3f, 3.6f,},
+        new float[3] {3.7f, 3.3f, 1.3f,},
+        new float[3] {3.4f, 4.2f, 2.4f,},
+
+        new float[3] {5.2f, 2.8f, 5.1f,},
+        new float[3] {5.4f, 1.6f, 3.3f,},
+        new float[3] {3.4f, 4.6f, 4.6f,},
+        new float[3] {5.2f, 3.4f, 3.7f,},
+        new float[3] {4.9f, 4.8f, 3.2f,},
+        new float[3] {5.4f, 3.8f, 2.2f,},
+    };
+    public static bool[] isInn = { true, true, false, false, true, true, false, false, true, true, false, false, true, true, false, false, true, false, true, true, true, true, true, true, false, false, false, false, false, false, };
     private float[] output;
     private static int opFrame = 20; // 出力フレーム
     private int opf;
@@ -126,7 +164,7 @@ public class FourDDemo
 
         for (int i = 0; i < spinv.Length; i++) Vec.normalize(spinv[i], spinv[i]);
 
-        output = new float[outputNum.Length];
+        output = new float[outputPlc.Length];
     }
 
     public void connect()
@@ -147,14 +185,29 @@ public class FourDDemo
         {
             new Geom.Shape[] { Shapes.cell_5() },
             new Geom.Shape[] { Shapes.cell_8() },
+            //new Geom.Shape[2],
             new Geom.Shape[] { Shapes.cell_16() },
             new Geom.Shape[] { Shapes.cell_24(sb) },
             new Geom.Shape[] { Shapes.cell_120(sb) },
             new Geom.Shape[] { Shapes.cell_600(sb) },
             new Geom.Shape[7],
             new Geom.Shape[7],
-            new Geom.Shape[] { Shapes.convex(sb) }
+            new Geom.Shape[] { Shapes.convex(sb) },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_8() },
+            new Geom.Shape[] { Shapes.cell_8() },
         };
+        //shapelist[1][0] = Shapes.cell_8();
+        //shapelist[1][1] = Shapes.cell_5();
+        //shapelist[1][0].scale(new double[] { .6,.6,.6,.6 });
+        //shapelist[1][1].scale(new double[] { .6,.6,.6,.6 });
+        //shapelist[1][0].translate(new double[] { .8, 0, 0, 0 });
+        //shapelist[1][1].translate(new double[] { -.8, 0, 0, 0 });
+        //shapelist[1][0].calculate();
+        //shapelist[1][1].calculate();
 
         shapelist[6][0] = Shapes.cone(sb);
         for (int i = 1; i < 7; i++) shapelist[6][i] = shapelist[6][0].copy();
@@ -222,6 +275,13 @@ public class FourDDemo
         shapelist[7][5] = Shapes.flat5(sb);
         shapelist[7][6] = Shapes.cone(sb);
 
+        shapelist[9][0].scale(new double[4] { 2, .01, 2, 1 } );
+        shapelist[10][0].scale(new double[4] { .03, 2, .03, 1 } );
+        shapelist[11][0].scale(new double[4] { .1, .1, .1, 1 } );
+        shapelist[12][0].scale(new double[4] { 2, .01, 2, 1 } );
+        shapelist[13][0].scale(new double[4] { .03, 2, .03, 1 } );
+        shapelist[14][0].scale(new double[4] { .1, .1, .1, 1 } );
+
         randomShape = new List<int>();
         for (int i = 0; i < shapelist.Length; i++) randomShape.Add(i);
         random = new System.Random();
@@ -229,11 +289,11 @@ public class FourDDemo
 
     private void initHaptics()
     {
-        haptics = new double[outputNum.Length];
-        for (int i = 0; i < outputNum.Length; i++) haptics[i] = 0;
+        haptics = new double[outputPlc.Length];
+        for (int i = 0; i < outputPlc.Length; i++) haptics[i] = 0;
         //cutting = new bool[hNum3];
         //for (int i = 0; i < hNum3; i++) cutting[i] = !cut[i];
-        cut = new bool[outputNum.Length];
+        cut = new bool[outputPlc.Length];
     }
 
     public void changeShape(int shapeNum)
@@ -332,7 +392,7 @@ public class FourDDemo
     }
 
     private int target = 0;
-    private float[] strength = new float[outputNum.Length];
+    private float[] strength = new float[outputPlc.Length];
     public static float[] cor = { 0.4f, 0.55f, 0.6f, 0.7f, 0.6f, 1.25f, 1.3f, 1.2f, 1.42f, 1.15f, 1.05f, 0.8f, 0.5f, 0.7f, 0.7f, 0.8f, 0.5f, 0.9f, 0.85f, 0.55f, 1.42f, 1.05f, 1.1f, 0.8f, 1.15f, 0.7f, 0.85f, 0.9f, 0.7f, 0.7f }; 
 
     public void Run(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, ref double[] haptics,
@@ -373,7 +433,7 @@ public class FourDDemo
                 ws.Send(Vec.ToString(output));
             } catch (InvalidOperationException e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
                 error = true;
             }
         }
@@ -405,7 +465,7 @@ public class FourDDemo
             drawShape(shapes[i], eyeVector);
         }
 
-        renderRelative.run(axis);
+        renderRelative.run(axis, false);
         //for (int i = 0; i < objRetina3.Length; i += 2) bufRelative.add(objRetina3[i], objRetina3[i + 1], edgeColor);
 
         bufRelative.sort(eyeVector); // できる限り自然な描画にするために、meshを大まかに並べ替える。
@@ -586,11 +646,11 @@ public class FourDDemo
     private void calcHaptics(double[] cursor, double[][] cursorAxis)
     {
         int count = 0;
-        foreach (int i in outputNum) //(int i = 0; i < haptics.Length; i++) if (cut[i])
+        for(int i = 0; i < outputPlc.Length; i++) //(int i = 0; i < haptics.Length; i++) if (cut[i])
         {
-            reg4[0] = i % hNum - hNumh; // 立方体形に配置
-            reg4[1] = i / hNum % hNum - hNumh;
-            reg4[2] = i / hNum2 - hNumh;
+            reg4[0] = outputPlc[i][0] - hNumh; // 立方体形に配置
+            reg4[1] = outputPlc[i][1] - hNumh;
+            reg4[2] = outputPlc[i][2] - hNumh;
             Vec.scale(reg4, reg4, 0.4 / hNumh / size); // 解像度・画面サイズに合わせて縮小
             reg4[0] = reg4[0] + 0.1 / size; // 手の位置へ平行移動
             reg4[1] = reg4[1] + 0.05 / size;
@@ -598,8 +658,12 @@ public class FourDDemo
             Vec.fromAxisCoordinates(reg5, reg4, cursorAxis); // 向きを変更
             for (int j = 0; j < 3; j++) reg0[j] = reg5[j]; // reg0[3] (= 0) は編集されない
             Vec.add(reg0, cursor, reg0);
-            haptics[count] = click(reg0, false, false);
-            haptics[count] = 1 - haptics[count]; // 近いほど大きく
+            if (shapeNum > 8) haptics[count] = calcHapTest(reg0);
+            else
+            {
+                haptics[count] = click(reg0, false, false);
+                haptics[count] = 1 - haptics[count]; // 近いほど大きく
+            }
             count++;
         }
         double max = Vec.max(haptics); // 最も近い点
@@ -620,7 +684,7 @@ public class FourDDemo
         //if (touch > 0) for (int i = 0; i < hNum3; i++) haptics[i] *= ( 2 * touch - max) / touch;
         if (touch > 0) for (int i = 0; i < haptics.Length; i++) haptics[i] *= 1 - 0.75 * Math.Sqrt(Math.Max(max / touch - 0.25,0)/0.75);
         max_ = Math.Max(Vec.max(haptics), max_);
-        Debug.Log(max_);
+        //Debug.Log(max_);
     }
 
     public double click(double[] vector, bool edit, bool select)
@@ -659,6 +723,27 @@ public class FourDDemo
         return dMin;
     }
 
+    private double calcHapTest(double[] cursor)
+    {
+        int n = (shapeNum - 9) % 3;
+        double d = 0;
+        switch (n)
+        {
+            case 0:
+                d = Math.Abs(Vec.dot(cursor, shapes[0].axis[1]) * .00025);
+                break;
+            case 1:
+                d = Math.Sqrt(Math.Pow(Vec.dot(cursor, shapes[0].axis[0]),2) + Math.Pow(Vec.dot(cursor, shapes[0].axis[2]),2)) * .00025;
+                break;
+            case 2:
+                d = Vec.norm(cursor) * .00025;
+                break;
+            default:
+                break;
+        }
+        if (shapeNum < 12) d = -d+1;
+        return d;
+    }
     public void save()
     {
         StreamWriter sw = new StreamWriter("./LogData.txt", true);
