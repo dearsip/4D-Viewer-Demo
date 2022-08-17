@@ -64,5 +64,21 @@ namespace Valve.VR
                 return SteamVR_Actions.control_Grab;
             }
         }
+        
+        public virtual SteamVR_Action_Boolean Button1
+        {
+            get
+            {
+                return SteamVR_Actions.control_Button1;
+            }
+        }
+        
+        public virtual SteamVR_Action_Boolean Button2
+        {
+            get
+            {
+                return SteamVR_Actions.control_Button2;
+            }
+        }
     }
 }

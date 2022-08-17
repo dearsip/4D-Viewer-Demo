@@ -745,7 +745,7 @@ public class Engine : IMove
         if (OptionsFisheye.of.fisheye)
         {
             renderPrepare();
-            if (OptionsFisheye.of.rainbow && dimSpaceCache == 4)
+            if (OptionsFisheye.of.rainbow/* && dimSpaceCache == 4*/)
             {
                 renderRainbow();
             }

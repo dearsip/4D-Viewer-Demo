@@ -51,7 +51,7 @@ public class Core : MonoBehaviour
 
     public Command command;
     public Command menuCommand;
-    public SteamVR_Action_Boolean trigger, move, menu, grip;
+    public SteamVR_Action_Boolean trigger, move, menu, grip, button1, button2;
     public SteamVR_Action_Pose pose;
     public SteamVR_Action_Vector2 trackPad;
     public SteamVR_Input_Sources left, right;
@@ -222,14 +222,24 @@ public class Core : MonoBehaviour
         if (engine.getSaveType() == IModel.SAVE_GEOM
          || engine.getSaveType() == IModel.SAVE_NONE)
         {
-            command = click;
+            if (command == null) command = click;
         }
-        else { command = jump; }
+        else { if (command == null) command = jump; }
     }
 
     private void LeftGrip(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
         disableLeftAndRight = !disableLeftAndRight;
+    }
+
+    private void RightButton1(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (command == null) command = addShapes;
+    }
+
+    private void RightButton2(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
+    {
+        if (command == null) command = removeShape;
     }
 
     private void OnDestroy()
@@ -435,12 +445,12 @@ public class Core : MonoBehaviour
         Vector2 v = trackPad.GetAxis(right);
         if (v == Vector2.zero) swipeDir = 0;
         if (v.x < -tSwipe) {
-            if (swipeDir == 1) command = removeShape;
+            if (swipeDir == 1 && command == null) command = removeShape;
             swipeDir = -1;
             swipeTime = swipeTimeTor;
         }
         if (v.x > tSwipe) {
-            if (swipeDir == -1) command = addShapes;
+            if (swipeDir == -1 && command == null) command = addShapes;
             swipeDir = 1;
             swipeTime = swipeTimeTor;
         }
