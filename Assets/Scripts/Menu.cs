@@ -325,6 +325,14 @@ public class Menu : MonoBehaviour
         core.menuCommand = core.newGame;
     }
 
+    public void doRestart() {
+        core.restartGame();
+    }
+
+    public void doResetWin() {
+        core.resetWin();
+    }
+
     public void doToggleSkybox()
     {
         if (skyboxToggle.isOn) {

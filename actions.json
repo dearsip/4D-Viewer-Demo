@@ -35,6 +35,16 @@
       "requirement": "mandatory"
     },
     {
+      "name": "/actions/default/in/SkeletonLeftHand",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/left"
+    },
+    {
+      "name": "/actions/default/in/SkeletonRightHand",
+      "type": "skeleton",
+      "skeleton": "/skeleton/hand/right"
+    },
+    {
       "name": "/actions/default/out/Haptic",
       "type": "vibration",
       "requirement": "optional"

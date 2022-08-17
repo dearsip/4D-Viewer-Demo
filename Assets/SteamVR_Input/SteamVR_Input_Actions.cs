@@ -31,6 +31,10 @@ namespace Valve.VR
         
         private static SteamVR_Action_Boolean p_default_Teleport;
         
+        private static SteamVR_Action_Skeleton p_default_SkeletonLeftHand;
+        
+        private static SteamVR_Action_Skeleton p_default_SkeletonRightHand;
+        
         private static SteamVR_Action_Vibration p_default_Haptic;
         
         private static SteamVR_Action_Boolean p_control_Menu;
@@ -102,6 +106,22 @@ namespace Valve.VR
             get
             {
                 return SteamVR_Actions.p_default_Teleport.GetCopy<SteamVR_Action_Boolean>();
+            }
+        }
+        
+        public static SteamVR_Action_Skeleton default_SkeletonLeftHand
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_SkeletonLeftHand.GetCopy<SteamVR_Action_Skeleton>();
+            }
+        }
+        
+        public static SteamVR_Action_Skeleton default_SkeletonRightHand
+        {
+            get
+            {
+                return SteamVR_Actions.p_default_SkeletonRightHand.GetCopy<SteamVR_Action_Skeleton>();
             }
         }
         
@@ -187,6 +207,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_Menu,
                     SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SkeletonLeftHand,
+                    SteamVR_Actions.default_SkeletonRightHand,
                     SteamVR_Actions.default_Haptic,
                     SteamVR_Actions.control_Menu,
                     SteamVR_Actions.control_Trigger,
@@ -204,6 +226,8 @@ namespace Valve.VR
                     SteamVR_Actions.default_HeadsetOnHead,
                     SteamVR_Actions.default_Menu,
                     SteamVR_Actions.default_Teleport,
+                    SteamVR_Actions.default_SkeletonLeftHand,
+                    SteamVR_Actions.default_SkeletonRightHand,
                     SteamVR_Actions.control_Menu,
                     SteamVR_Actions.control_Trigger,
                     SteamVR_Actions.control_Move,
@@ -236,7 +260,9 @@ namespace Valve.VR
             Valve.VR.SteamVR_Input.actionsVector2 = new Valve.VR.SteamVR_Action_Vector2[] {
                     SteamVR_Actions.control_TrackPad};
             Valve.VR.SteamVR_Input.actionsVector3 = new Valve.VR.SteamVR_Action_Vector3[0];
-            Valve.VR.SteamVR_Input.actionsSkeleton = new Valve.VR.SteamVR_Action_Skeleton[0];
+            Valve.VR.SteamVR_Input.actionsSkeleton = new Valve.VR.SteamVR_Action_Skeleton[] {
+                    SteamVR_Actions.default_SkeletonLeftHand,
+                    SteamVR_Actions.default_SkeletonRightHand};
             Valve.VR.SteamVR_Input.actionsNonPoseNonSkeletonIn = new Valve.VR.ISteamVR_Action_In[] {
                     SteamVR_Actions.default_InteractUI,
                     SteamVR_Actions.default_GrabPinch,
@@ -262,6 +288,8 @@ namespace Valve.VR
             SteamVR_Actions.p_default_HeadsetOnHead = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/HeadsetOnHead")));
             SteamVR_Actions.p_default_Menu = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/Menu")));
             SteamVR_Actions.p_default_Teleport = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/default/in/Teleport")));
+            SteamVR_Actions.p_default_SkeletonLeftHand = ((SteamVR_Action_Skeleton)(SteamVR_Action.Create<SteamVR_Action_Skeleton>("/actions/default/in/SkeletonLeftHand")));
+            SteamVR_Actions.p_default_SkeletonRightHand = ((SteamVR_Action_Skeleton)(SteamVR_Action.Create<SteamVR_Action_Skeleton>("/actions/default/in/SkeletonRightHand")));
             SteamVR_Actions.p_default_Haptic = ((SteamVR_Action_Vibration)(SteamVR_Action.Create<SteamVR_Action_Vibration>("/actions/default/out/Haptic")));
             SteamVR_Actions.p_control_Menu = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/control/in/Menu")));
             SteamVR_Actions.p_control_Trigger = ((SteamVR_Action_Boolean)(SteamVR_Action.Create<SteamVR_Action_Boolean>("/actions/control/in/Trigger")));

@@ -116,9 +116,6 @@
                "inputs" : {
                   "east" : {
                      "output" : "/actions/control/in/button1"
-                  },
-                  "west" : {
-                     "output" : "/actions/control/in/button2"
                   }
                },
                "mode" : "dpad",
@@ -151,7 +148,20 @@
                "path" : "/user/hand/right/pose/raw"
             }
          ],
-         "skeleton" : [],
+         "skeleton" : [
+            {
+               "output" : "none",
+               "path" : "/user/hand/left/input/skeleton/right"
+            },
+            {
+               "output" : "/actions/default/in/skeletonrighthand",
+               "path" : "/user/hand/right/input/skeleton/right"
+            },
+            {
+               "output" : "/actions/default/in/skeletonlefthand",
+               "path" : "/user/hand/left/input/skeleton/left"
+            }
+         ],
          "sources" : [
             {
                "inputs" : {
@@ -193,24 +203,25 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/interactui"
+                     "output" : "/actions/default/in/menu"
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
+               "path" : "/user/hand/left/input/system"
             },
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/grabpinch"
+                     "output" : "/actions/default/in/teleport"
                   }
                },
                "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.8",
-                  "click_deactivate_threshold" : "0.7"
-               },
-               "path" : "/user/hand/right/input/trigger"
+               "path" : "/user/hand/left/input/x"
+            },
+            {
+               "inputs" : {},
+               "mode" : "none",
+               "path" : "/user/hand/left/input/skeleton/left"
             },
             {
                "inputs" : {
@@ -219,21 +230,12 @@
                   }
                },
                "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.8",
-                  "click_deactivate_threshold" : "0.7",
-                  "force_input" : "force"
-               },
                "path" : "/user/hand/right/input/grip"
             },
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/menu"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/system"
+               "inputs" : {},
+               "mode" : "none",
+               "path" : "/user/hand/right/input/skeleton/left"
             },
             {
                "inputs" : {
@@ -247,11 +249,20 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/teleport"
+                     "output" : "/actions/default/in/interactui"
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/left/input/x"
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabpinch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
             },
             {
                "inputs" : {

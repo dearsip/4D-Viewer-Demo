@@ -59,10 +59,12 @@ public class TrainModel : GeomModel {
     {
         setTexture(texture);
         setTransparency(od.transparency);
+        usePolygon = od.usePolygon;
         useEdgeColor = od.useEdgeColor;
         hideSel = od.hidesel;
         invertNormals = od.invertNormals;
         useSeparation = od.separate;
+        cameraDistance = od.cameraDistance;
         velNumber = od.trainSpeed;
     }
 

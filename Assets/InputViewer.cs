@@ -47,12 +47,12 @@ public class InputViewer : MonoBehaviour
         for (int i = 0; i < colors.Length; i++) colors[i] = color;
         GetComponent<MeshFilter>().sharedMesh = mesh;
 
-        grip.AddOnStateDownListener(LeftGrip, hand);
+        if (isMover) grip.AddOnStateDownListener(LeftGrip, hand);
     }
 
     private void LeftGrip(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
-        if (isMover) disableLeftAndRight = !disableLeftAndRight;
+        disableLeftAndRight = !disableLeftAndRight;
     }
 
     // Update is called once per frame
@@ -107,7 +107,7 @@ public class InputViewer : MonoBehaviour
     }
 
     private void DrawVector() {
-        if (disableLeftAndRight && isMover) for (int i = 0; i < arrowVector.Length; i++) vertices[i] = Vector3.zero;
+        if (disableLeftAndRight && isMover) for (int i = 0; i < arrowVector.Length-1; i++) vertices[i] = Vector3.zero;
         else {
             float f = dPos.magnitude;
             for (int i = 0; i < arrowVector.Length; i++) {

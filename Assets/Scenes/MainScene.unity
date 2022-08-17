@@ -25551,6 +25551,7 @@ MonoBehaviour:
   pose:
     actionPath: /actions/default/in/Pose
     needsReinit: 0
+  size: {fileID: 2091061562}
 --- !u!1 &1865472546
 GameObject:
   m_ObjectHideFlags: 0

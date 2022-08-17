@@ -304,6 +304,10 @@ public class Core : MonoBehaviour
 
         IModel model = new MapModel(this.dim, oa.omCurrent, oc(), oa.oeCurrent, ov(), null);
         engine.newGame(this.dim, model, ov(), /*oa.opt.os,*/ ot(), true);
+        controllerReset();
+    }
+
+    private void controllerReset() {
         setKeepUpAndDown();
 
         updateOptions();
@@ -314,6 +318,16 @@ public class Core : MonoBehaviour
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
+
+    }
+
+    public void resetWin() {
+        engine.resetWin();
+    }
+
+    public void restartGame() {
+        engine.restartGame();
+        controllerReset();
     }
 
     Task renderTask = Task.CompletedTask;
@@ -1082,16 +1096,7 @@ public class Core : MonoBehaviour
 
         IModel model = new MapModel(dim,oa.omCurrent,oc(),oa.oeCurrent,ov(),store);
         engine.newGame(dim,model,ov(),/*oa.opt.os,*/ot(),false);
-        setKeepUpAndDown();
-
-        updateOptions();
-        setOptions();
-
-        target = engine;
-        command = null;
-        saveOrigin = new double[this.dim];
-        saveAxis = new double[this.dim][];
-        for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
+        controllerReset();
 
         engine.load(store,alignModeLoad);
     }
@@ -1136,16 +1141,8 @@ public class Core : MonoBehaviour
 
         // model already constructed
         engine.newGame(dim, model, ov(), /*oa.opt.os,*/ ot(), true);
-        setKeepUpAndDown();
+        controllerReset();
 
-        updateOptions();
-        setOptions();
-
-        target = engine;
-        command = null;
-        saveOrigin = new double[this.dim];
-        saveAxis = new double[this.dim][];
-        for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
         alignMode = model.getAlignMode(alignMode);
     }
 
