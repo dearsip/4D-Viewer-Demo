@@ -143,7 +143,7 @@ public class InputViewer : MonoBehaviour
     }
 
     private bool KeyStateDown() {
-        if (!Input.GetKey(KeyCode.LeftAlt)&&!Input.GetKey(KeyCode.RightAlt)) return false;
+        if (!Input.GetKey(KeyCode.LeftControl)&&!Input.GetKey(KeyCode.RightControl)) return false;
         if (isMover)
             return Input.GetKeyDown(Core.KEY_SLIDELEFT )||
                    Input.GetKeyDown(Core.KEY_SLIDERIGHT)||
@@ -189,7 +189,7 @@ public class InputViewer : MonoBehaviour
     }
 
     private bool KeyStateUp() {
-        if (Input.GetKeyUp(KeyCode.LeftAlt)||Input.GetKeyUp(KeyCode.RightAlt)) return true;
+        if (Input.GetKeyUp(KeyCode.LeftControl)||Input.GetKeyUp(KeyCode.RightControl)) return true;
         if (isMover)
             return Input.GetKeyUp(Core.KEY_SLIDELEFT )||
                    Input.GetKeyUp(Core.KEY_SLIDERIGHT)||

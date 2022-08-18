@@ -697,7 +697,7 @@ public class Core : MonoBehaviour
                 }
             }
 
-            if (leftTrigger && ! lastLeftTrigger)
+            if ((leftTrigger && ! lastLeftTrigger) || Input.GetKeyDown(KeyCode.Q))
             {
                 opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
             }
@@ -862,7 +862,7 @@ public class Core : MonoBehaviour
     private const int KEYMODE_SPIN = 2;
     private const int KEYMODE_SPIN2 = 3;
     private void keyControl(int keyMode) {
-        if (Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt)) return;
+        if (Input.GetKey(KeyCode.LeftControl)||Input.GetKey(KeyCode.RightControl)) return;
         if (keyMode == KEYMODE_SLIDE) {
             if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
             if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
