@@ -42361,12 +42361,12 @@ PrefabInstance:
     - target: {fileID: 224000010383356806, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0000076293945
+      value: 0.000022888184
       objectReference: {fileID: 0}
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 78
+      value: 78.000046
       objectReference: {fileID: 0}
     - target: {fileID: 224000010015050490, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -68387,7 +68387,7 @@ GameObject:
   - component: {fileID: 2099341913}
   - component: {fileID: 2099341912}
   m_Layer: 5
-  m_Name: Text-LimitControll
+  m_Name: Text-LimitControl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68411,7 +68411,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 60.00004, y: -325}
-  m_SizeDelta: {x: 220, y: 30}
+  m_SizeDelta: {x: 240, y: 30}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2099341912
 MonoBehaviour:
@@ -68446,7 +68446,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Limit Controll in 3D:'
+  m_Text: 'Limit Control to 3D:'
 --- !u!222 &2099341913
 CanvasRenderer:
   m_ObjectHideFlags: 0
