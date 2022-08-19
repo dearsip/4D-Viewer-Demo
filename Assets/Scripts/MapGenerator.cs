@@ -67,9 +67,10 @@ public class MapGenerator
         // (can't just start with one borer, it might immediately hit a wall and die)
     }
 
+    int[] finish;
     public void generate()
     {
-        int[] finish = null;
+        finish = null;
 
         int count = computeCount();
         while (count-- > 0)
@@ -248,6 +249,7 @@ public class MapGenerator
      */
     private void branch(int[] p, int dirForward, int dirBackward)
     {
+        if (!om.allowReservedPaths) reserve.Clear();
 
         for (int dir = 0; dir < 2 * om.dimMap; dir++)
         { // no need to consider non-map directions
