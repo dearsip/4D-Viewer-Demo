@@ -5985,7 +5985,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 193739730}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -6025,6 +6025,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &208573362
 GameObject:
   m_ObjectHideFlags: 0
@@ -11112,7 +11113,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 338165980}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -11152,6 +11153,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &341430786
 GameObject:
   m_ObjectHideFlags: 0
@@ -16026,7 +16028,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d249a08ba2c4dd8438d077bea58b5f4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 600473343}
+  slider: {fileID: 0}
 --- !u!114 &485153192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19849,7 +19851,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 600473341}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -19889,6 +19891,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &603488265
 GameObject:
   m_ObjectHideFlags: 0
@@ -26308,7 +26311,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 744340039}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -26348,6 +26351,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &745986089
 GameObject:
   m_ObjectHideFlags: 0
@@ -42914,7 +42918,7 @@ PrefabInstance:
     - target: {fileID: 224000010383356806, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000022888184
+      value: 0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 224000012931849942, guid: a4e357c9bf84fa7438984def3c9d2d94,
         type: 3}
@@ -63276,7 +63280,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1912769754}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -63316,6 +63320,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &1912773694
 GameObject:
   m_ObjectHideFlags: 0
@@ -65084,7 +65089,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1957518317}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -113659843, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: cdcb3392c41e8da4ab61a8eb54159061, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -65124,6 +65129,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.Slider+SliderEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  step: 0
 --- !u!1 &1957795636
 GameObject:
   m_ObjectHideFlags: 0

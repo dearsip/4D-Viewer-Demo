@@ -71,5 +71,11 @@ namespace Valve.VR.InteractionSystem
             }
 
         }
+
+        public void PassiveUpdate() {
+            linearMapping.value = Mathf.InverseLerp(min, max, slider.value);
+            initialMappingOffset = linearMapping.value;
+            transform.position = Vector3.Lerp(startPosition.position, endPosition.position, linearMapping.value);
+        }
     }
 }
