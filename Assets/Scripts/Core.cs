@@ -527,7 +527,8 @@ public class Core : MonoBehaviour
         //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
 
-    private double tAlign = 0.5;
+    private double tAlign = 0.5; // threshold for align mode
+    private double tAlignSpin = 0.8;
     private double limitAng = 30;
     private double limitAngRoll = 30;
     private double limitAngForward = 30;
@@ -640,7 +641,7 @@ public class Core : MonoBehaviour
                     keyControl(KEYMODE_SPIN);
                     for (int i = 0; i < 3; i++)
                     {
-                        if (Mathf.Abs(reg0[i]) > tAlign)
+                        if (Mathf.Abs(reg0[i]) > tAlignSpin)
                         {
                             tActive = timeRotate;
                             ad0 = Dir.forAxis((i + 1) % 3);

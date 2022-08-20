@@ -348,21 +348,18 @@ public class Menu : MonoBehaviour
     private void put(InputField inputField, Slider slider, float value)
     {
         slider.value = value;
-        if (slider is StepSlider) ((StepSlider)slider).UpdateMapping();
         inputField.text = value.ToString();
     }
 
     private void put(InputField inputField, Slider slider, double value)
     {
         slider.value = (float)value;
-        if (slider is StepSlider) ((StepSlider)slider).UpdateMapping();
         inputField.text = value.ToString();
     }
 
     private void put(InputField inputField, Slider slider, int[] value)
     {
         slider.value = value[0];
-        if (slider is StepSlider) ((StepSlider)slider).UpdateMapping();
         inputField.text = Vec.ToString(value);
     }
 
