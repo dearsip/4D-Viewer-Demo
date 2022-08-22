@@ -20,6 +20,7 @@ public class OptionsMap // implements IValidate
     public double branchProbability;
     public bool allowLoops;
     public double loopCrossProbability;
+    public bool allowReservedPaths;
 
     // --- construction ---
 
@@ -41,6 +42,7 @@ public class OptionsMap // implements IValidate
         dest.branchProbability = src.branchProbability;
         dest.allowLoops = src.allowLoops;
         dest.loopCrossProbability = src.loopCrossProbability;
+        dest.allowReservedPaths = src.allowReservedPaths;
     }
 
     // --- implementation of IValidate ---

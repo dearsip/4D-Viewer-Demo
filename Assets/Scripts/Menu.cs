@@ -33,7 +33,7 @@ public class Menu : MonoBehaviour
         dimSamePerpendicularField, mazeCurrent, mazeNext, colorCurrent, colorNext, depthField, retinaField, scaleField, trainSpeedField, cameraDistanceField,
         transparencyField, lineThicknessField, borderField, baseTransparencyField, sliceTransparencyField, 
         frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
-    public Toggle allowLoopsCurrent, allowLoopsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
+    public Toggle allowLoopsCurrent, allowLoopsNext, allowReservedPathsCurrent, allowReservedPathsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
         invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow;
     public Toggle[] enable, texture;
     public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
@@ -117,7 +117,7 @@ public class Menu : MonoBehaviour
 
         put(dimCurrent, oa.omCurrent.dimMap);
         put(dimNext, dimSlider, oa.opt.om4.dimMap);
-        put(sizeCurrent, oa.omCurrent.size[0]);
+        put(sizeCurrent, oa.omCurrent.size);
         put(sizeNext, sizeSlider, oa.opt.om4.size);
         put(densityCurrent, oa.omCurrent.density);
         put(densityNext, densitySlider, oa.opt.om4.density);
@@ -129,6 +129,8 @@ public class Menu : MonoBehaviour
         put(allowLoopsNext, oa.opt.om4.allowLoops);
         put(loopCrossProbabilityCurrent, oa.omCurrent.loopCrossProbability);
         put(loopCrossProbabilityNext, loopCrossProbabilitySlider, oa.opt.om4.loopCrossProbability);
+        put(allowReservedPathsCurrent, oa.omCurrent.allowReservedPaths);
+        put(allowReservedPathsNext, oa.opt.om4.allowReservedPaths);
 
         put(colorMode, oa.opt.oc4.colorMode);
         put(dimSameParallelField, dimSameParallelSlider, oa.opt.oc4.dimSameParallel);
@@ -248,6 +250,7 @@ public class Menu : MonoBehaviour
         getDouble(ref oa.opt.om4.branchProbability, branchProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
         oa.opt.om4.allowLoops = getBool(allowLoopsNext);
         getDouble(ref oa.opt.om4.loopCrossProbability, loopCrossProbabilityNext, OptionsMap.PROBABILITY_MIN, OptionsMap.PROBABILITY_MAX, true);
+        oa.opt.om4.allowReservedPaths = getBool(allowReservedPathsNext);
 
         if (mazeNext.text.Length > 0)
         {
@@ -281,10 +284,6 @@ public class Menu : MonoBehaviour
         getDouble(ref oa.opt.ot4.timeRotate, timeRotateField, false);
         getDouble(ref oa.opt.ot4.timeAlignMove, timeAlignMoveField, false);
         getDouble(ref oa.opt.ot4.timeAlignRotate, timeAlignRotateField, false);
-
-        oa.omCurrent = oa.opt.om4;
-        oa.ocCurrent = oa.opt.oc4;
-        oa.ovCurrent = oa.opt.ov4;
 
         // command
         core.menuCommand = core.setOptions;
@@ -367,6 +366,11 @@ public class Menu : MonoBehaviour
     private void put(InputField inputField, int value)
     {
         inputField.text = value.ToString();
+    }
+
+    private void put(InputField inputField, int[] value)
+    {
+        inputField.text = Vec.ToString(value);
     }
 
     private void put(InputField inputField, float value)

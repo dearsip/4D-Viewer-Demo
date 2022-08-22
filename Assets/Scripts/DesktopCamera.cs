@@ -27,7 +27,7 @@ public class DesktopCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        if(Input.GetKeyDown(KeyCode.P))
             switch (mode++ % 7)
             {
                 case 0:

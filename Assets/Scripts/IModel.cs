@@ -17,6 +17,7 @@ public abstract class IModel
     public abstract void setTexture(bool[] texture);
     public abstract void setTransparency(double transparency);
     public abstract void setOptions(OptionsColor oc, int seed, int depth, bool[] texture, OptionsDisplay od);
+    public abstract void setRetina(double retina);
 
     public abstract bool isAnimated();
     public abstract int getSaveType();

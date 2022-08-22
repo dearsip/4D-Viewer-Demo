@@ -219,6 +219,11 @@ public class Core : MonoBehaviour
 
     private void RightClick(SteamVR_Action_Boolean fromBoolean, SteamVR_Input_Sources fromSource)
     {
+        RightClick();
+    }
+
+    private void RightClick()
+    {
         if (engine.getSaveType() == IModel.SAVE_GEOM
          || engine.getSaveType() == IModel.SAVE_NONE)
         {
@@ -288,6 +293,7 @@ public class Core : MonoBehaviour
 
     public void newGame()
     {
+        setOptions();
         newGame(0);
     }
 
@@ -473,6 +479,15 @@ public class Core : MonoBehaviour
             if (menuPanel.gameObject.activeSelf == false) openMenu();
             else menuPanel.doCancel();
         }
+
+        if (trigger.GetStateDown(left) || Input.GetKeyDown(KeyCode.Q)) 
+            opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
+        if (Input.GetKeyDown(KeyCode.Space))
+            RightClick();
+        if (Input.GetKeyDown(KeyCode.H) && command == null)
+            command = addShapes;
+        if (Input.GetKeyDown(KeyCode.Y) && command == null)
+            command = removeShape;
     }
 
 
@@ -512,7 +527,8 @@ public class Core : MonoBehaviour
         //for (int i = 0; i < 3; i++) cursorAxis[2][i] = reg1[i];
     }
 
-    private double tAlign = 0.5;
+    private double tAlign = 0.5; // threshold for align mode
+    private double tAlignSpin = 0.8;
     private double limitAng = 30;
     private double limitAngRoll = 30;
     private double limitAngForward = 30;
@@ -584,7 +600,7 @@ public class Core : MonoBehaviour
                     {
                         tActive = timeMove;
                         ad0 = Dir.forAxis(i, reg3[i] < 0);
-                        if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) command = alignMove;
+                        if (target.canMove(Dir.getAxis(ad0), Dir.getSign(ad0))) {command = alignMove; break;}
                     }
                 }
             }
@@ -625,7 +641,7 @@ public class Core : MonoBehaviour
                     keyControl(KEYMODE_SPIN);
                     for (int i = 0; i < 3; i++)
                     {
-                        if (Mathf.Abs(reg0[i]) > tAlign)
+                        if (Mathf.Abs(reg0[i]) > tAlignSpin)
                         {
                             tActive = timeRotate;
                             ad0 = Dir.forAxis((i + 1) % 3);
@@ -697,10 +713,9 @@ public class Core : MonoBehaviour
                 }
             }
 
-            if (leftTrigger && ! lastLeftTrigger)
-            {
-                opt.oo.sliceDir = (opt.oo.sliceDir + 1) % ((opt.oo.sliceMode) ? 4 : 2);
-            }
+            //if (leftTrigger)
+            //{
+            //}
             //if (rightTrigger)
             //{
 
@@ -862,42 +877,50 @@ public class Core : MonoBehaviour
     private const int KEYMODE_SPIN = 2;
     private const int KEYMODE_SPIN2 = 3;
     private void keyControl(int keyMode) {
-        if (Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt)) return;
-        if (keyMode == KEYMODE_SLIDE) {
-            if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
-            if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
-            if (Input.GetKey(KEY_SLIDEUP   )) reg3[1] =  1;
-            if (Input.GetKey(KEY_SLIDEDOWN )) reg3[1] = -1;
-            if (Input.GetKey(KEY_SLIDEIN   )) reg3[2] =  1;
-            if (Input.GetKey(KEY_SLIDEOUT  )) reg3[2] = -1;
-            if (Input.GetKey(KEY_FORWARD   )) reg3[3] =  1;
-            if (Input.GetKey(KEY_BACK      )) reg3[3] = -1;
-        }
-        if (keyMode == KEYMODE_TURN) {
-            if (Input.GetKey(KEY_TURNLEFT ) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] = -1;
-            if (Input.GetKey(KEY_TURNRIGHT) && !Input.GetKey(KeyCode.LeftShift)) reg2[0] =  1;
-            if (Input.GetKey(KEY_TURNUP   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] =  1;
-            if (Input.GetKey(KEY_TURNDOWN ) && !Input.GetKey(KeyCode.LeftShift)) reg2[1] = -1;
-            if (Input.GetKey(KEY_TURNIN   ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] =  1;
-            if (Input.GetKey(KEY_TURNOUT  ) && !Input.GetKey(KeyCode.LeftShift)) reg2[2] = -1;
-        }
-        if (keyMode == KEYMODE_SPIN) {
-            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] = -1;
-            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) reg0[0] =  1;
-            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] =  1;
-            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[1] = -1;
-            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] =  1;
-            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) reg0[2] = -1;
-        }
-        if (keyMode == KEYMODE_SPIN2) {
-            Quaternion q = Quaternion.identity;
-            if (Input.GetKey(KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(-(float)dRotate,0,0);
-            if (Input.GetKey(KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler( (float)dRotate,0,0);
-            if (Input.GetKey(KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0, (float)dRotate,0);
-            if (Input.GetKey(KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,-(float)dRotate,0);
-            if (Input.GetKey(KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0, (float)dRotate);
-            if (Input.GetKey(KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) q *= Quaternion.Euler(0,0,-(float)dRotate);
-            if (q != Quaternion.identity) relarot = q;
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) return;
+        switch (keyMode) {
+            case (KEYMODE_SLIDE):
+                if (Input.GetKey(KEY_SLIDELEFT )) reg3[0] = -1;
+                if (Input.GetKey(KEY_SLIDERIGHT)) reg3[0] =  1;
+                if (Input.GetKey(KEY_SLIDEUP   )) reg3[1] =  1;
+                if (Input.GetKey(KEY_SLIDEDOWN )) reg3[1] = -1;
+                if (Input.GetKey(KEY_SLIDEIN   )) reg3[2] =  1;
+                if (Input.GetKey(KEY_SLIDEOUT  )) reg3[2] = -1;
+                if (Input.GetKey(KEY_FORWARD   )) reg3[3] =  1;
+                if (Input.GetKey(KEY_BACK      )) reg3[3] = -1;
+                break;
+            case (KEYMODE_TURN):
+                if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift)) {
+                    if (Input.GetKey(KEY_TURNLEFT )) reg2[0] = -1;
+                    if (Input.GetKey(KEY_TURNRIGHT)) reg2[0] =  1;
+                    if (Input.GetKey(KEY_TURNUP   )) reg2[1] =  1;
+                    if (Input.GetKey(KEY_TURNDOWN )) reg2[1] = -1;
+                    if (Input.GetKey(KEY_TURNIN   )) reg2[2] =  1;
+                    if (Input.GetKey(KEY_TURNOUT  )) reg2[2] = -1;
+                }
+                break;
+            case (KEYMODE_SPIN):
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                    if (Input.GetKey(KEY_SPINLEFT )) reg0[0] = -1;
+                    if (Input.GetKey(KEY_SPINRIGHT)) reg0[0] =  1;
+                    if (Input.GetKey(KEY_SPINUP   )) reg0[1] =  1;
+                    if (Input.GetKey(KEY_SPINDOWN )) reg0[1] = -1;
+                    if (Input.GetKey(KEY_SPININ   )) reg0[2] =  1;
+                    if (Input.GetKey(KEY_SPINOUT  )) reg0[2] = -1;
+                }
+                break;
+            case (KEYMODE_SPIN2):
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                    Quaternion q = Quaternion.identity;
+                    if (Input.GetKey(KEY_SPINLEFT )) q *= Quaternion.Euler(-(float)dRotate,0,0);
+                    if (Input.GetKey(KEY_SPINRIGHT)) q *= Quaternion.Euler( (float)dRotate,0,0);
+                    if (Input.GetKey(KEY_SPINUP   )) q *= Quaternion.Euler(0, (float)dRotate,0);
+                    if (Input.GetKey(KEY_SPINDOWN )) q *= Quaternion.Euler(0,-(float)dRotate,0);
+                    if (Input.GetKey(KEY_SPININ   )) q *= Quaternion.Euler(0,0, (float)dRotate);
+                    if (Input.GetKey(KEY_SPINOUT  )) q *= Quaternion.Euler(0,0,-(float)dRotate);
+                    if (q != Quaternion.identity) relarot = q;
+                }
+                break;
         }
     }
 
@@ -960,6 +983,7 @@ public class Core : MonoBehaviour
 
     public void setOptions()
     {
+        engine.setOptions(oc(), ov(), oa.oeCurrent, ot(), oa.opt.od);
         setOptionsMotion(oa.opt.ot4);
         setFrameRate(oa.opt.ot4.frameRate);
     }

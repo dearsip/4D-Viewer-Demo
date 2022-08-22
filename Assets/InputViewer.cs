@@ -143,7 +143,7 @@ public class InputViewer : MonoBehaviour
     }
 
     private bool KeyStateDown() {
-        if (!Input.GetKey(KeyCode.LeftAlt)&&!Input.GetKey(KeyCode.RightAlt)) return false;
+        if (!Input.GetKey(KeyCode.LeftControl)&&!Input.GetKey(KeyCode.RightControl)) return false;
         if (isMover)
             return Input.GetKeyDown(Core.KEY_SLIDELEFT )||
                    Input.GetKeyDown(Core.KEY_SLIDERIGHT)||
@@ -164,32 +164,35 @@ public class InputViewer : MonoBehaviour
 
     private void CalcKey() {
         if (isMover) {
-            if (Input.GetKey(Core.KEY_SLIDELEFT )) dPos[0] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SLIDERIGHT)) dPos[0] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SLIDEUP   )) dPos[1] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SLIDEDOWN )) dPos[1] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SLIDEIN   )) dPos[2] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SLIDEOUT  )) dPos[2] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_FORWARD   )) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, fromForward);
-            if (Input.GetKey(Core.KEY_BACK      )) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, fromForward);
+            if (Input.GetKey(Core.KEY_SLIDELEFT )) dPos += -Time.deltaTime*0.2f * screen.transform.right;
+            if (Input.GetKey(Core.KEY_SLIDERIGHT)) dPos +=  Time.deltaTime*0.2f * screen.transform.right;
+            if (Input.GetKey(Core.KEY_SLIDEUP   )) dPos +=  Time.deltaTime*0.2f * screen.transform.up;
+            if (Input.GetKey(Core.KEY_SLIDEDOWN )) dPos += -Time.deltaTime*0.2f * screen.transform.up;
+            if (Input.GetKey(Core.KEY_SLIDEIN   )) dPos +=  Time.deltaTime*0.2f * screen.transform.forward;
+            if (Input.GetKey(Core.KEY_SLIDEOUT  )) dPos += -Time.deltaTime*0.2f * screen.transform.forward;
+            if (Input.GetKey(Core.KEY_FORWARD   )) dRot *=  Quaternion.AngleAxis(-Time.deltaTime*180, fromForward);
+            if (Input.GetKey(Core.KEY_BACK      )) dRot *=  Quaternion.AngleAxis( Time.deltaTime*180, fromForward);
         } else {
-            if (Input.GetKey(Core.KEY_TURNLEFT ) && !Input.GetKey(KeyCode.LeftShift)) dPos[0] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_TURNRIGHT) && !Input.GetKey(KeyCode.LeftShift)) dPos[0] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_TURNUP   ) && !Input.GetKey(KeyCode.LeftShift)) dPos[1] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_TURNDOWN ) && !Input.GetKey(KeyCode.LeftShift)) dPos[1] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_TURNIN   ) && !Input.GetKey(KeyCode.LeftShift)) dPos[2] +=  Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_TURNOUT  ) && !Input.GetKey(KeyCode.LeftShift)) dPos[2] += -Time.deltaTime*0.2f;
-            if (Input.GetKey(Core.KEY_SPINLEFT ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.right);
-            if (Input.GetKey(Core.KEY_SPINRIGHT) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.right);
-            if (Input.GetKey(Core.KEY_SPINUP   ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.up);
-            if (Input.GetKey(Core.KEY_SPINDOWN ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.up);
-            if (Input.GetKey(Core.KEY_SPININ   ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis(-Time.deltaTime*180, Vector3.forward);
-            if (Input.GetKey(Core.KEY_SPINOUT  ) &&  Input.GetKey(KeyCode.LeftShift)) dRot    *=  Quaternion.AngleAxis( Time.deltaTime*180, Vector3.forward);
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+                if (Input.GetKey(Core.KEY_SPINLEFT )) dRot *=  Quaternion.AngleAxis( Time.deltaTime*180, screen.transform.right);
+                if (Input.GetKey(Core.KEY_SPINRIGHT)) dRot *=  Quaternion.AngleAxis(-Time.deltaTime*180, screen.transform.right);
+                if (Input.GetKey(Core.KEY_SPINUP   )) dRot *=  Quaternion.AngleAxis(-Time.deltaTime*180, screen.transform.up);
+                if (Input.GetKey(Core.KEY_SPINDOWN )) dRot *=  Quaternion.AngleAxis( Time.deltaTime*180, screen.transform.up);
+                if (Input.GetKey(Core.KEY_SPININ   )) dRot *=  Quaternion.AngleAxis(-Time.deltaTime*180, screen.transform.forward);
+                if (Input.GetKey(Core.KEY_SPINOUT  )) dRot *=  Quaternion.AngleAxis( Time.deltaTime*180, screen.transform.forward);
+            } else {
+                if (Input.GetKey(Core.KEY_TURNLEFT )) dPos += -Time.deltaTime*0.2f * screen.transform.right;
+                if (Input.GetKey(Core.KEY_TURNRIGHT)) dPos +=  Time.deltaTime*0.2f * screen.transform.right;
+                if (Input.GetKey(Core.KEY_TURNUP   )) dPos +=  Time.deltaTime*0.2f * screen.transform.up;
+                if (Input.GetKey(Core.KEY_TURNDOWN )) dPos += -Time.deltaTime*0.2f * screen.transform.up;
+                if (Input.GetKey(Core.KEY_TURNIN   )) dPos +=  Time.deltaTime*0.2f * screen.transform.forward;
+                if (Input.GetKey(Core.KEY_TURNOUT  )) dPos += -Time.deltaTime*0.2f * screen.transform.forward;
+            }
         }
     }
 
     private bool KeyStateUp() {
-        if (Input.GetKeyUp(KeyCode.LeftAlt)||Input.GetKeyUp(KeyCode.RightAlt)) return true;
+        if (Input.GetKeyUp(KeyCode.LeftControl)||Input.GetKeyUp(KeyCode.RightControl)) return true;
         if (isMover)
             return Input.GetKeyUp(Core.KEY_SLIDELEFT )||
                    Input.GetKeyUp(Core.KEY_SLIDERIGHT)||

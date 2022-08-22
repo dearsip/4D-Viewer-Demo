@@ -208,8 +208,8 @@ public class Engine : IMove
 
     private void updateRetina()
     {
-        renderRelative.setRetina(getRetina());
-        if (getSaveType() != IModel.SAVE_MAZE) ((GeomModel)model).setRetina(getRetina());
+        //renderRelative.setRetina(getRetina());
+        model.setRetina(getRetina());
     }
 
     // --- implementation of IStorable ---
