@@ -23,15 +23,18 @@ an extension of [4D Blocks](http://www.urticator.net/blocks/v6/index.html).
 ## Key & Mouse Inputs
 
 - WERASDFZ: Move
-- (Shift+) UIOJKL: Rotate
-- Alt+ Move or Rotate: Show Input Vectors as a guide
+- (Shift +) UIOJKL: Rotate
+- Control + Move or Rotate: Show Input Vectors as a guide
 - XCVBNM,.: Show button guides
+- Space: Select blocks / Jump
+- H: Add blocks / Shoot
+- Y: Delete blocks
 - Esc: Open/Close menu on the desktop
 - Left mouse button: Point with orange line as a guide
 - Right mouse button: Rotate the camera
 - Center mouse button & wheel: Move the camera
 - Enter: Reset the camera
-- Space: Toggle camera type
+- P: Toggle camera type
 
 ## 4D Viewer (legacy)
 
