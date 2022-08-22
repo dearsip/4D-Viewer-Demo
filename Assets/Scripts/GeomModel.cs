@@ -896,7 +896,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private double retina;
     private Clip.CustomBoundary[] clip, axisClip;
     private double orthoRetina = 2;
-    public void setRetina(double retina) // almost same as RenderRelative.setRetina
+    public override void setRetina(double retina) // almost same as RenderRelative.setRetina
     {
         this.retina = retina;
 

@@ -122,6 +122,10 @@ public class MapModel : IModel
         showMap = od.map;
     }
 
+    public override void setRetina(double retina) {
+        geomModel.setRetina(retina);
+    }
+
     public override bool isAnimated()
     {
         return false;
