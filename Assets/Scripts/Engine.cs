@@ -208,7 +208,7 @@ public class Engine : IMove
 
     private void updateRetina()
     {
-        //renderRelative.setRetina(getRetina());
+        renderRelative.setRetina(getRetina());
         model.setRetina(getRetina());
     }
 

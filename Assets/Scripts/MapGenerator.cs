@@ -113,7 +113,7 @@ public class MapGenerator
 
         // total number of interior cells
         int cells = 1;
-        for (int i = 0; i < om.size.Length; i++)
+        for (int i = 0; i < om.dimMap /*&& i < om.size.Length*/; i++)
         {
             cells *= om.size[i];
         }
