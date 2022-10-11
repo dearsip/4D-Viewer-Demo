@@ -64,7 +64,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/control/in/move"
+                     "output" : "/actions/control/in/menu"
                   }
                },
                "mode" : "button",
@@ -73,7 +73,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/control/in/move"
+                     "output" : "/actions/control/in/menu"
                   }
                },
                "mode" : "button",
@@ -126,6 +126,24 @@
                   "sub_mode" : "touch"
                },
                "path" : "/user/hand/right/input/thumbstick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/move"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/move"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
             }
          ]
       },
@@ -173,43 +191,8 @@
             },
             {
                "inputs" : {
-                  "grab" : {
-                     "output" : "/actions/default/in/grabgrip"
-                  }
-               },
-               "mode" : "grab",
-               "parameters" : {
-                  "force_hold_threshold" : "0.02",
-                  "force_release_threshold" : "0.01"
-               },
-               "path" : "/user/hand/left/input/grip"
-            },
-            {
-               "inputs" : {
-                  "grab" : {
-                     "output" : "/actions/default/in/grabpinch"
-                  }
-               },
-               "mode" : "grab",
-               "parameters" : {
-                  "force_hold_threshold" : "0.02",
-                  "force_release_threshold" : "0.01"
-               },
-               "path" : "/user/hand/left/input/pinch"
-            },
-            {
-               "inputs" : {
                   "click" : {
                      "output" : "/actions/default/in/menu"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/system"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/teleport"
                   }
                },
                "mode" : "button",
@@ -218,38 +201,11 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/teleport"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/b"
-            },
-            {
-               "inputs" : {
-                  "grab" : {
-                     "output" : "/actions/default/in/grabgrip"
-                  }
-               },
-               "mode" : "grab",
-               "path" : "/user/hand/right/input/grip"
-            },
-            {
-               "inputs" : {
-                  "grab" : {
-                     "output" : "/actions/default/in/grabpinch"
-                  }
-               },
-               "mode" : "grab",
-               "path" : "/user/hand/right/input/pinch"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/menu"
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/right/input/system"
+               "path" : "/user/hand/right/input/b"
             },
             {
                "inputs" : {
@@ -259,6 +215,60 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabgrip"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabgrip"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/teleport"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/teleport"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabpinch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabpinch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/grip"
             }
          ]
       },
@@ -273,6 +283,7 @@
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
    "description" : "",
+   "interaction_profile" : "",
    "name" : "knuckles_default",
    "options" : {},
    "simulated_actions" : []

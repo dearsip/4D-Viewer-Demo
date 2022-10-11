@@ -16,8 +16,15 @@ public class LogText : MonoBehaviour
         text = GetComponent<Text>();
         text.verticalOverflow = VerticalWrapMode.Truncate;
         text.supportRichText = true;
-        Application.logMessageReceived += HandleLog;
         builder = new StringBuilder();
+    }
+
+    void OnEnable() {
+        Application.logMessageReceived += HandleLog;
+    }
+
+    void OnDisable() {
+        Application.logMessageReceived -= HandleLog;
     }
 
     private void HandleLog(string logText, string stackTrace, LogType logType)

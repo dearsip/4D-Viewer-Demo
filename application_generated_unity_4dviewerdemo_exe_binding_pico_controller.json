@@ -32,6 +32,15 @@
                   }
                },
                "mode" : "button",
+               "path" : "/user/hand/left/input/system"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/menu"
+                  }
+               },
+               "mode" : "button",
                "path" : "/user/hand/right/input/system"
             },
             {
@@ -121,20 +130,20 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/control/in/menu"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/left/input/y"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/control/in/move"
                   }
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/control/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/y"
             },
             {
                "inputs" : {
@@ -196,30 +205,11 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/grabpinch"
+                     "output" : "/actions/default/in/menu"
                   }
                },
                "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.8",
-                  "click_deactivate_threshold" : "0.7",
-                  "force_input" : "force"
-               },
-               "path" : "/user/hand/left/input/grip"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/grabgrip"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "click_activate_threshold" : "0.8",
-                  "click_deactivate_threshold" : "0.7",
-                  "force_input" : "value"
-               },
-               "path" : "/user/hand/left/input/trigger"
+               "path" : "/user/hand/left/input/system"
             },
             {
                "inputs" : {
@@ -234,15 +224,6 @@
                "inputs" : {},
                "mode" : "none",
                "path" : "/user/hand/left/input/skeleton/left"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/default/in/grabpinch"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/grip"
             },
             {
                "inputs" : {},
@@ -270,15 +251,6 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/grabgrip"
-                  }
-               },
-               "mode" : "button",
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
                      "output" : "/actions/default/in/teleport"
                   }
                },
@@ -288,11 +260,20 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/teleport"
+                     "output" : "/actions/default/in/menu"
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/right/input/a"
+               "path" : "/user/hand/left/input/y"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/menu"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/y"
             },
             {
                "inputs" : {
@@ -306,11 +287,47 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/default/in/menu"
+                     "output" : "/actions/default/in/grabpinch"
                   }
                },
                "mode" : "button",
-               "path" : "/user/hand/left/input/y"
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabpinch"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabgrip"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/grabgrip"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/default/in/teleport"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
             }
          ]
       },
@@ -323,10 +340,15 @@
       }
    },
    "category" : "steamvr_input",
-   "controller_type" : "oculus_touch",
+   "controller_type" : "pico_controller",
    "description" : "",
    "interaction_profile" : "",
    "name" : "oculus_touch",
-   "options" : {},
+   "options" : {
+      "compatibility_mode" : true,
+      "simulate_hmd" : true,
+      "simulate_rendermodel" : true,
+      "simulated_controller_type" : "oculus_touch"
+   },
    "simulated_actions" : []
 }
