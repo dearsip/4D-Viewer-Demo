@@ -28,7 +28,7 @@ public abstract class IModel
 
     public abstract void setBuffer(PolygonBuffer buf);
     public abstract void animate(double delta);
-    public abstract void render(double[] origin, double[][] axis);
+    public abstract void render(HapticsBase hapticsBase, double[] origin, double[][] axis);
 
     public const int SAVE_NONE = 0;
     public const int SAVE_MAZE = 1;

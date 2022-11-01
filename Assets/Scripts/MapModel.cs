@@ -187,12 +187,12 @@ public class MapModel : IModel
     }
 
     private Polygon p;
-    public override void render(double[] origin, double[][] axis)
+    public override void render(HapticsBase hapticsBase, double[] origin, double[][] axis)
     {
         renderAbsolute.run(origin);
         if (showMap) {
             Vec.addScaled(reg, origin, this.axis[3], -distance);
-            geomModel.render(reg, axis);
+            geomModel.render(hapticsBase, reg, axis);
             geomRelative.run(this.axis, false);
             for (int i = 0; i < bufRelative.getSize(); i++)
             {

@@ -82,6 +82,8 @@ public class Core : MonoBehaviour
     private WebSocket ws;
     public HapticsTester hapticsTester;
 
+    public HapticsBase hapticsBase;
+
     // --- option accessors ---
 
     // some of these also implement IOptions
@@ -366,7 +368,7 @@ public class Core : MonoBehaviour
             menuCommand?.Invoke();
             menuCommand = null;
             control();
-            renderTask = Task.Run(() => engine.renderAbsolute(eyeVector, opt.oo, delta));
+            renderTask = Task.Run(() => engine.renderAbsolute(hapticsBase, eyeVector, opt.oo, delta));
             //doHaptics();
         }
     }

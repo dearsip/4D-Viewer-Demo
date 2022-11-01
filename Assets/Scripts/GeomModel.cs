@@ -1011,7 +1011,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     {
     }
 
-    public override void render(double[] origin, double[][] axis)
+    public override void render(HapticsBase hapticsBase, double[] origin, double[][] axis)
     {
         renderer(origin, axis);
     }

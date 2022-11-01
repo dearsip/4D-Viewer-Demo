@@ -141,6 +141,7 @@ public class SyncEffect : MonoBehaviour {
                 double yL = transform.InverseTransformPoint(deviceL.stylusPositionWorld).y;
 
                 double d = -5 * Mathf.Clamp((float)(yR+yL), -1, 0);
+                Debug.Log(", posR: "+deviceR.stylusPositionRaw.x+","+deviceR.stylusPositionRaw.y+","+deviceR.stylusPositionRaw.z);
 
                 // Send the current effect settings to OpenHaptics.
                 HapticPlugin.effects_settings(

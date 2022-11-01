@@ -658,12 +658,12 @@ public class Engine : IMove
 
     // --- rendering ---
 
-    public void renderAbsolute(double[] eyeVector, OptionsControl oo, double delta)
+    public void renderAbsolute(HapticsBase hapticsBase, double[] eyeVector, OptionsControl oo, double delta)
     {
         try {
             model.animate(delta);
-            model.render(origin, axis);
-            RenderRelative(eyeVector, oo);
+            model.render(hapticsBase, origin, axis);
+            RenderRelative(hapticsBase, eyeVector, oo);
         }catch(Exception e) {Debug.LogException(e);};
     }
 
@@ -690,6 +690,22 @@ public class Engine : IMove
         for (int i = 0; i < obj.Length; i += 2)
         {
             buf.add(obj[i], obj[i + 1], color);
+        }
+    }
+
+    int count = 0;
+    private void renderStylus(HapticsBase hapticsBase, PolygonBuffer buf) {
+        if (hapticsBase == null) return;
+        reg3 = hapticsBase.GetPosition();
+        if (count++ > 20) {Debug.Log(Vec.ToString(reg3)); count = 0;}
+        double w = 0.1;
+        for (int i = 0; i < 3; i++) {
+            Vec.unitVector(reg9, i);
+            Vec.addScaled(reg4, reg3, reg9, w);
+            Vec.projectRetina(reg5, reg4, getRetina());
+            Vec.addScaled(reg4, reg3, reg9, -w);
+            Vec.projectRetina(reg6, reg4, getRetina());
+            buf.add(reg5, reg6, Color.yellow*OptionsColor.fixer);
         }
     }
 
@@ -740,7 +756,7 @@ public class Engine : IMove
         }
     }
 
-    private void RenderRelative(double[] eyeVector, OptionsControl oo)
+    private void RenderRelative(HapticsBase hapticsBase, double[] eyeVector, OptionsControl oo)
     {
         if (OptionsFisheye.of.fisheye)
         {
@@ -757,6 +773,7 @@ public class Engine : IMove
         else
         {
             renderRelative.run(axis, model.getSaveType()==IModel.SAVE_MAZE);
+            renderStylus(hapticsBase, bufRelative);
             renderObject(bufRelative, objRetina);
             renderPolygon(bufRelative, objRetinaPoly, 3, oo.sliceDir);
             renderObject(bufRelative, objCross);
