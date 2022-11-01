@@ -696,8 +696,7 @@ public class Engine : IMove
     int count = 0;
     private void renderStylus(HapticsBase hapticsBase, PolygonBuffer buf) {
         if (hapticsBase == null) return;
-        reg3 = hapticsBase.GetPosition();
-        if (count++ > 20) {Debug.Log(Vec.ToString(reg3)); count = 0;}
+        hapticsBase.GetPosition(reg3);
         double w = 0.1;
         for (int i = 0; i < 3; i++) {
             Vec.unitVector(reg9, i);
@@ -773,7 +772,7 @@ public class Engine : IMove
         else
         {
             renderRelative.run(axis, model.getSaveType()==IModel.SAVE_MAZE);
-            renderStylus(hapticsBase, bufRelative);
+            //renderStylus(hapticsBase, bufRelative);
             renderObject(bufRelative, objRetina);
             renderPolygon(bufRelative, objRetinaPoly, 3, oo.sliceDir);
             renderObject(bufRelative, objCross);

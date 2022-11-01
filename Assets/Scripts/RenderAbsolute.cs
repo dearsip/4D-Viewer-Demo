@@ -38,6 +38,10 @@ public class RenderAbsolute
 
     MapModel mapModel;
 
+    private int[] stylus;
+    private double[] stylusDraw;
+    private bool hapActive, touching;
+
     // --- construction ---
 
     public RenderAbsolute(int dim, Map map, IColorize colorizer, OptionsView ov, MapModel mapModel)
@@ -64,6 +68,9 @@ public class RenderAbsolute
         reg4 = new int[dim];
 
         this.mapModel = mapModel;
+
+        stylus = new int[dim];
+        stylusDraw = new double[dim];
     }
 
     public void setBuffer(PolygonBuffer buf)
@@ -502,6 +509,8 @@ public class RenderAbsolute
             //
             if (count[dir] > 0) continue;
 
+            if (hapActive && Grid.equals(p, stylus)) drawHaptics();
+
             Dir.apply(dir, p, 1);
 
             if (!map.isOpen(p))
@@ -535,8 +544,20 @@ public class RenderAbsolute
         }
     }
 
-    public void run(double[] origin)
+    private void drawHaptics() {
+        double w = 0.1;
+        for (int i = 0; i < dim; i++) {
+            Vec.unitVector(reg1, i);
+            Vec.addScaled(reg2, stylusDraw, reg1, w);
+            Vec.addScaled(reg1, stylusDraw, reg1, -w);
+            addLine(reg1, reg2, (touching ? Color.red : Color.yellow)*OptionsColor.fixer);
+        }
+    }
+
+    public void run(HapticsBase hapticsBase, double[] origin, double[][] axis)
     {
+        RunHaptics(hapticsBase, origin, axis);
+
         buf.clear();
         Vec.copy(this.origin, origin);
 
@@ -562,5 +583,44 @@ public class RenderAbsolute
         }
     }
 
-}
+    private void RunHaptics(HapticsBase hapticsBase, double[] origin, double[][] axis) {
+        if (hapticsBase == null) return;
+        hapticsBase.GetPosition(reg2);
+        Vec.fromAxisCoordinates(reg1, reg2, axis);
+        Vec.add(reg1, reg1, origin);
+        Grid.toCell(reg3, reg4, reg1); // ignore boundaries, not important
+        if (!hapActive)
+        {
+            for (int i = 0; i < dim; i++) reg4[i] = (int)System.Math.Floor(origin[i]);
+            if (Grid.equals(reg3,reg4)) { hapActive = true; Grid.copy(stylus, reg3); }
+        }
+        touching = !Trace(stylus, reg3);
+        Vec.zero(reg2);
+        if (hapActive) {
+            for (int i = 0; i < dim; i++)
+            {
+                int d = stylus[i] - reg3[i];
+                if (d!=0) reg2[i] = (d>0 ? System.Math.Ceiling(reg1[i]) : System.Math.Floor(reg1[i])) - reg1[i];
+            }
+            Vec.add(stylusDraw, reg1, reg2);
+        }
+        Vec.toAxisCoordinates(reg1, reg2, axis);
+        hapticsBase.SetHaptics(reg1);
+    }
 
+    private bool Trace(int[] from, int[] to) { // They are no more than two cells apart in one direction
+        int[] reg = new int[dim];
+        Grid.copy(reg, from);
+        while (!Grid.equals(from, to)){
+            for (int i = 0; i < dim; i++) {
+                if (reg[i] == to[i]) continue;
+                reg[i] = to[i];
+                if (map.inBounds(reg) && map.isOpen(reg)) { break; }
+                reg[i] = from[i];
+            }
+            if (Grid.equals(from, reg)) return false;
+            Grid.copy(from, reg);
+        }
+        return true;
+    }
+}

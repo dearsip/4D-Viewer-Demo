@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class HapticsBase : MonoBehaviour
 {
-    public virtual double[] GetPosition() { return new double[] {0,0,0,0}; }
+    public virtual void GetPosition(double[] pos) { }
     public virtual void SetHaptics(double[] haptics) {}
 }

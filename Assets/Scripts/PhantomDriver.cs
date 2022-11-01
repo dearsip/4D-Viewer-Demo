@@ -42,12 +42,10 @@ public class PhantomDriver : HapticsBase
         {
             if (inTheZone)
             {
-                Debug.Log("start");
                 HapticPlugin.effects_startEffect(deviceR.configName, FXID_RU);
                 HapticPlugin.effects_startEffect(deviceR.configName, FXID_RD);
             } else
             {
-                Debug.Log("stop");
                 HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RU);
                 HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RD);
             }
@@ -84,12 +82,11 @@ public class PhantomDriver : HapticsBase
             (int)HapticEffect.EFFECT_TYPE.SPRING);
     }
 
-    public override double[] GetPosition() {
-        double x = deviceL.stylusPositionRaw.x*.01;
-        double y = (deviceL.stylusPositionRaw.y-50)*.01;
-        double z = deviceL.stylusPositionRaw.z*.01;
-        double w = -(deviceR.stylusPositionRaw.y-50)*.01+1.1;
-        return new double[] {x,y,z,w};
+    public override void GetPosition(double[] pos) {
+        pos[0] = deviceL.stylusPositionRaw.x*.02;
+        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02;
+        pos[2] = deviceL.stylusPositionRaw.z*.02;
+        pos[3] = -(deviceR.stylusPositionRaw.y-50)*.02+2.1;
     }
 
     public override void SetHaptics(double[] haptics){
@@ -102,7 +99,7 @@ public class PhantomDriver : HapticsBase
             deviceL.configName,
             FXID_LH,
             0, // Gain
-            1.5*System.Math.Sqrt(haptics[0]*haptics[0]+haptics[1]*haptics[1]+haptics[2]*haptics[2]), // Magnitude
+            10*System.Math.Sqrt(haptics[0]*haptics[0]+haptics[1]*haptics[1]+haptics[2]*haptics[2]), // Magnitude
             1, // Frequency
             new double[] {0,0,0}, // Position
             new double[] {haptics[0],haptics[1],haptics[2]}); // Direction
@@ -114,7 +111,7 @@ public class PhantomDriver : HapticsBase
             deviceR.configName,
             FXID_RH,
             0,
-            1.5*System.Math.Abs(haptics[3]),
+            10*System.Math.Abs(haptics[3]),
             1,
             new double[] {0,0,0},
             new double[] {0,-haptics[3],0});
