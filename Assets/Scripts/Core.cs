@@ -83,6 +83,8 @@ public class Core : MonoBehaviour
     public HapticsTester hapticsTester;
 
     public HapticsBase hapticsBase;
+    private bool hapButton1, hapButton2;
+    private double[] lastHapLeft, lastHapRight;
 
     // --- option accessors ---
 
@@ -190,6 +192,9 @@ public class Core : MonoBehaviour
 
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
+
+        lastHapLeft = new double[4];
+        lastHapRight = new double[4];
     }
 
     private void addEvevts()
@@ -490,6 +495,15 @@ public class Core : MonoBehaviour
             command = addShapes;
         if (Input.GetKeyDown(KeyCode.Y) && command == null)
             command = removeShape;
+
+        if (hapticsBase!=null) {
+            bool b = hapticsBase.Button1Pressed();
+            if (b && !hapButton1) hapticsBase.GetPosition(lastHapLeft);
+            hapButton1 = b;
+            b = hapticsBase.Button2Pressed();
+            if (b && !hapButton2) hapticsBase.GetPosition(lastHapRight);
+            hapButton2 = b;
+        }
     }
 
 
@@ -592,6 +606,13 @@ public class Core : MonoBehaviour
             if (opt.oo.invertLeftAndRight) for (int i=0; i<reg3.Length-1; i++) reg3[i] = -reg3[i];
             if (opt.oo.invertForward) reg3[reg3.Length-1] = -reg3[reg3.Length-1];
             if (!leftMove) Vec.zero(reg3);
+            if (hapticsBase != null && hapticsBase.Button2Pressed())
+            {
+                hapticsBase.GetPosition(reg4);
+                Vec.sub(reg3, lastHapRight, reg4);
+                Vec.scale(reg3, reg3, 1/dMove);
+                Vec.copy(lastHapRight, reg4);
+            }
             keyControl(KEYMODE_SLIDE);
 
             if (alignMode)
@@ -671,6 +692,13 @@ public class Core : MonoBehaviour
                 if (opt.oo.limit3D) reg2[2] = 0;
                 if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
                 if (!rightMove) Vec.zero(reg2);
+                if (hapticsBase != null && hapticsBase.Button1Pressed())
+                {
+                    hapticsBase.GetPosition(reg4);
+                    Vec.sub(reg2, lastHapLeft, reg4);
+                    Vec.scale(reg2, reg2, 180/dRotate/Math.PI);
+                    Vec.copy(lastHapLeft, reg4);
+                }
                 keyControl(KEYMODE_TURN);
                 t = Vec.norm(reg2);
                 if (t != 0)

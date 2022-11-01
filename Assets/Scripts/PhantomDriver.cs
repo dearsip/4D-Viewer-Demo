@@ -125,4 +125,14 @@ public class PhantomDriver : HapticsBase
             startHaptics = true;
         }
     }
+
+    public override bool Button1Pressed()
+    {
+        return deviceL.Buttons[0]==1;
+    }
+
+    public override bool Button2Pressed()
+    {
+        return deviceR.Buttons[0]==1;
+    }
 }
