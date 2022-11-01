@@ -85,6 +85,7 @@ public class Core : MonoBehaviour
     public HapticsBase hapticsBase;
     private bool hapButton1, hapButton2;
     private double[] lastHapLeft, lastHapRight;
+    private Quaternion lastHapRot, dlHapRot;
 
     // --- option accessors ---
 
@@ -332,6 +333,7 @@ public class Core : MonoBehaviour
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
 
+        hapticsBase.ToggleLimit3D(opt.oo.limit3D);
     }
 
     public void resetWin() {
@@ -498,7 +500,7 @@ public class Core : MonoBehaviour
 
         if (hapticsBase!=null) {
             bool b = hapticsBase.Button1Pressed();
-            if (b && !hapButton1) hapticsBase.GetPosition(lastHapLeft);
+            if (b && !hapButton1) { hapticsBase.GetPosition(lastHapLeft); lastHapRot = hapticsBase.GetRotation(); }
             hapButton1 = b;
             b = hapticsBase.Button2Pressed();
             if (b && !hapButton2) hapticsBase.GetPosition(lastHapRight);
@@ -525,6 +527,9 @@ public class Core : MonoBehaviour
         lastRightTrigger = rightTrigger; rightTrigger = trigger.GetState(right);
         lastLeftGrip = leftGrip; leftGrip = grip.GetState(left);
         lastRightGrip = rightGrip; rightGrip = grip.GetState(right);
+
+        dlHapRot = relarot * lastHapRot * Quaternion.Inverse(relarot * hapticsBase.GetRotation());
+        lastHapRot = hapticsBase.GetRotation();
 
         leftMove = move.GetState(left); rightMove = move.GetState(right);
         reg1 = relarot * 
@@ -720,10 +725,14 @@ public class Core : MonoBehaviour
                     if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
                     relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
                 }
-                if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                 if (isPlatformer() || keepUpAndDown) { relarot[0] = 0; relarot[2] = 0; }
                 if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                 if (!rightMove) relarot = Quaternion.identity;
+                if (hapticsBase != null && hapticsBase.Button1Pressed())
+                {
+                    relarot = dlHapRot;
+                }
+                if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                 keyControl(KEYMODE_SPIN2);
                 if (relarot.w < 1f) {
                     relarot.ToAngleAxis(out f, out reg0);

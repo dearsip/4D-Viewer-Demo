@@ -10,7 +10,7 @@ public class PhantomDriver : HapticsBase
     HapticPlugin deviceL;
     HapticPlugin deviceR;
     int FXID_RU, FXID_RD, FXID_LH, FXID_RH;
-    bool inTheZone, startHaptics;
+    bool inTheZone, startHaptics, limit3D;
     // Start is called before the first frame update
     void Start()
     {
@@ -85,8 +85,13 @@ public class PhantomDriver : HapticsBase
     public override void GetPosition(double[] pos) {
         pos[0] = deviceL.stylusPositionRaw.x*.02;
         pos[1] = (deviceL.stylusPositionRaw.y-50)*.02;
-        pos[2] = deviceL.stylusPositionRaw.z*.02;
+        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02;
         pos[3] = -(deviceR.stylusPositionRaw.y-50)*.02+2.1;
+    }
+
+    public override Quaternion GetRotation()
+    {
+        return deviceL.stylusRotationWorld;
     }
 
     public override void SetHaptics(double[] haptics){
@@ -134,5 +139,10 @@ public class PhantomDriver : HapticsBase
     public override bool Button2Pressed()
     {
         return deviceR.Buttons[0]==1;
+    }
+
+    public override void ToggleLimit3D(bool limit3D)
+    {
+        this.limit3D = limit3D;
     }
 }
