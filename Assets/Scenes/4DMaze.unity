@@ -15017,6 +15017,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1000011547835092, guid: 8ade79fed86bbd141926d1cd94c98457,
         type: 3}
+    - target: {fileID: 11476190, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 11489144, guid: dc06161b6d97feb419f45f03b62e14b9, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -36802,6 +36806,7 @@ GameObject:
   - component: {fileID: 1022013572}
   - component: {fileID: 1022013571}
   - component: {fileID: 1022013573}
+  - component: {fileID: 1022013574}
   m_Layer: 0
   m_Name: FixedCamera
   m_TagString: Untagged
@@ -36890,6 +36895,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   center: {fileID: 1863553872}
+--- !u!114 &1022013574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1022013569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa9bd778db0ae22499c06f113c68cd1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  center: {fileID: 511379487}
+  left: {fileID: 1810062942}
+  right: {fileID: 977447954}
+  fix: {fileID: 1022013572}
+  fLeft: {fileID: 1202347133}
+  fRight: {fileID: 696262075}
 --- !u!1 &1030927360
 GameObject:
   m_ObjectHideFlags: 0
@@ -61829,7 +61852,6 @@ GameObject:
   - component: {fileID: 1810062939}
   - component: {fileID: 1810062942}
   - component: {fileID: 1810062941}
-  - component: {fileID: 1810062940}
   m_Layer: 0
   m_Name: LeftCamera
   m_TagString: Untagged
@@ -61852,24 +61874,6 @@ Transform:
   m_Father: {fileID: 1442596689}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 15, y: 7, z: 0}
---- !u!114 &1810062940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1810062938}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa9bd778db0ae22499c06f113c68cd1b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  center: {fileID: 511379487}
-  left: {fileID: 1810062942}
-  right: {fileID: 977447954}
-  fix: {fileID: 1022013572}
-  fLeft: {fileID: 1202347133}
-  fRight: {fileID: 696262075}
 --- !u!81 &1810062941
 AudioListener:
   m_ObjectHideFlags: 0

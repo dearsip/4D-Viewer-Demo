@@ -788,10 +788,10 @@ public class HapticPlugin : MonoBehaviour  {
 	private Rect windowRect = new Rect (20, 20, 350, 125);
 	void OnGUI ()
 	{
-		if (showOldVersionPopup)
-			windowRect = GUI.Window(0, windowRect, OldVersionDialogWindow, "Out-of-date OpenHaptics version.");
-		else if(showNoDevicePopup)
-			windowRect = GUI.Window(0, windowRect, NoDeviceDialogWindow, "Haptic Device Not Found.");
+		//if (showOldVersionPopup)
+			//windowRect = GUI.Window(0, windowRect, OldVersionDialogWindow, "Out-of-date OpenHaptics version.");
+		//else if(showNoDevicePopup)
+			//windowRect = GUI.Window(0, windowRect, NoDeviceDialogWindow, "Haptic Device Not Found.");
 
 	}
 
