@@ -6,11 +6,12 @@ public class PhantomDriver : HapticsBase
 {
     public string configNameL = "Left Device";
     public string configNameR = "Right Device";
+    public GameObject leftRestrict;
 
     HapticPlugin deviceL;
     HapticPlugin deviceR;
     int FXID_RU, FXID_RD, FXID_LH, FXID_RH;
-    bool inTheZone, startHaptics, limit3D;
+    bool inTheZone, inTheZoneLeft, startHaptics, limit3D;
     // Start is called before the first frame update
     void Start()
     {
@@ -144,5 +145,11 @@ public class PhantomDriver : HapticsBase
     public override void ToggleLimit3D(bool limit3D)
     {
         this.limit3D = limit3D;
+        if (limit3D)
+        {
+            HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), .5, .5, 0, 0, 0);
+            HapticPlugin.shape_facing(leftRestrict.GetInstanceID(), 2);
+        }
+        else HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), 0, 0, 0, 0, 0);
     }
 }

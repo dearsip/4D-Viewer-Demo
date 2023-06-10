@@ -332,8 +332,6 @@ public class Core : MonoBehaviour
         saveOrigin = new double[this.dim];
         saveAxis = new double[this.dim][];
         for (int i = 0; i < this.dim; i++) saveAxis[i] = new double[this.dim];
-
-        hapticsBase.ToggleLimit3D(opt.oo.limit3D);
     }
 
     public void resetWin() {
@@ -1018,6 +1016,7 @@ public class Core : MonoBehaviour
     public void updateOptions()
     {
         engine.setOptions(oc(), ov(), oa.oeCurrent, ot(), oa.opt.od);
+        hapticsBase.ToggleLimit3D(opt.oo.limit3D);
     }
 
     public void setOptions()
