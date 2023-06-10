@@ -70,6 +70,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private double transparency;
     protected double cameraDistance;
 
+    private bool glide;
+
     // --- construction ---
 
     public GeomModel(int dim, Geom.Shape[] shapes, Struct.DrawInfo drawInfo, Struct.ViewInfo viewInfo) //throws Exception
@@ -891,6 +893,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         invertNormals = od.invertNormals;
         useSeparation = od.separate;
         cameraDistance = od.cameraDistance;
+        glide = od.glide;
     }
 
     private double retina;
@@ -951,7 +954,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         return IModel.SAVE_GEOM;
     }
 
-    public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2)
+    const double epsilon = 0.00001;
+    public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2, bool detectHits)
     {
 
         if (!useSeparation) return true;
@@ -959,7 +963,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         if (p2[1] < 0 && p2[1] < p1[1])
         {
             shapeNumber = -1;
-            return false; // solid floor
+            if (!glide || detectHits) return false; // solid floor
+            else  p2[1] = epsilon;
         }
         // I once got to negative y by aligning while near the floor
 
@@ -982,7 +987,13 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             if ((Clip.clip(p1, p2, shape, clipResult) & Clip.KEEP_A) != 0)
             {
                 shapeNumber = i;
-                return false;
+                if (!glide || detectHits) return false;
+                else
+                {
+                    Vec.sub(reg2, p1, p2);
+                    Vec.scale(reg2, shape.cell[clipResult.ia].normal, Vec.dot(reg2, shape.cell[clipResult.ia].normal) * (1 - clipResult.a + epsilon));
+                    Vec.add(p2, p2, reg2);
+                }
             }
             // it's possible to get inside a block by aligning
             // or by placing blocks carelessly, so only exclude motion that enters

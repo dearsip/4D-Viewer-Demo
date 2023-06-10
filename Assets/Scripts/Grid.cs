@@ -121,16 +121,17 @@ public class Grid
         }
     }
 
+    const double epsilon = 0.00001;
     /**
      * Check whether the move from p1 to p2 goes through open points of the map.
      * The point p1 is assumed to be an open point.
      */
-    public static bool isOpenMove(double[] p1, double[] p2, Map map, int[] reg1, double[] reg2)
+    public static bool isOpenMove(double[] p1, double[] p2, Map map, int[] reg1, double[] reg2, bool glide)
     {
 
         // first, check the obvious ... the endpoint must be open
 
-        if (!isOpen(p2, map, reg1)) return false;
+        // if (!isOpen(p2, map, reg1)) return false;
 
         // as for the rest, the important thing is to prevent sneaking diagonally
         // (and the various higher-dimensional analogues)
@@ -182,7 +183,11 @@ public class Grid
 
             // check that it's open
 
-            if (!isOpen(reg2, map, reg1)) return false;
+            if (!isOpen(reg2, map, reg1))
+            {
+                if (!glide) return false;
+                else p2[iMin] = pMin + ((p2[iMin] < pMin) ? epsilon : -epsilon);
+            }
         }
 
         return true;

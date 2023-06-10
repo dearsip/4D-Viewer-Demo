@@ -7,7 +7,7 @@ public class OptionsDisplay// : IValidate
     
     public double transparency, lineThickness, cameraDistance;
     public double border;
-    public bool usePolygon, useEdgeColor, hidesel, invertNormals, separate, map;
+    public bool usePolygon, useEdgeColor, hidesel, invertNormals, separate, map, glide;
     public int trainSpeed;
 
     // --- construction ---
@@ -31,6 +31,7 @@ public class OptionsDisplay// : IValidate
         dest.map = src.map;
         dest.cameraDistance = src.cameraDistance;
         dest.trainSpeed = src.trainSpeed;
+        dest.glide = src.glide;
     }
 
     public const double TRANSPARENCY_MIN = 0;

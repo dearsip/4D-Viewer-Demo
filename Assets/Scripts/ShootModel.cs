@@ -140,7 +140,7 @@ public class ShootModel : ActionModel {
       Geom.Shape shape = bullet.shape;
       Vec.scale(reg3,shape.axis[dim-1],bullet.speed*delta);
       Vec.add(reg3,shape.aligncenter,reg3);
-      if (!canMove(shape.aligncenter,reg3,reg4,reg2)) {
+      if (!canMove(shape.aligncenter,reg3,reg4,reg2,true)) {
          Geom.Shape hitShape = getHitShape();
          for (int i=0; i<enemies.Length; i++) {
             if (enemies[i] != null && hitShape == enemies[i].getShape()) {

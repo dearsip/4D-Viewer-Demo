@@ -466,7 +466,7 @@ public class Engine : IMove
         if (!isPlatformer())
         {
             Vec.addScaled(reg3, origin, axis[a], d);
-            if (!model.canMove(origin, reg3, reg1, reg4)) return false;
+            if (!model.canMove(origin, reg3, reg1, reg4, true)) return false;
         }
 
         return true;
@@ -495,7 +495,7 @@ public class Engine : IMove
             Vec.unitVector(reg4, 1);
             Vec.rotate(d,reg3,axis[1],reg4,regA,regB);
             Vec.add(reg3, origin, d);
-            if (model.canMove(origin, reg3, reg1, reg4))
+            if (model.canMove(origin, reg3, reg1, reg4, false))
             {
                 Vec.copy(origin, reg3);
             }
@@ -588,7 +588,7 @@ public class Engine : IMove
 
     public bool update(double[] saveOrigin, double[][] saveAxis, double[] viewOrigin)
     {
-        if (model.canMove(saveOrigin, origin, reg1, reg4))
+        if (model.canMove(saveOrigin, origin, reg1, reg4, false))
         {
             if (atFinish()) win = true;
             return true;
@@ -616,7 +616,7 @@ public class Engine : IMove
         const double epsilon = 0.001;
         Vec.unitVector(reg3, 1);
         Vec.addScaled(reg3, origin, reg3, -epsilon);
-        if (!model.canMove(origin, reg3, reg1, reg4) || reg3[1] < 0) fall = hdef;
+        if (!model.canMove(origin, reg3, reg1, reg4, true) || reg3[1] < 0) fall = hdef;
     }
 
     public void Fall(double delta)
@@ -631,7 +631,7 @@ public class Engine : IMove
             fall = 0;
             origin[1] = epsilon;
         }
-        else if (model.canMove(origin, reg3, reg1, reg4))
+        else if (model.canMove(origin, reg3, reg1, reg4, true))
         {
             Vec.copy(origin, reg3);
         }

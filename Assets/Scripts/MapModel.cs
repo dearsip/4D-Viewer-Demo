@@ -29,6 +29,7 @@ public class MapModel : IModel
     private double[] origin;
     private double[][] axis;
     public bool showMap;
+    private bool glide;
 
     // --- construction ---
 
@@ -120,6 +121,7 @@ public class MapModel : IModel
         renderAbsolute.usePolygon = od.usePolygon;
         geomModel.setOptions(oc, seed, depth, texture, od);
         showMap = od.map;
+        glide = od.glide;
     }
 
     public override void setRetina(double retina) {
@@ -136,9 +138,9 @@ public class MapModel : IModel
         return IModel.SAVE_MAZE;
     }
 
-    public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2)
+    public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2, bool detectHits)
     {
-        return Grid.isOpenMove(p1, p2, map, reg1, reg2);
+        return Grid.isOpenMove(p1, p2, map, reg1, reg2, glide);
     }
 
     public override bool atFinish(double[] origin, int[] reg1, int[] reg2)

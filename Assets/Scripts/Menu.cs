@@ -34,7 +34,7 @@ public class Menu : MonoBehaviour
         transparencyField, lineThicknessField, borderField, baseTransparencyField, sliceTransparencyField, 
         frameRateField, timeMoveField, timeRotateField, timeAlignMoveField, timeAlignRotateField, width, flare, rainbowGap;
     public Toggle allowLoopsCurrent, allowLoopsNext, allowReservedPathsCurrent, allowReservedPathsNext, usePolygon, useEdgeColor, hideSel, invertNormals, separate, map, invertLeftAndRight, invertForward,
-        invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow;
+        invertYawAndPitch, invertRoll, alignMode, sliceMode, limit3D, keepUpAndDown, fisheye, custom, rainbow, glide;
     public Toggle[] enable, texture;
     public Dropdown colorMode, inputTypeLeftAndRight, inputTypeForward, inputTypeYawAndPitch, inputTypeRoll;
     public Material defaultMat, alternativeMat;
@@ -185,6 +185,8 @@ public class Menu : MonoBehaviour
         put(flare, OptionsFisheye.of.flare);
         put(rainbowGap, OptionsFisheye.of.rainbowGap);
 
+        put(glide, oa.opt.od.glide);
+
         isActivating = false;
     }
 
@@ -237,6 +239,9 @@ public class Menu : MonoBehaviour
         getDouble(ref ofTemp.rainbowGap, rainbowGap, 0, 1, true);
         OptionsFisheye.copy(OptionsFisheye.of, ofTemp);
         OptionsFisheye.recalculate();
+
+        oa.opt.od.glide = getBool(glide);
+
         core.menuCommand = core.updateOptions;
     }
 
