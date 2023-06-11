@@ -194,7 +194,7 @@ public class MapModel : IModel
         renderAbsolute.run(hapticsBase, origin, axis);
         if (showMap) {
             Vec.addScaled(reg, origin, this.axis[3], -distance);
-            geomModel.render(hapticsBase, reg, axis);
+            geomModel.render(null, reg, axis);
             geomRelative.run(this.axis, false);
             for (int i = 0; i < bufRelative.getSize(); i++)
             {

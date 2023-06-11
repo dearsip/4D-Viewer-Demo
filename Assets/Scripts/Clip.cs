@@ -360,7 +360,7 @@ public class Clip
         }
     }
 
-    public static CustomBoundaryList calcViewBoundaries(double[] origin, Geom.Shape shape)
+    public static CustomBoundaryList calcViewBoundaries(double[] origin, Geom.Shape shape, bool includeFront)
     {
 
         CustomBoundaryList list = new CustomBoundaryList();
@@ -377,6 +377,13 @@ public class Clip
                 Boundary b = calcViewBoundary(origin, c1, c2);
                 if (b != null) list.addBoundary(b); // only null if glass
             }
+        }
+
+        // more expensive, now for haptics cursor drawing (also needs to modify some scenery, not support invertNormals)
+        if (includeFront) foreach (Geom.Cell c in shape.cell) if (c.visible)
+        {
+            Boundary b = new CustomBoundary(c.getNormal(), c.getThreshold());
+            list.addBoundary(b);
         }
 
         return list;
@@ -689,7 +696,7 @@ public class Clip
      */
     public static bool outsideRadius(double[] p1, double[] p2, Geom.Shape shape)
     {
-        double d = Vec.dist(p2, shape.shapecenter) - shape.radius; // distance from sphere
+        double d = System.Math.Min(Vec.dist(p1, shape.shapecenter), Vec.dist(p2, shape.shapecenter)) - shape.radius; // distance from sphere
         if (d < 0) return false; // definitely not outside
         double s = Vec.dist(p1, p2);
         return (d >= s / 2); // check this to prevent flythroughs

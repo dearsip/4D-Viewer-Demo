@@ -150,6 +150,7 @@ public class Grid
 
         Vec.copy(reg2, p1);
 
+        bool through = true;
         while (true)
         {
 
@@ -186,11 +187,11 @@ public class Grid
             if (!isOpen(reg2, map, reg1))
             {
                 if (!glide) return false;
-                else p2[iMin] = pMin + ((p2[iMin] < pMin) ? epsilon : -epsilon);
+                else { through = false; p2[iMin] = pMin + ((p2[iMin] < pMin) ? epsilon : -epsilon); }
             }
         }
 
-        return true;
+        return through;
     }
 
     /**

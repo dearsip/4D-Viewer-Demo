@@ -50,8 +50,12 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     protected double[][] axis;
     protected double[] reg1;
     protected double[] reg2;
+    protected int[] reg3;
+    protected double[] reg4;
     protected Clip.Result clipResult;
     protected IDraw currentDraw;
+    protected double[] stylus;
+    protected bool hapActive, touching;
 
     private List<NamedObject<Color>> availableColors;
     private List<NamedObject<Geom.Shape>> availableShapes;
@@ -108,6 +112,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         for (int i = 0; i < dim; i++) axis[i] = new double[dim];
         reg1 = new double[dim];
         reg2 = new double[dim];
+        reg3 = new int[dim];
+        reg4 = new double[dim];
+        stylus = new double[dim];
         clipResult = new Clip.Result();
 
         paintColor = Color.red; // annoying to have to set up every time
@@ -957,6 +964,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     const double epsilon = 0.00001;
     public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2, bool detectHits)
     {
+        bool through = true;
 
         if (!useSeparation) return true;
 
@@ -964,9 +972,10 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         {
             shapeNumber = -1;
             if (!glide || detectHits) return false; // solid floor
-            else  p2[1] = epsilon;
+            else { through = false; p2[1] = epsilon; }
         }
         // I once got to negative y by aligning while near the floor
+        List<double[]> normals = new List<double[]>();
 
         for (int i = 0; i < shapes.Length; i++)
         {
@@ -982,17 +991,28 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             // jerky motion you get if you try to follow a slow train.  so, nope
 
             // prefilter by checking distance to shape against radius
-            if (Clip.outsideRadius(p1, p2, shape)) continue;
+            // if (Clip.outsideRadius(p1, p2, shape)) continue;
 
-            if ((Clip.clip(p1, p2, shape, clipResult) & Clip.KEEP_A) != 0)
+            if ((Clip.clip(p1, p2, shape, clipResult) & (invertNormals ? Clip.KEEP_B : Clip.KEEP_A)) != 0)
             {
                 shapeNumber = i;
                 if (!glide || detectHits) return false;
                 else
                 {
+                    through = false;
                     Vec.sub(reg2, p1, p2);
-                    Vec.scale(reg2, shape.cell[clipResult.ia].normal, Vec.dot(reg2, shape.cell[clipResult.ia].normal) * (1 - clipResult.a + epsilon));
-                    Vec.add(p2, p2, reg2);
+                    double[] normal = new double[dim];
+                    Vec.copy(normal, shape.cell[invertNormals ? clipResult.ib : clipResult.ia].normal);
+                    foreach(double[] n in normals)
+                    {
+                        Vec.addScaled(normal, normal, n, -Vec.dot(normal, n) / Vec.norm2(n));
+                    }
+                    double d = (invertNormals ? clipResult.b : clipResult.a) - epsilon / Vec.norm(reg2);
+                    Vec.scale(reg2, normal, Vec.dot(reg2, normal) / Vec.norm2(normal));
+                    Vec.addScaled(p2, p2, reg2, 1 - d + epsilon);
+                    Vec.addScaled(p1, p1, reg2,   - d + epsilon);
+                    normals.Add(normal);
+                    i = -1;
                 }
             }
             // it's possible to get inside a block by aligning
@@ -1001,7 +1021,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             // so you can't navigate around inside a chain of blocks if you get in.
         }
 
-        return true;
+        return through;
     }
 
     public override bool atFinish(double[] origin, int[] reg1, int[] reg2)
@@ -1024,7 +1044,32 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     public override void render(HapticsBase hapticsBase, double[] origin, double[][] axis)
     {
+        RunHaptics(hapticsBase, origin, axis);
         renderer(origin, axis);
+    }
+
+    private void RunHaptics(HapticsBase hapticsBase, double[] origin, double[][] axis) {
+        if (hapticsBase == null) return;
+        hapticsBase.GetPosition(reg2);
+        Vec.fromAxisCoordinates(reg1, reg2, axis);
+        Vec.add(reg2, reg1, origin);
+        if (!hapActive)
+        {
+            double max = 0;
+            foreach (double d in reg1) max = Math.Max(max, Math.Abs(d));
+            if (max < 0.5) { hapActive = true; Vec.copy(stylus, reg2); }
+            Vec.zero(reg1);
+            hapticsBase.SetHaptics(reg1);
+        }
+        else
+        {
+            Vec.copy(reg1, reg2);
+            touching = !canMove(stylus, reg2, reg3, reg4, false);
+            Vec.copy(stylus, reg2);
+            Vec.sub(reg2, stylus, reg1);
+            Vec.toAxisCoordinates(reg1, reg2, axis);
+            hapticsBase.SetHaptics(reg1);
+        }
     }
 
     protected void renderer(double[] origin, double[][] axis)
@@ -1047,7 +1092,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
         {
             if (shapes[s[i]] == null) continue;
             calcVisShape(shapes[s[i]]);
-            clipUnits[s[i]].setBoundaries(Clip.calcViewBoundaries(origin, shapes[s[i]]));
+            clipUnits[s[i]].setBoundaries(Clip.calcViewBoundaries(origin, shapes[s[i]], hapActive && !invertNormals));
             currentDraw = clipUnits[s[i]].chain(currentDraw); // set up for floor drawing
         }
 
@@ -1059,6 +1104,9 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             scenery[i].draw(out texture, out textureColor, origin);
             for (int j = 0; j < textureColor.Length; j++) drawLine(texture[j*2], texture[j*2+1], textureColor[j]);
         }
+
+        if (invertNormals) currentDraw = buf;
+        if (hapActive) DrawHaptics();
 
         calcInFront();
 
@@ -1105,6 +1153,16 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             cell.visible = true; // glass
         }
         return cell.visible;
+    }
+
+    private void DrawHaptics() {
+        double w = 0.2;
+        for (int i = 0; i < dim; i++) {
+            Vec.unitVector(reg1, i);
+            Vec.addScaled(reg2, stylus, reg1, w);
+            Vec.addScaled(reg1, stylus, reg1, -w);
+            drawLine(reg1, reg2, (touching ? Color.red : Color.yellow)*OptionsColor.fixer);
+        }
     }
 
     private void drawShape(Geom.Shape shape)

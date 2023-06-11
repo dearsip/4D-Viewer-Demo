@@ -18,6 +18,7 @@ public class Engine : IMove
     private double[][] axis;
     private bool win;
     private bool keepUpAndDown;
+    private bool glide;
 
     private Clip.Result clipResult;
     private double fall;
@@ -354,6 +355,7 @@ public class Engine : IMove
 
         //renderAbsolute(); // not always necessary, but who cares, it's fast enough
         width = od.lineThickness;
+        glide = od.glide;
     }
 
     public void setKeepUpAndDown(bool b) {
@@ -466,7 +468,7 @@ public class Engine : IMove
         if (!isPlatformer())
         {
             Vec.addScaled(reg3, origin, axis[a], d);
-            if (!model.canMove(origin, reg3, reg1, reg4, true)) return false;
+            return model.canMove(origin, reg3, reg1, reg4, true);
         }
 
         return true;
@@ -495,7 +497,7 @@ public class Engine : IMove
             Vec.unitVector(reg4, 1);
             Vec.rotate(d,reg3,axis[1],reg4,regA,regB);
             Vec.add(reg3, origin, d);
-            if (model.canMove(origin, reg3, reg1, reg4, false))
+            if (model.canMove(origin, reg3, reg1, reg4, false) || glide)
             {
                 Vec.copy(origin, reg3);
             }
@@ -588,7 +590,7 @@ public class Engine : IMove
 
     public bool update(double[] saveOrigin, double[][] saveAxis, double[] viewOrigin)
     {
-        if (model.canMove(saveOrigin, origin, reg1, reg4, false))
+        if (model.canMove(saveOrigin, origin, reg1, reg4, false) || glide)
         {
             if (atFinish()) win = true;
             return true;

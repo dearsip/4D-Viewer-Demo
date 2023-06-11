@@ -448,7 +448,7 @@ public class FourDDemo
         {
             if (shapes[i] == null) continue;
             calcVisShape(shapes[i]);
-            clipUnits[i].setBoundaries(Clip.calcViewBoundaries(origin, shapes[i]));
+            clipUnits[i].setBoundaries(Clip.calcViewBoundaries(origin, shapes[i], false));
         }
 
         calcInFront();
