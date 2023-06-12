@@ -1007,10 +1007,12 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
                     {
                         Vec.addScaled(normal, normal, n, -Vec.dot(normal, n) / Vec.norm2(n));
                     }
-                    double d = (invertNormals ? clipResult.b : clipResult.a) - epsilon / Vec.norm(reg2);
+                    double d = Math.Max((invertNormals ? clipResult.b : clipResult.a) - epsilon / Vec.norm(reg2), 0);
                     Vec.scale(reg2, normal, Vec.dot(reg2, normal) / Vec.norm2(normal));
-                    Vec.addScaled(p2, p2, reg2, 1 - d + epsilon);
-                    Vec.addScaled(p1, p1, reg2,   - d + epsilon);
+                    Vec.addScaled(p2, p2, reg2, 1 - d);
+                    Vec.addScaled(p1, p1, reg2,   - d);
+                    if (normals.Count == 0) UnityEngine.Debug.Log("log");
+                    UnityEngine.Debug.Log(d + " " + Vec.ToString(normal));
                     normals.Add(normal);
                     i = -1;
                 }

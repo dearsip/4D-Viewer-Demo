@@ -10,7 +10,7 @@ public class PhantomDriver : HapticsBase
 
     HapticPlugin deviceL;
     HapticPlugin deviceR;
-    int FXID_RU, FXID_RD, FXID_LH, FXID_RH;
+    int FXID_RU, FXID_RD, FXID_LU, FXID_LH, FXID_RH;
     bool inTheZone, inTheZoneLeft, startHaptics, limit3D;
     // Start is called before the first frame update
     void Start()
@@ -36,7 +36,7 @@ public class PhantomDriver : HapticsBase
     }
 
     private void RightRestrict() {
-        if (FXID_RU == -1 || FXID_RD == -1) AssignRestrict();
+        if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) AssignRestrict();
         bool oldInTheZone = inTheZone;
         inTheZone = Mathf.Abs(deviceR.stylusPositionRaw.x) + Mathf.Abs(deviceR.stylusPositionRaw.z) < 50;
         if (oldInTheZone != inTheZone)
@@ -45,10 +45,12 @@ public class PhantomDriver : HapticsBase
             {
                 HapticPlugin.effects_startEffect(deviceR.configName, FXID_RU);
                 HapticPlugin.effects_startEffect(deviceR.configName, FXID_RD);
+                HapticPlugin.effects_startEffect(deviceL.configName, FXID_LU);
             } else
             {
                 HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RU);
                 HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RD);
+                HapticPlugin.effects_stopEffect(deviceL.configName, FXID_LU);
             }
 		}
     }
@@ -56,14 +58,15 @@ public class PhantomDriver : HapticsBase
     private void AssignRestrict() {
         FXID_RD = HapticPlugin.effects_assignEffect(deviceR.configName);
         FXID_RU = HapticPlugin.effects_assignEffect(deviceR.configName);
-        if (FXID_RU == -1 || FXID_RD == -1) return;
+        FXID_LU = HapticPlugin.effects_assignEffect(deviceL.configName);
+        if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) return;
         HapticPlugin.effects_settings(
             deviceR.configName,
             FXID_RU,
             0.75, // Gain
             0.9, // Magnitude
             1, // Frequency
-            new double[] {0,150,0}, // Position
+            new double[] {0,200,0}, // Position
             new double[] {0,0,0}); // Direction
         HapticPlugin.effects_type(
             deviceR.configName,
@@ -75,12 +78,24 @@ public class PhantomDriver : HapticsBase
             0.75,
             0.75,
             1,
-            new double[] {0,-50,0},
+            new double[] {0,-100,0},
             new double[] {0,0,0});
         HapticPlugin.effects_type(
             deviceR.configName,
             FXID_RD,
             (int)HapticEffect.EFFECT_TYPE.SPRING);
+        HapticPlugin.effects_settings(
+            deviceL.configName,
+            FXID_LU,
+            0, // Gain
+            0.08, // Magnitude
+            1, // Frequency
+            new double[] {0,0,0}, // Position
+            new double[] {0,1,-0.5}); // Direction
+        HapticPlugin.effects_type(
+            deviceL.configName,
+            FXID_LU,
+            (int)HapticEffect.EFFECT_TYPE.CONSTANT);
     }
 
     public override void GetPosition(double[] pos) {
