@@ -141,7 +141,7 @@ public class MapModel : IModel
 
     public override bool canMove(double[] p1, double[] p2, int[] reg1, double[] reg2, bool detectHits)
     {
-        return Grid.isOpenMove(p1, p2, map, reg1, reg2, glide);
+        return Grid.isOpenMove(p1, p2, map, reg1, reg2, detectHits, glide);
     }
 
     public override bool atFinish(double[] origin, int[] reg1, int[] reg2)

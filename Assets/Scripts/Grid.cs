@@ -126,7 +126,7 @@ public class Grid
      * Check whether the move from p1 to p2 goes through open points of the map.
      * The point p1 is assumed to be an open point.
      */
-    public static bool isOpenMove(double[] p1, double[] p2, Map map, int[] reg1, double[] reg2, bool glide)
+    public static bool isOpenMove(double[] p1, double[] p2, Map map, int[] reg1, double[] reg2, bool detectHits, bool glide)
     {
 
         // first, check the obvious ... the endpoint must be open
@@ -186,7 +186,7 @@ public class Grid
 
             if (!isOpen(reg2, map, reg1))
             {
-                if (!glide) return false;
+                if (!glide || detectHits) return false;
                 else { through = false; p2[iMin] = pMin + ((p2[iMin] < pMin) ? epsilon : -epsilon); }
             }
         }

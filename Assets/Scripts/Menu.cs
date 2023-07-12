@@ -323,9 +323,20 @@ public class Menu : MonoBehaviour
         if (!core.keepUpAndDown) core.command = core.align;
     }
 
-    public void doNewGame()
+    public void doNewGame(int dim)
     {
         doOK();
+        if (dim>0) {
+            OptionsAll oa = core.getOptionsAll();
+            oa.opt.om4.dimMap = dim;
+            if (dim==3) {
+                oa.opt.oo.limit3D = true;
+                oa.opt.oo.sliceDir = 1;
+            } else {
+                oa.opt.oo.limit3D = false;
+                oa.opt.oo.sliceDir = 0;
+            }
+        }
         core.menuCommand = core.newGame;
     }
 

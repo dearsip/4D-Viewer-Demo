@@ -470,17 +470,16 @@ public class RenderAbsolute
     private void addFace(int[] p, int dir)
     {
         Color color = colorizer.getColor(p, dir);
-        Color color5 = Color.clear;
 
         if (texture[0]) addTexture(p, dir, useEdgeColor ? color : Color.white, 0.999999);
 
         if (Grid.equals(p, map.getStart()))
         {
-            color5 = (texture[5] && color.Equals(COLOR_START)) ? COLOR_START_ALTERNATE : COLOR_START;
+            color = (texture[5] && color.Equals(COLOR_START)) ? COLOR_START_ALTERNATE : COLOR_START;
         }
         else if (Grid.equals(p, map.getFinish()))
         {
-            color5 = (texture[5] && color.Equals(COLOR_FINISH)) ? COLOR_FINISH_ALTERNATE : COLOR_FINISH;
+            color = (texture[5] && color.Equals(COLOR_FINISH)) ? COLOR_FINISH_ALTERNATE : COLOR_FINISH;
         }
 
         int d = colorizer.getTrace(p);
@@ -490,12 +489,6 @@ public class RenderAbsolute
 
             Color c = color;
             bool draw = texture[i];
-
-            if (i == 5 && color5 != Color.clear)
-            {
-                c = color5;
-                draw = true;
-            }
 
             if (draw) addTexture(p, dir, c, 0.1 * i);
         }
