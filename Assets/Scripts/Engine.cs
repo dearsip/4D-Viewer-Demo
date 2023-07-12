@@ -957,8 +957,9 @@ public class Engine : IMove
                     int z = (oo.sliceDir + 1) % 3;
                     for (int j = 0; j < v - 1; j++)
                     {
-                        if (p.vertex[j][z] * p.vertex[j + 1][z] < 0)
+                        if (p.vertex[j][z] * p.vertex[j + 1][z] <= 0)
                         {
+                            if (p.vertex[j][z] == 0) continue;
                             if (k == 0)
                             {
                                 reg7[x] = (p.vertex[j][x] * Math.Abs(p.vertex[j + 1][z]) + p.vertex[j + 1][x] * Math.Abs(p.vertex[j][z])) / (Math.Abs(p.vertex[j][z]) + Math.Abs(p.vertex[j + 1][z]));

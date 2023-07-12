@@ -838,6 +838,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
             Vec.unitMatrix(axis);
         }
+        hapActive = false;
     }
 
     public virtual bool getAlignMode(bool defaultAlignMode)
@@ -1011,8 +1012,6 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
                     Vec.scale(reg2, normal, Vec.dot(reg2, normal) / Vec.norm2(normal));
                     Vec.addScaled(p2, p2, reg2, 1 - d);
                     Vec.addScaled(p1, p1, reg2,   - d);
-                    if (normals.Count == 0) UnityEngine.Debug.Log("log");
-                    UnityEngine.Debug.Log(d + " " + Vec.ToString(normal));
                     normals.Add(normal);
                     i = -1;
                 }
@@ -1052,6 +1051,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     private void RunHaptics(HapticsBase hapticsBase, double[] origin, double[][] axis) {
         if (hapticsBase == null) return;
+        if (hapticsBase.Button3Pressed()) hapActive = false;
         hapticsBase.GetPosition(reg2);
         Vec.fromAxisCoordinates(reg1, reg2, axis);
         Vec.add(reg2, reg1, origin);
@@ -1060,7 +1060,8 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             double max = 0;
             foreach (double d in reg1) max = Math.Max(max, Math.Abs(d));
             if (max < 0.5) { hapActive = true; Vec.copy(stylus, reg2); }
-            Vec.zero(reg1);
+            if (Vec.normalizeTry(reg1, reg1)) Vec.scale(reg2, reg1, -0.2);
+            Vec.toAxisCoordinates(reg1, reg2, axis);
             hapticsBase.SetHaptics(reg1);
         }
         else
@@ -1159,6 +1160,23 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
 
     private void DrawHaptics() {
         double w = 0.2;
+        for (int i = 0; i < 3; i++) {
+            double[][] reg = new double[4][];
+            for (int j = 0; j < reg.Length; j++) reg[j] = new double[dim];
+            int k = i == 2 ? 3 : i;
+            Vec.unitVector(reg1, k);
+            Vec.addScaled(reg[0], stylus, reg1, w);
+            Vec.unitVector(reg1, 2);
+            Vec.addScaled(reg[1], stylus, reg1, w);
+            Vec.unitVector(reg1, k);
+            Vec.addScaled(reg[2], stylus, reg1, -w);
+            Vec.unitVector(reg1, 2);
+            Vec.addScaled(reg[3], stylus, reg1, -w);
+            Color c = (touching ? Color.red : Color.yellow)*OptionsColor.fixer;
+            c.a = 0;
+            Polygon p = new Polygon(reg, c);
+            drawPolygon(p);
+        }
         for (int i = 0; i < dim; i++) {
             Vec.unitVector(reg1, i);
             Vec.addScaled(reg2, stylus, reg1, w);

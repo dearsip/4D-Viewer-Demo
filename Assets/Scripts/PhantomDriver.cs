@@ -157,6 +157,16 @@ public class PhantomDriver : HapticsBase
         return deviceR.Buttons[0]==1;
     }
 
+    public override bool Button3Pressed()
+    {
+        return deviceL.Buttons[1]==1;
+    }
+
+    public override bool Button4Pressed()
+    {
+        return deviceR.Buttons[1]==1;
+    }
+
     public override void ToggleLimit3D(bool limit3D)
     {
         this.limit3D = limit3D;

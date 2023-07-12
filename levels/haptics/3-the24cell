@@ -1,8 +1,0 @@
-"reg4/the24cell" include
-
-[0.5 2.5 0.5 -1] [X+ Y+ Z+ W+] viewinfo
-
-the24cell [0.3 0.3 0.3 0.3] scale [0.35 2.35 0.35 0.35] translate
-
-nomat
-

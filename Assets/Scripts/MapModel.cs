@@ -69,6 +69,7 @@ public class MapModel : IModel
         //
         for (int a = 0; a < axis.Length; a++) Vec.unitVector(axis[a], (a + 1) % axis.Length);
 
+        renderAbsolute.initPlayer();
         this.axis = axis;
         this.origin = origin;
     }
