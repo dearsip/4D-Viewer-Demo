@@ -84,8 +84,11 @@ public class Core : MonoBehaviour
 
     public HapticsBase hapticsBase;
     private bool hapButton1, hapButton2;
-    private double[] lastHapLeft, lastHapRight;
-    private Quaternion lastHapRot, dlHapRot;
+    private double[] hapPos, lastHapPos, fromHapPos, dlHapPos, dfHapPos;
+    private Quaternion hapRot, lastHapRot, fromHapRot, dlHapRot, dfHapRot;
+
+    AudioSource audioSource;
+    public AudioClip startSound, goalSound;
 
     // --- option accessors ---
 
@@ -164,6 +167,8 @@ public class Core : MonoBehaviour
         posLeft = pose.GetLocalPosition(left); rotLeft = pose.GetLocalRotation(left);
         posRight = pose.GetLocalPosition(right); rotRight = pose.GetLocalRotation(right);
 
+        audioSource = GetComponent<AudioSource>();
+
         optDefault = ScriptableObject.CreateInstance<Options>();
         opt = ScriptableObject.CreateInstance<Options>();
         // ロード
@@ -178,7 +183,7 @@ public class Core : MonoBehaviour
         eyeVector = new double[3];
         mesh = new Mesh();
         GetComponent<MeshFilter>().sharedMesh = mesh;
-        engine = new Engine(mesh);
+        engine = new Engine(mesh, audioSource, goalSound);
 
         //initHaptics();
 
@@ -194,8 +199,11 @@ public class Core : MonoBehaviour
         FileBrowser.HideDialog();
         menuPanel.gameObject.SetActive(false);
 
-        lastHapLeft = new double[4];
-        lastHapRight = new double[4];
+        hapPos = new double[4];
+        lastHapPos = new double[4];
+        fromHapPos = new double[4];
+        dlHapPos = new double[4];
+        dfHapPos = new double[4];
     }
 
     private void addEvevts()
@@ -357,7 +365,7 @@ public class Core : MonoBehaviour
         if (renderTask.IsCompleted) {
             frameCount++;
             now = Time.realtimeSinceStartup;
-            delta = Mathf.Clamp(now-last, 0.01f, 0.5f);
+            delta = Mathf.Clamp(now-last, 0.0001f, 0.5f);
             last = now;
             dOneSec = now - lastOneSec;
             if (dOneSec >= 1) {
@@ -498,10 +506,19 @@ public class Core : MonoBehaviour
 
         if (hapticsBase!=null) {
             bool b = hapticsBase.Button1Pressed();
-            if (b && !hapButton1) { hapticsBase.GetPosition(lastHapLeft); lastHapRot = hapticsBase.GetRotation(); }
+            if (b && !hapButton1)
+            {
+                hapticsBase.GetPosition(lastHapPos);
+                Vec.copy(fromHapPos, lastHapPos);
+                fromHapRot = lastHapRot = hapticsBase.GetRotation();
+            }
             hapButton1 = b;
             b = hapticsBase.Button2Pressed();
-            if (b && !hapButton2) hapticsBase.GetPosition(lastHapRight);
+            if (b && !hapButton2)
+            {
+                hapticsBase.GetPosition(lastHapPos);
+                Vec.copy(fromHapPos, lastHapPos);
+            }
             hapButton2 = b;
         }
     }
@@ -526,15 +543,26 @@ public class Core : MonoBehaviour
         lastLeftGrip = leftGrip; leftGrip = grip.GetState(left);
         lastRightGrip = rightGrip; rightGrip = grip.GetState(right);
 
-        dlHapRot = relarot * lastHapRot * Quaternion.Inverse(relarot * hapticsBase.GetRotation());
-        lastHapRot = hapticsBase.GetRotation();
-
         leftMove = move.GetState(left); rightMove = move.GetState(right);
         reg1 = relarot * 
                (transform.position - ((headsetOnHead.GetState(SteamVR_Input_Sources.Head)) ? 
                 player.hmdTransform.position : fixedCamera.transform.position));
         for (int i = 0; i < 3; i++) eyeVector[i] = reg1[i];
         Vec.normalize(eyeVector, eyeVector);
+
+        if (hapticsBase != null)
+        {
+            rightMove = hapticsBase.Button1Pressed();
+            leftMove = hapticsBase.Button2Pressed();
+            hapticsBase.GetPosition(hapPos);
+            Vec.sub(dlHapPos, hapPos, lastHapPos);
+            Vec.copy(lastHapPos, hapPos);
+            Vec.sub(dfHapPos, hapPos, fromHapPos);
+            hapRot = hapticsBase.GetRotation();
+            dlHapRot = hapRot * Quaternion.Inverse(lastHapRot);
+            lastHapRot = hapticsBase.GetRotation();
+            dfHapRot = hapRot * Quaternion.Inverse(fromHapRot);
+        }
 
         //reg1 = (pose.GetLocalPosition(right) - transform.position) / 0.3f * 1.2f / (float)opt.ov4.scale;
         //for (int i = 0; i < 3; i++) cursor[i] = reg1[i];
@@ -611,10 +639,8 @@ public class Core : MonoBehaviour
             if (!leftMove) Vec.zero(reg3);
             if (hapticsBase != null && hapticsBase.Button2Pressed())
             {
-                hapticsBase.GetPosition(reg4);
-                Vec.sub(reg3, lastHapRight, reg4);
-                Vec.scale(reg3, reg3, 1/dMove);
-                Vec.copy(lastHapRight, reg4);
+                if (!alignMode) Vec.scale(reg3, dlHapPos, -1/dMove);
+                else Vec.scale(reg3, dfHapPos, -1);
             }
             keyControl(KEYMODE_SLIDE);
 
@@ -640,6 +666,11 @@ public class Core : MonoBehaviour
             if (alignMode)
             {
                 for (int i = 0; i < 3; i++) reg2[i] = dfPosRight[i];
+                if (hapticsBase != null && hapticsBase.Button1Pressed())
+                {
+                    Vec.scale(reg2, dfHapPos, -0.1);
+                }
+                keyControl(KEYMODE_TURN);
                 Vec.scale(reg2, reg2, 1.0 / Math.Max(limit, Vec.norm(reg2)));
                 if (opt.oo.limit3D) reg2[2] = 0;
                 if (opt.oo.invertYawAndPitch) for (int i = 0; i < reg2.Length; i++) reg2[i] = -reg2[i];
@@ -659,12 +690,16 @@ public class Core : MonoBehaviour
                 if (command == null)
                 {
                     relarot = dfRotRight;
+                    if (!rightMove) relarot = Quaternion.identity;
+                    if (hapticsBase != null && hapticsBase.Button1Pressed())
+                    {
+                        relarot = Quaternion.Inverse(dfHapRot * dfHapRot * dfHapRot);
+                    }
                     for (int i = 0; i < 3; i++) reg0[i] = Mathf.Asin(relarot[i]) * Mathf.Sign(relarot.w) / (float)limitAng / Mathf.PI * 180;
                     if (opt.oo.limit3D) { reg0[0] = 0; reg0[1] = 0; }
-                    if (isPlatformer()) { reg0[0] = 0; reg0[2] = 0; }
                     if (opt.oo.invertRoll) reg0 = -reg0;
-                    if (!rightMove) reg0 = Vector3.zero;
                     keyControl(KEYMODE_SPIN);
+                    if (isPlatformer()) { reg0[0] = 0; reg0[2] = 0; }
                     for (int i = 0; i < 3; i++)
                     {
                         if (Mathf.Abs(reg0[i]) > tAlignSpin)
@@ -697,10 +732,7 @@ public class Core : MonoBehaviour
                 if (!rightMove) Vec.zero(reg2);
                 if (hapticsBase != null && hapticsBase.Button1Pressed())
                 {
-                    hapticsBase.GetPosition(reg4);
-                    Vec.sub(reg2, lastHapLeft, reg4);
-                    Vec.scale(reg2, reg2, 180/dRotate/Math.PI);
-                    Vec.copy(lastHapLeft, reg4);
+                    Vec.scale(reg2, dlHapPos, -180/dRotate/Math.PI);
                 }
                 keyControl(KEYMODE_TURN);
                 t = Vec.norm(reg2);
@@ -723,15 +755,15 @@ public class Core : MonoBehaviour
                     if (f>0) f = (float)(dRotate / limitAngRoll) * Mathf.Min((float)limitAngRoll * Mathf.PI / 180, f) / f;
                     relarot = Quaternion.Slerp(Quaternion.identity, relarot, f);
                 }
-                if (isPlatformer() || keepUpAndDown) { relarot[0] = 0; relarot[2] = 0; }
                 if (opt.oo.invertRoll) relarot = Quaternion.Inverse(relarot);
                 if (!rightMove) relarot = Quaternion.identity;
                 if (hapticsBase != null && hapticsBase.Button1Pressed())
                 {
-                    relarot = dlHapRot;
+                    relarot = Quaternion.Inverse(dlHapRot);
                 }
                 if (opt.oo.limit3D) { relarot[0] = 0; relarot[1] = 0; }
                 keyControl(KEYMODE_SPIN2);
+                if (isPlatformer() || keepUpAndDown) { relarot[0] = 0; relarot[2] = 0; }
                 if (relarot.w < 1f) {
                     relarot.ToAngleAxis(out f, out reg0);
                     //f = Math.PI / 180 * (float)dRotate * f / Mathf.Max((float)limitAng, f);

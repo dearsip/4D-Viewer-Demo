@@ -62,6 +62,8 @@ public class Engine : IMove
     private List<Color> cols;
     private Mesh mesh;
     //private double border;
+    private AudioSource audioSource;
+    private AudioClip goalSound;
 
     // --- construction ---
 
@@ -69,7 +71,7 @@ public class Engine : IMove
      * Construct a new engine object.
      * After construction, you must call newGame before anything else.
      */
-    public Engine(/*IDisplay displayInterface*/ Mesh mesh)
+    public Engine(/*IDisplay displayInterface*/ Mesh mesh, AudioSource audioSource, AudioClip goalSound)
     {
         //this.displayInterface = displayInterface;
 
@@ -77,6 +79,8 @@ public class Engine : IMove
         //  ... so enableCache is irrelevant
         // edgeCache starts at zero
         this.mesh = mesh;
+        this.audioSource = audioSource;
+        this.goalSound = goalSound;
     }
 
     // --- helpers ---
@@ -592,7 +596,7 @@ public class Engine : IMove
     {
         if (model.canMove(saveOrigin, origin, reg1, reg4, false) || glide)
         {
-            if (atFinish()) win = true;
+            if (atFinish()) { if (!win) audioSource.PlayOneShot(goalSound); win = true; }
             return true;
         }
         else
