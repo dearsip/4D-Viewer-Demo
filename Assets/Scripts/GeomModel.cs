@@ -1052,20 +1052,23 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
     private void RunHaptics(HapticsBase hapticsBase, double[] origin, double[][] axis) {
         if (hapticsBase == null) return;
         if (hapticsBase.Button3Pressed()) hapActive = false;
-        hapticsBase.GetPosition(reg2);
-        Vec.fromAxisCoordinates(reg1, reg2, axis);
-        Vec.add(reg2, reg1, origin);
         if (!hapActive)
         {
+            hapticsBase.GetAbsolutePosition(reg2);
+            Vec.fromAxisCoordinates(reg1, reg2, axis);
+            Vec.add(reg2, reg1, origin);
             double max = 0;
             foreach (double d in reg1) max = Math.Max(max, Math.Abs(d));
-            if (max < 0.5) { hapActive = true; Vec.copy(stylus, reg2); }
+            if (max < 0.1) hapActive = true;
             if (Vec.normalizeTry(reg1, reg1)) Vec.scale(reg2, reg1, -0.2);
             Vec.toAxisCoordinates(reg1, reg2, axis);
             hapticsBase.SetHaptics(reg1);
         }
-        else
+        if (hapActive)
         {
+            hapticsBase.GetPosition(reg2);
+            Vec.fromAxisCoordinates(reg1, reg2, axis);
+            Vec.add(reg2, reg1, origin);
             Vec.copy(reg1, reg2);
             touching = !canMove(stylus, reg2, reg3, reg4, false);
             Vec.copy(stylus, reg2);
@@ -1108,7 +1111,7 @@ public class GeomModel : IModel, IMove//, IKeysNew, ISelectShape
             for (int j = 0; j < textureColor.Length; j++) drawLine(texture[j*2], texture[j*2+1], textureColor[j]);
         }
 
-        if (invertNormals) currentDraw = buf;
+        /*if (invertNormals)*/ currentDraw = buf;
         if (hapActive) DrawHaptics();
 
         calcInFront();

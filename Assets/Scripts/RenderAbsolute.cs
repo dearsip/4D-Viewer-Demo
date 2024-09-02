@@ -3,6 +3,7 @@
  */
 
 using UnityEngine;
+using System;
 
 /**
  * An object that uses map and color information
@@ -599,15 +600,19 @@ public class RenderAbsolute
     private void RunHaptics(HapticsBase hapticsBase, double[] origin, double[][] axis) {
         if (hapticsBase == null) return;
         if (hapticsBase.Button3Pressed()) hapActive = false;
-        hapticsBase.GetPosition(reg2);
-        Vec.fromAxisCoordinates(reg1, reg2, axis);
-        Vec.add(reg1, reg1, origin);
+        hapticsBase.GetPosition(reg1);
+        Vec.fromAxisCoordinates(reg2, reg1, axis);
+        Vec.add(reg1, reg2, origin);
         Grid.toCell(reg3, reg4, reg1); // ignore boundaries, not important
         if (!hapActive)
         {
-            for (int i = 0; i < dim; i++) reg4[i] = (int)System.Math.Floor(origin[i]);
-            if (Grid.equals(reg3,reg4)) hapActive = true;
-            Grid.copy(stylus, reg3);
+            double max = 0;
+            foreach (double d in reg2) max = Math.Max(max, Math.Abs(d));
+            if (max < 0.1) { 
+                for (int i = 0; i < dim; i++) reg4[i] = (int)System.Math.Floor(origin[i]);
+                if (Grid.equals(reg3,reg4)) hapActive = true;
+                Grid.copy(stylus, reg3);
+            }
         }
         Vec.zero(reg2);
         if (hapActive)

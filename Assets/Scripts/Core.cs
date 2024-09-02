@@ -1048,7 +1048,7 @@ public class Core : MonoBehaviour
     public void updateOptions()
     {
         engine.setOptions(oc(), ov(), oa.oeCurrent, ot(), oa.opt.od);
-        hapticsBase.ToggleLimit3D(opt.oo.limit3D);
+        if (hapticsBase != null) hapticsBase.ToggleLimit3D(opt.oo.limit3D);
     }
 
     public void setOptions()
@@ -1095,7 +1095,7 @@ public class Core : MonoBehaviour
     private bool opened;
     IEnumerator ShowLoadDialogCoroutine()
     {
-        yield return FileBrowser.WaitForLoadDialog(false, opened ? null : Directory.GetCurrentDirectory(), "Load File", "Load");
+        yield return FileBrowser.WaitForLoadDialog(false, opened ? null : Directory.GetCurrentDirectory() + "/levels/haptics/4D", "Load File", "Load");
         opened = true;
 
         Debug.Log("LoadFile " + (FileBrowser.Success ? "successful" : "failed") + ": " + Path.GetFileName(FileBrowser.Result));

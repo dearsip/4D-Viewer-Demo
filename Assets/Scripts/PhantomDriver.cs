@@ -7,11 +7,14 @@ public class PhantomDriver : HapticsBase
     public string configNameL = "Left Device";
     public string configNameR = "Right Device";
     public GameObject leftRestrict;
+    public double scale = 1;
+    public double wOffset = 0;
 
     HapticPlugin deviceL;
     HapticPlugin deviceR;
     int FXID_RU, FXID_RD, FXID_LU, FXID_LH, FXID_RH;
-    bool inTheZone, inTheZoneLeft, startHaptics, limit3D;
+    bool inTheZone, inTheZoneLeft, startHaptics, limit3D, lastButton4Pressed;
+    bool idle = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +36,8 @@ public class PhantomDriver : HapticsBase
     void Update()
     {
         RightRestrict();
+        if (Button4Pressed() && !lastButton4Pressed) idle = !idle;
+        lastButton4Pressed = Button4Pressed();
     }
 
     private void RightRestrict() {
@@ -99,10 +104,19 @@ public class PhantomDriver : HapticsBase
     }
 
     public override void GetPosition(double[] pos) {
-        pos[0] = deviceL.stylusPositionRaw.x*.02;
-        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02;
-        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02;
-        pos[3] = -(deviceR.stylusPositionRaw.y-50)*.02+2.1;
+        pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
+        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
+        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
+        pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+wOffset+2.1)*scale;
+        // Debug.Log(deviceR.stylusPositionRaw.y);
+    }
+
+    public override void GetAbsolutePosition(double[] pos) {
+        pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
+        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
+        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
+        pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+2.1)*scale;
+        // Debug.Log(deviceR.stylusPositionRaw.y);
     }
 
     public override Quaternion GetRotation()
@@ -111,11 +125,13 @@ public class PhantomDriver : HapticsBase
     }
 
     public override void SetHaptics(double[] haptics){
+        if (idle) Vec.zero(haptics);
         if (FXID_LH == -1 || FXID_RH == -1) {
             FXID_LH = HapticPlugin.effects_assignEffect(deviceL.configName);
             FXID_RH = HapticPlugin.effects_assignEffect(deviceR.configName);
             if (FXID_LH == -1 || FXID_RH == -1) return;
         }
+        // Vec.scale(haptics, haptics, 1/scale);
         HapticPlugin.effects_settings(
             deviceL.configName,
             FXID_LH,

@@ -1,6 +1,6 @@
 "reg3/cube" include
 
-[0.5 1.5 0.5 -1.5] [X+ Y+ Z+ W+] viewinfo
+[0.5 1.5 0.5 -10.5] [X+ Y+ Z+ W+] viewinfo
 
 cube
 [-0.5 -0.5 -0.5] translate

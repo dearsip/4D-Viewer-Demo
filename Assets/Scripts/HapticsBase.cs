@@ -5,6 +5,7 @@ using UnityEngine;
 public class HapticsBase : MonoBehaviour
 {
     public virtual void GetPosition(double[] pos) {}
+    public virtual void GetAbsolutePosition(double[] pos) {}
     public virtual Quaternion GetRotation() { return Quaternion.identity; }
     public virtual void SetHaptics(double[] haptics) {}
     public virtual bool Button1Pressed() { return false; }
