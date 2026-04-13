@@ -569,10 +569,10 @@ public class Vec
     
     public static String ToString(double[] dest)
     {
-        String s = dest[0].ToString();
-        for (int i = 1; i < dest.Length; i++)
+        String s = "";
+        for (int i = 0; i < dest.Length; i++)
         {
-            s += ",";
+            s += "\n";
             s += dest[i].ToString();
         }
         return s;

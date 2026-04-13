@@ -1,196 +1,196 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+//using System.Collections;
+//using System.Collections.Generic;
+//using UnityEngine;
 
-public class PhantomDriver : HapticsBase
-{
-    public string configNameL = "Left Device";
-    public string configNameR = "Right Device";
-    public GameObject leftRestrict;
-    public double scale = 1;
-    public double wOffset = 0;
+//public class PhantomDriver : HapticsBase
+//{
+    //public string configNameL = "Left Device";
+    //public string configNameR = "Right Device";
+    //public GameObject leftRestrict;
+    //public double scale = 1;
+    //public double wOffset = 0;
 
-    HapticPlugin deviceL;
-    HapticPlugin deviceR;
-    int FXID_RU, FXID_RD, FXID_LU, FXID_LH, FXID_RH;
-    bool inTheZone, inTheZoneLeft, startHaptics, limit3D, lastButton4Pressed;
-    bool idle = true;
-    // Start is called before the first frame update
-    void Start()
-    {
-        HapticPlugin[] devices = (HapticPlugin[])Object.FindObjectsOfType(typeof(HapticPlugin));
-        for (int ii = 0; ii < devices.Length; ii++)
-        {
-            if (devices[ii].configName == configNameL) deviceL = devices[ii];
-            if (devices[ii].configName == configNameR) deviceR = devices[ii];
-        }
-        if (deviceL == null || deviceR == null) { Debug.Log("Unable to initialize the haptic device."); Destroy(this.gameObject); }
-        inTheZone = false;
+    //HapticPlugin deviceL;
+    //HapticPlugin deviceR;
+    //int FXID_RU, FXID_RD, FXID_LU, FXID_LH, FXID_RH;
+    //bool inTheZone, inTheZoneLeft, startHaptics, limit3D, lastButton4Pressed;
+    //bool idle = true;
+    //// Start is called before the first frame update
+    //void Start()
+    //{
+        //HapticPlugin[] devices = (HapticPlugin[])Object.FindObjectsOfType(typeof(HapticPlugin));
+        //for (int ii = 0; ii < devices.Length; ii++)
+        //{
+            //if (devices[ii].configName == configNameL) deviceL = devices[ii];
+            //if (devices[ii].configName == configNameR) deviceR = devices[ii];
+        //}
+        //if (deviceL == null || deviceR == null) { Debug.Log("Unable to initialize the haptic device."); Destroy(this.gameObject); }
+        //inTheZone = false;
 
-        FXID_LH = HapticPlugin.effects_assignEffect(deviceL.configName);
-        FXID_RH = HapticPlugin.effects_assignEffect(deviceR.configName);
-        AssignRestrict();
-    }
+        //FXID_LH = HapticPlugin.effects_assignEffect(deviceL.configName);
+        //FXID_RH = HapticPlugin.effects_assignEffect(deviceR.configName);
+        //AssignRestrict();
+    //}
 
-    // Update is called once per frame
-    void Update()
-    {
-        RightRestrict();
-        if (Button4Pressed() && !lastButton4Pressed) idle = !idle;
-        lastButton4Pressed = Button4Pressed();
-    }
+    //// Update is called once per frame
+    //void Update()
+    //{
+        //RightRestrict();
+        //if (Button4Pressed() && !lastButton4Pressed) idle = !idle;
+        //lastButton4Pressed = Button4Pressed();
+    //}
 
-    private void RightRestrict() {
-        if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) AssignRestrict();
-        bool oldInTheZone = inTheZone;
-        inTheZone = Mathf.Abs(deviceR.stylusPositionRaw.x) + Mathf.Abs(deviceR.stylusPositionRaw.z) < 50;
-        if (oldInTheZone != inTheZone)
-        {
-            if (inTheZone)
-            {
-                HapticPlugin.effects_startEffect(deviceR.configName, FXID_RU);
-                HapticPlugin.effects_startEffect(deviceR.configName, FXID_RD);
-                HapticPlugin.effects_startEffect(deviceL.configName, FXID_LU);
-            } else
-            {
-                HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RU);
-                HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RD);
-                HapticPlugin.effects_stopEffect(deviceL.configName, FXID_LU);
-            }
-		}
-    }
+    //private void RightRestrict() {
+        //if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) AssignRestrict();
+        //bool oldInTheZone = inTheZone;
+        //inTheZone = Mathf.Abs(deviceR.stylusPositionRaw.x) + Mathf.Abs(deviceR.stylusPositionRaw.z) < 50;
+        //if (oldInTheZone != inTheZone)
+        //{
+            //if (inTheZone)
+            //{
+                //HapticPlugin.effects_startEffect(deviceR.configName, FXID_RU);
+                //HapticPlugin.effects_startEffect(deviceR.configName, FXID_RD);
+                //HapticPlugin.effects_startEffect(deviceL.configName, FXID_LU);
+            //} else
+            //{
+                //HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RU);
+                //HapticPlugin.effects_stopEffect(deviceR.configName, FXID_RD);
+                //HapticPlugin.effects_stopEffect(deviceL.configName, FXID_LU);
+            //}
+		//}
+    //}
 
-    private void AssignRestrict() {
-        FXID_RD = HapticPlugin.effects_assignEffect(deviceR.configName);
-        FXID_RU = HapticPlugin.effects_assignEffect(deviceR.configName);
-        FXID_LU = HapticPlugin.effects_assignEffect(deviceL.configName);
-        if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) return;
-        HapticPlugin.effects_settings(
-            deviceR.configName,
-            FXID_RU,
-            0.75, // Gain
-            0.9, // Magnitude
-            1, // Frequency
-            new double[] {0,200,0}, // Position
-            new double[] {0,0,0}); // Direction
-        HapticPlugin.effects_type(
-            deviceR.configName,
-            FXID_RU,
-            (int)HapticEffect.EFFECT_TYPE.SPRING);
-        HapticPlugin.effects_settings(
-            deviceR.configName,
-            FXID_RD,
-            0.75,
-            0.75,
-            1,
-            new double[] {0,-100,0},
-            new double[] {0,0,0});
-        HapticPlugin.effects_type(
-            deviceR.configName,
-            FXID_RD,
-            (int)HapticEffect.EFFECT_TYPE.SPRING);
-        HapticPlugin.effects_settings(
-            deviceL.configName,
-            FXID_LU,
-            0, // Gain
-            0.08, // Magnitude
-            1, // Frequency
-            new double[] {0,0,0}, // Position
-            new double[] {0,1,-0.5}); // Direction
-        HapticPlugin.effects_type(
-            deviceL.configName,
-            FXID_LU,
-            (int)HapticEffect.EFFECT_TYPE.CONSTANT);
-    }
+    //private void AssignRestrict() {
+        //FXID_RD = HapticPlugin.effects_assignEffect(deviceR.configName);
+        //FXID_RU = HapticPlugin.effects_assignEffect(deviceR.configName);
+        //FXID_LU = HapticPlugin.effects_assignEffect(deviceL.configName);
+        //if (FXID_RU == -1 || FXID_RD == -1 || FXID_LU == -1) return;
+        //HapticPlugin.effects_settings(
+            //deviceR.configName,
+            //FXID_RU,
+            //0.75, // Gain
+            //0.9, // Magnitude
+            //1, // Frequency
+            //new double[] {0,200,0}, // Position
+            //new double[] {0,0,0}); // Direction
+        //HapticPlugin.effects_type(
+            //deviceR.configName,
+            //FXID_RU,
+            //(int)HapticEffect.EFFECT_TYPE.SPRING);
+        //HapticPlugin.effects_settings(
+            //deviceR.configName,
+            //FXID_RD,
+            //0.75,
+            //0.75,
+            //1,
+            //new double[] {0,-100,0},
+            //new double[] {0,0,0});
+        //HapticPlugin.effects_type(
+            //deviceR.configName,
+            //FXID_RD,
+            //(int)HapticEffect.EFFECT_TYPE.SPRING);
+        //HapticPlugin.effects_settings(
+            //deviceL.configName,
+            //FXID_LU,
+            //0, // Gain
+            //0.08, // Magnitude
+            //1, // Frequency
+            //new double[] {0,0,0}, // Position
+            //new double[] {0,1,-0.5}); // Direction
+        //HapticPlugin.effects_type(
+            //deviceL.configName,
+            //FXID_LU,
+            //(int)HapticEffect.EFFECT_TYPE.CONSTANT);
+    //}
 
-    public override void GetPosition(double[] pos) {
-        pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
-        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
-        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
-        pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+wOffset+2.1)*scale;
-        // Debug.Log(deviceR.stylusPositionRaw.y);
-    }
+    //public override void GetPosition(double[] pos) {
+        //pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
+        //pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
+        //pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
+        //pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+wOffset+2.1)*scale;
+        //// Debug.Log(deviceR.stylusPositionRaw.y);
+    //}
 
-    public override void GetAbsolutePosition(double[] pos) {
-        pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
-        pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
-        pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
-        pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+2.1)*scale;
-        // Debug.Log(deviceR.stylusPositionRaw.y);
-    }
+    //public override void GetAbsolutePosition(double[] pos) {
+        //pos[0] = deviceL.stylusPositionRaw.x*.02*scale;
+        //pos[1] = (deviceL.stylusPositionRaw.y-50)*.02*scale;
+        //pos[2] = limit3D ? 0 : deviceL.stylusPositionRaw.z*.02*scale;
+        //pos[3] = (-(deviceR.stylusPositionRaw.y-50)*.02+2.1)*scale;
+        //// Debug.Log(deviceR.stylusPositionRaw.y);
+    //}
 
-    public override Quaternion GetRotation()
-    {
-        return deviceL.stylusRotationWorld;
-    }
+    //public override Quaternion GetRotation()
+    //{
+        //return deviceL.stylusRotationWorld;
+    //}
 
-    public override void SetHaptics(double[] haptics){
-        if (idle) Vec.zero(haptics);
-        if (FXID_LH == -1 || FXID_RH == -1) {
-            FXID_LH = HapticPlugin.effects_assignEffect(deviceL.configName);
-            FXID_RH = HapticPlugin.effects_assignEffect(deviceR.configName);
-            if (FXID_LH == -1 || FXID_RH == -1) return;
-        }
-        // Vec.scale(haptics, haptics, 1/scale);
-        HapticPlugin.effects_settings(
-            deviceL.configName,
-            FXID_LH,
-            0, // Gain
-            10*System.Math.Sqrt(haptics[0]*haptics[0]+haptics[1]*haptics[1]+haptics[2]*haptics[2]), // Magnitude
-            1, // Frequency
-            new double[] {0,0,0}, // Position
-            new double[] {haptics[0],haptics[1],haptics[2]}); // Direction
-        HapticPlugin.effects_type(
-            deviceL.configName,
-            FXID_LH,
-            (int)HapticEffect.EFFECT_TYPE.CONSTANT);
-        HapticPlugin.effects_settings(
-            deviceR.configName,
-            FXID_RH,
-            0,
-            10*System.Math.Abs(haptics[3]),
-            1,
-            new double[] {0,0,0},
-            new double[] {0,-haptics[3],0});
-        HapticPlugin.effects_type(
-            deviceR.configName,
-            FXID_RH,
-            (int)HapticEffect.EFFECT_TYPE.CONSTANT);
-        if (!startHaptics) {
-            HapticPlugin.effects_startEffect(deviceL.configName, FXID_LH);
-            HapticPlugin.effects_startEffect(deviceR.configName, FXID_RH);
-            startHaptics = true;
-        }
-    }
+    //public override void SetHaptics(double[] haptics){
+        //if (idle) Vec.zero(haptics);
+        //if (FXID_LH == -1 || FXID_RH == -1) {
+            //FXID_LH = HapticPlugin.effects_assignEffect(deviceL.configName);
+            //FXID_RH = HapticPlugin.effects_assignEffect(deviceR.configName);
+            //if (FXID_LH == -1 || FXID_RH == -1) return;
+        //}
+        //// Vec.scale(haptics, haptics, 1/scale);
+        //HapticPlugin.effects_settings(
+            //deviceL.configName,
+            //FXID_LH,
+            //0, // Gain
+            //10*System.Math.Sqrt(haptics[0]*haptics[0]+haptics[1]*haptics[1]+haptics[2]*haptics[2]), // Magnitude
+            //1, // Frequency
+            //new double[] {0,0,0}, // Position
+            //new double[] {haptics[0],haptics[1],haptics[2]}); // Direction
+        //HapticPlugin.effects_type(
+            //deviceL.configName,
+            //FXID_LH,
+            //(int)HapticEffect.EFFECT_TYPE.CONSTANT);
+        //HapticPlugin.effects_settings(
+            //deviceR.configName,
+            //FXID_RH,
+            //0,
+            //10*System.Math.Abs(haptics[3]),
+            //1,
+            //new double[] {0,0,0},
+            //new double[] {0,-haptics[3],0});
+        //HapticPlugin.effects_type(
+            //deviceR.configName,
+            //FXID_RH,
+            //(int)HapticEffect.EFFECT_TYPE.CONSTANT);
+        //if (!startHaptics) {
+            //HapticPlugin.effects_startEffect(deviceL.configName, FXID_LH);
+            //HapticPlugin.effects_startEffect(deviceR.configName, FXID_RH);
+            //startHaptics = true;
+        //}
+    //}
 
-    public override bool Button1Pressed()
-    {
-        return deviceL.Buttons[0]==1;
-    }
+    //public override bool Button1Pressed()
+    //{
+        //return deviceL.Buttons[0]==1;
+    //}
 
-    public override bool Button2Pressed()
-    {
-        return deviceR.Buttons[0]==1;
-    }
+    //public override bool Button2Pressed()
+    //{
+        //return deviceR.Buttons[0]==1;
+    //}
 
-    public override bool Button3Pressed()
-    {
-        return deviceL.Buttons[1]==1;
-    }
+    //public override bool Button3Pressed()
+    //{
+        //return deviceL.Buttons[1]==1;
+    //}
 
-    public override bool Button4Pressed()
-    {
-        return deviceR.Buttons[1]==1;
-    }
+    //public override bool Button4Pressed()
+    //{
+        //return deviceR.Buttons[1]==1;
+    //}
 
-    public override void ToggleLimit3D(bool limit3D)
-    {
-        this.limit3D = limit3D;
-        if (limit3D)
-        {
-            HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), .5, .5, 0, 0, 0);
-            HapticPlugin.shape_facing(leftRestrict.GetInstanceID(), 2);
-        }
-        else HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), 0, 0, 0, 0, 0);
-    }
-}
+    //public override void ToggleLimit3D(bool limit3D)
+    //{
+        //this.limit3D = limit3D;
+        //if (limit3D)
+        //{
+            //HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), .5, .5, 0, 0, 0);
+            //HapticPlugin.shape_facing(leftRestrict.GetInstanceID(), 2);
+        //}
+        //else HapticPlugin.shape_settings(leftRestrict.GetInstanceID(), 0, 0, 0, 0, 0);
+    //}
+//}

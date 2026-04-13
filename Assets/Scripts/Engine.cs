@@ -781,7 +781,7 @@ public class Engine : IMove
             //renderStylus(hapticsBase, bufRelative);
             renderObject(bufRelative, objRetina);
             renderPolygon(bufRelative, objRetinaPoly, 3, oo.sliceDir);
-            //renderObject(bufRelative, objCross);
+            renderObject(bufRelative, objCross);
             renderPolygon(bufRelative, objCrossPoly, 4, oo.sliceDir);
         }
 
